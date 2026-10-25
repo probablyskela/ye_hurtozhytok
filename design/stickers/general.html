@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <title>єГуртожиток · загальні наліпки</title>
+    <style>
+      @font-face {
+        font-family: "Fixel Text";
+        src: url("FixelText-Regular.woff2") format("woff2");
+        font-weight: 400;
+      }
+      @font-face {
+        font-family: "Fixel Text";
+        src: url("FixelText-SemiBold.woff2") format("woff2");
+        font-weight: 600;
+      }
+      @font-face {
+        font-family: "Fixel Text";
+        src: url("FixelText-Bold.woff2") format("woff2");
+        font-weight: 700;
+      }
+      @font-face {
+        font-family: "Fixel Display";
+        src: url("FixelDisplay-Black.woff2") format("woff2");
+        font-weight: 900;
+      }
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Fixel Text", sans-serif;
+        color: #101217;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .sheet {
+        width: 190mm;
+        height: 275mm;
+        display: grid;
+        grid-template-rows: repeat(3, minmax(0, 1fr));
+        gap: 6mm;
+        overflow: hidden;
+      }
+      .sticker {
+        position: relative;
+        overflow: hidden;
+        border: 0.3mm dashed #b9c0cc;
+        border-radius: 6mm;
+        padding: 7mm 9mm;
+        min-height: 0;
+        display: grid;
+        grid-template-columns: 1fr 52mm;
+        gap: 8mm;
+        align-items: center;
+        background: linear-gradient(
+          135deg,
+          #e3f5ee 0%,
+          #e2ebfb 55%,
+          #ece5f8 100%
+        );
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 2.5mm;
+        font-weight: 700;
+        font-size: 5mm;
+        letter-spacing: -0.03em;
+      }
+      .brand svg {
+        width: 8mm;
+        height: 8mm;
+      }
+      .headline {
+        margin: 4mm 0 2mm;
+        font-family: "Fixel Display";
+        font-weight: 900;
+        font-size: 10.5mm;
+        white-space: nowrap;
+        line-height: 0.95;
+        letter-spacing: -0.04em;
+      }
+      .lead {
+        margin: 0 0 4mm;
+        font-size: 5mm;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .rules {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        font-size: 3.7mm;
+        line-height: 1.35;
+        color: #2b2f38;
+      }
+      .rules li {
+        position: relative;
+        padding-left: 5mm;
+        margin-top: 1.2mm;
+      }
+      .rules li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 1.6mm;
+        width: 2mm;
+        height: 2mm;
+        border-radius: 50%;
+        background: #2a37d8;
+      }
+      .qr {
+        background: #fff;
+        border-radius: 4mm;
+        padding: 4mm;
+        box-shadow: 0 2mm 5mm rgb(31 45 90 / 0.15);
+        text-align: center;
+      }
+      .qr img {
+        width: 100%;
+        display: block;
+      }
+      .qr span {
+        display: block;
+        margin-top: 2.5mm;
+        font-size: 3.2mm;
+        font-weight: 600;
+        color: #525a6b;
+      }
+      .url {
+        margin-top: 3mm;
+        font-size: 3.2mm;
+        color: #626a7c;
+      }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="logo" viewBox="0 0 100 100">
+        <rect width="100" height="100" rx="23" fill="#14161b" />
+        <g fill="#ffffff" fill-opacity=".18">
+          <rect x="20" y="20" width="16" height="16" rx="4.5" />
+          <rect x="64" y="20" width="16" height="16" rx="4.5" />
+          <rect x="42" y="42" width="16" height="16" rx="4.5" />
+          <rect x="20" y="64" width="16" height="16" rx="4.5" />
+          <rect x="64" y="64" width="16" height="16" rx="4.5" />
+        </g>
+        <g fill="#fff">
+          <rect x="42" y="20" width="16" height="16" rx="4.5" />
+          <rect x="20" y="42" width="16" height="16" rx="4.5" />
+          <rect x="42" y="64" width="16" height="16" rx="4.5" />
+        </g>
+        <rect x="64" y="42" width="16" height="16" rx="4.5" fill="#2a37d8" />
+      </symbol>
+    </svg>
+
+    <section class="sheet">
+      <!-- Three identical stickers that lead to the app, not to a particular machine. -->
+      <article class="sticker">
+        <div>
+          <div class="brand">
+            <svg><use href="#logo" /></svg>єГуртожиток
+          </div>
+          <div class="headline">Пралки без зошита</div>
+          <p class="lead">Записуйтеся на пралку з телефона</p>
+          <ul class="rules">
+            <li>Вхід через пошту Політехніки @lpnu.ua</li>
+            <li>Пралки на 4 і 6 поверхах, з 06:00 до 24:00</li>
+            <li>Обираєте пралку й час, нагадаємо за 15 хвилин</li>
+          </ul>
+          <div class="url">ehurtozhytok.pages.dev</div>
+        </div>
+        <div class="qr">
+          <img src="qr-home.svg" alt="QR-код застосунку" /><span
+            >Відкрити єГуртожиток</span
+          >
+        </div>
+      </article>
+      <article class="sticker">
+        <div>
+          <div class="brand">
+            <svg><use href="#logo" /></svg>єГуртожиток
+          </div>
+          <div class="headline">Пралки без зошита</div>
+          <p class="lead">Записуйтеся на пралку з телефона</p>
+          <ul class="rules">
+            <li>Вхід через пошту Політехніки @lpnu.ua</li>
+            <li>Пралки на 4 і 6 поверхах, з 06:00 до 24:00</li>
+            <li>Обираєте пралку й час, нагадаємо за 15 хвилин</li>
+          </ul>
+          <div class="url">ehurtozhytok.pages.dev</div>
+        </div>
+        <div class="qr">
+          <img src="qr-home.svg" alt="QR-код застосунку" /><span
+            >Відкрити єГуртожиток</span
+          >
+        </div>
+      </article>
+      <article class="sticker">
+        <div>
+          <div class="brand">
+            <svg><use href="#logo" /></svg>єГуртожиток
+          </div>
+          <div class="headline">Пралки без зошита</div>
+          <p class="lead">Записуйтеся на пралку з телефона</p>
+          <ul class="rules">
+            <li>Вхід через пошту Політехніки @lpnu.ua</li>
+            <li>Пралки на 4 і 6 поверхах, з 06:00 до 24:00</li>
+            <li>Обираєте пралку й час, нагадаємо за 15 хвилин</li>
+          </ul>
+          <div class="url">ehurtozhytok.pages.dev</div>
+        </div>
+        <div class="qr">
+          <img src="qr-home.svg" alt="QR-код застосунку" /><span
+            >Відкрити єГуртожиток</span
+          >
+        </div>
+      </article>
+    </section>
+  </body>
+</html>
