@@ -12,7 +12,7 @@
     // Used for the Google sign-in redirect and in reminders sent from cron.
     "APP_URL": "https://ehurtozhytok.pages.dev",
     // Public half of the Web Push key pair; the private half is a secret.
-    "VAPID_PUBLIC_KEY": "",
+    "VAPID_PUBLIC_KEY": "BINn6_eWph5C_iIMcWD06U5O5b-P_92HXa7I5LlBYFfgSfl2yXQaAmKpUO7GDxzWWtikvNnMa_npyubrhRR1kyE",
     "VAPID_SUBJECT": "https://ehurtozhytok.pages.dev",
   },
   // Every minute: sends reminders 15 minutes before a booking starts.
@@ -26,8 +26,7 @@
     {
       "binding": "DB",
       "database_name": "ehurtozhytok",
-      // Replace with the id printed by `npx wrangler d1 create ehurtozhytok`.
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "6058d1d9-3fc5-43bc-b435-3a320f72ac97",
       "migrations_dir": "../../infra/d1/migrations",
     },
   ],
