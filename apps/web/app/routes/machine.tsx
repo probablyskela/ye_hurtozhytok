@@ -1,3 +1,4 @@
+import { PillGroup } from "~/components/pill-group";
 import { Form, Link, data } from "react-router";
 
 import { Icon, TopBar } from "~/components/ui";
@@ -149,9 +150,10 @@ export default function MachineDay({
         </p>
       )}
 
-      <nav className="seg" aria-label="День">
+      <PillGroup className="seg" label="День">
         {tabs.map((t) => (
           <Link
+            data-pill-item
             key={t}
             to={`?d=${t}`}
             replace
@@ -162,7 +164,7 @@ export default function MachineDay({
             {t !== today && t !== tabs[1] ? `, ${Number(t.slice(8))}` : ""}
           </Link>
         ))}
-      </nav>
+      </PillGroup>
 
       <div className="glass timeline" style={{ marginTop: 14 }}>
         {fromMin > OPEN_MIN && (

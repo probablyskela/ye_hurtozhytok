@@ -1,3 +1,4 @@
+import { PillGroup } from "~/components/pill-group";
 import { useEffect, useState } from "react";
 import { Form, Link, data, redirect, useNavigation } from "react-router";
 
@@ -170,11 +171,12 @@ export default function Book({ loaderData, actionData }: Route.ComponentProps) {
       <div className="section-h" style={{ marginTop: 0 }}>
         <h3>Скільки прати</h3>
       </div>
-      <nav className="durations" aria-label="Скільки прати">
+      <PillGroup className="durations" label="Скільки прати">
         {DURATIONS.map((d) => {
           const [num, unit] = durationLabel(d).split(" ");
           return (
             <Link
+              data-pill-item
               key={d}
               className="dur"
               to={qs({ len: d })}
@@ -188,14 +190,15 @@ export default function Book({ loaderData, actionData }: Route.ComponentProps) {
             </Link>
           );
         })}
-      </nav>
+      </PillGroup>
 
       <div className="section-h">
         <h3>Коли</h3>
       </div>
-      <nav className="days" aria-label="День">
+      <PillGroup className="days" label="День">
         {days.map((d, i) => (
           <Link
+            data-pill-item
             key={d.key}
             className="day"
             to={qs({ d: d.key })}
@@ -208,14 +211,15 @@ export default function Book({ loaderData, actionData }: Route.ComponentProps) {
             <b>{d.day}</b>
           </Link>
         ))}
-      </nav>
+      </PillGroup>
 
       <div className="section-h">
         <h3>Пралка</h3>
       </div>
-      <nav className="machine-pick" aria-label="Пралка">
+      <PillGroup className="machine-pick" label="Пралка">
         {machines.map((m) => (
           <Link
+            data-pill-item
             key={m.id}
             to={qs({ m: m.id })}
             preventScrollReset
@@ -232,7 +236,7 @@ export default function Book({ loaderData, actionData }: Route.ComponentProps) {
             </small>
           </Link>
         ))}
-      </nav>
+      </PillGroup>
 
       <div className="glass pick-card">
         {machine.starts.length === 0 ? (

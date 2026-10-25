@@ -2430,3 +2430,185 @@ html:not(.booted) .ticket::after,
     padding-inline: 0;
   }
 }
+
+/* ---------- sliding pill for every horizontal switcher ---------- */
+.has-pill {
+  position: relative;
+}
+.has-pill > [data-pill-item] {
+  position: relative;
+  z-index: 1;
+  transition: color 0.3s var(--ease);
+}
+.pill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  pointer-events: none;
+  will-change: transform, width;
+}
+.pill-ready {
+  transition:
+    transform 0.45s var(--ease),
+    width 0.45s var(--ease),
+    height 0.45s var(--ease),
+    background 0.3s var(--ease);
+}
+/* With the pill on, items drop their own highlight. */
+.has-pill > [data-pill-item][aria-current="true"] {
+  background: transparent;
+  box-shadow: none;
+  animation: none;
+}
+
+.seg.has-pill > .pill {
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: var(--shadow-gloss);
+}
+.seg.has-pill > a[aria-current="true"]:not([data-pill-on]) {
+  color: var(--muted);
+  font-weight: 500;
+}
+.seg.has-pill > a[data-pill-on] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.machine-pick.has-pill > .pill {
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: var(--shadow-gloss);
+}
+.machine-pick.has-pill > a[data-pill-on] b {
+  color: var(--ink);
+}
+
+.durations.has-pill > .pill {
+  border-radius: 20px;
+  background: var(--mine);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.25),
+    0 10px 20px -10px rgb(42 55 216 / 0.75);
+}
+.durations.has-pill > .dur[aria-current="true"]:not([data-pill-on]) {
+  color: var(--ink);
+}
+.durations.has-pill > .dur[aria-current="true"]:not([data-pill-on]) span {
+  color: var(--muted);
+}
+.durations.has-pill > .dur[data-pill-on] {
+  color: #fff;
+}
+.durations.has-pill > .dur[data-pill-on] span {
+  color: rgb(255 255 255 / 0.8);
+}
+.durations.has-pill > .dur:not([data-pill-on]) {
+  background: var(--glass-strong);
+}
+
+.days.has-pill > .pill {
+  border-radius: 18px;
+  background: var(--ink);
+}
+.days.has-pill > .day[aria-current="true"]:not([data-pill-on]) {
+  color: var(--ink);
+}
+.days.has-pill > .day[aria-current="true"]:not([data-pill-on]) small {
+  color: var(--muted);
+}
+.days.has-pill > .day[data-pill-on] {
+  color: #fff;
+  background: transparent;
+  box-shadow: none;
+}
+.days.has-pill > .day[data-pill-on] small {
+  color: rgb(255 255 255 / 0.7);
+}
+.days.has-pill > .day:not([data-pill-on]) {
+  background: var(--glass-strong);
+  box-shadow: var(--shadow-gloss);
+}
+.durations.has-pill > .dur[data-pill-on] {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Dark selected day: no white top highlight, a soft dark shadow instead. */
+.day[aria-current="true"],
+.day[aria-pressed="true"],
+.days.has-pill > .pill {
+  box-shadow: 0 10px 20px -10px rgb(16 18 23 / 0.55);
+}
+.days.has-pill > .day[data-pill-on] {
+  box-shadow: none;
+}
+
+/* ---------- nearest free time: one suggestion, one tap ---------- */
+.nearest {
+  margin-top: 12px;
+  padding: 18px 18px 16px;
+  animation: nearest-in 0.45s var(--ease-out) both;
+}
+.nearest-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.nearest-when {
+  font-size: 13.5px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.nearest-time {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 12px;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  font-feature-settings: "tnum";
+}
+.nearest-time .dash {
+  font-family: var(--font);
+  font-weight: 400;
+  font-size: 0.6em;
+  opacity: 0.5;
+  align-self: center;
+}
+.nearest-where {
+  margin-top: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink-2);
+}
+.nearest-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-top: 16px;
+}
+.nearest-others {
+  margin: 12px 2px 0;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+.nearest-others a {
+  color: var(--ink-2);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgb(16 18 23 / 0.25);
+}
+@keyframes nearest-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+}

@@ -1,9 +1,11 @@
-import { Link } from "react-router";
+import { PillGroup } from "~/components/pill-group";
+import { Form, Link } from "react-router";
 
 import { DayStrip, Port, StripScale, Ticket } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
 import {
   DURATIONS,
+  MAX_ACTIVE,
   countdown,
   durationLabel,
   fmtMin,
@@ -14,7 +16,13 @@ import {
 import { upcomingFor } from "~/lib/bookings.server";
 import { machinesOn } from "~/lib/day.server";
 import { initials } from "~/lib/profile";
-import { addDays, dayHeading, kyivMinuteToUtc, kyivNow } from "~/lib/time";
+import {
+  addDays,
+  dayHeading,
+  dayName,
+  kyivMinuteToUtc,
+  kyivNow,
+} from "~/lib/time";
 import { usePolling } from "~/lib/use-polling";
 import type { Route } from "./+types/home";
 
@@ -34,22 +42,27 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     upcomingFor(env, resident.id, now),
   ]);
 
-  const nearestOn = (day: typeof today, date: string, nowMin: number | null) =>
+  // The first free start on each working machine, soonest first.
+  const firstPerMachine = (
+    day: typeof today,
+    date: string,
+    nowMin: number | null,
+  ) =>
     day
       .filter((m) => m.working)
-      .flatMap((m) =>
-        freeStarts(m.bookings, len, nowMin).map((s) => ({
-          s,
-          slug: m.slug,
-          id: m.id,
-          shortName: m.shortName,
-          date,
-        })),
-      )
+      .map((m) => ({
+        s: freeStarts(m.bookings, len, nowMin)[0],
+        id: m.id,
+        name: m.name,
+        shortName: m.shortName,
+        date,
+      }))
+      .filter((x) => x.s !== undefined)
       .sort((a, b) => a.s - b.s);
-  let nearest = nearestOn(today, now.date, now.minute);
-  const nearestTomorrow = nearest.length === 0;
-  if (nearestTomorrow) nearest = nearestOn(next, tomorrow, null);
+  let options = firstPerMachine(today, now.date, now.minute);
+  const nearestTomorrow = options.length === 0;
+  if (nearestTomorrow) options = firstPerMachine(next, tomorrow, null);
+  const best = options[0];
 
   const first = upcoming[0];
   return {
@@ -57,8 +70,16 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     blocked: resident.blocked,
     now,
     len,
-    nearest: nearest.slice(0, 8),
+    nearest: best
+      ? {
+          ...best,
+          when: dayName(best.date, now.date).toLowerCase(),
+          countdown: countdown(nowMs, kyivMinuteToUtc(best.date, best.s)),
+        }
+      : null,
+    others: options.slice(1),
     nearestTomorrow,
+    canBookNow: !resident.blocked && upcoming.length < MAX_ACTIVE,
     machines: today.map((m) => {
       const state = machineNow(m.bookings, now.minute);
       return {
@@ -116,6 +137,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     blocked,
     len,
     nearest,
+    others,
+    canBookNow,
     nearestTomorrow,
     machines,
     next,
@@ -222,13 +245,14 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           <div className="section-h">
             <h3>Найближчий вільний час</h3>
           </div>
-          <nav
+          <PillGroup
             className="seg"
-            aria-label="Тривалість"
+            label="Тривалість"
             style={{ gridAutoColumns: "1fr" }}
           >
             {DURATIONS.map((d) => (
               <Link
+                data-pill-item
                 key={d}
                 to={`?len=${d}`}
                 preventScrollReset
@@ -238,34 +262,66 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                 {durationLabel(d)}
               </Link>
             ))}
-          </nav>
-          {nearest.length ? (
-            <>
-              {nearestTomorrow && (
-                <p
-                  className="muted"
-                  style={{ margin: "10px 4px 0", fontSize: 13.5 }}
+          </PillGroup>
+          {nearest ? (
+            <div
+              className="glass nearest"
+              key={`${len}-${nearest.id}-${nearest.s}`}
+            >
+              <div className="nearest-top">
+                <span className="state free">Вільно</span>
+                <span className="nearest-when">
+                  {nearest.when}, {nearest.countdown}
+                </span>
+              </div>
+              <div className="nearest-time">
+                {fmtMin(nearest.s)}
+                <span className="dash">–</span>
+                {fmtMin(nearest.s + len)}
+              </div>
+              <div className="nearest-where">{nearest.name}</div>
+              <Form method="post" action="/book" className="nearest-actions">
+                <input type="hidden" name="machine" value={nearest.id} />
+                <input type="hidden" name="date" value={nearest.date} />
+                <input type="hidden" name="start" value={nearest.s} />
+                <input type="hidden" name="len" value={len} />
+                <button
+                  className="btn btn-primary"
+                  type="submit"
+                  disabled={!canBookNow}
                 >
-                  Сьогодні вже немає — ось завтра:
+                  Записатися
+                </button>
+                <Link
+                  className="btn btn-soft"
+                  viewTransition
+                  to={`/book?len=${len}&d=${nearest.date}&m=${nearest.id}&s=${nearest.s}`}
+                >
+                  Інший час
+                </Link>
+              </Form>
+              {others.length > 0 && (
+                <p className="nearest-others">
+                  Також:{" "}
+                  {others.map((o, i) => (
+                    <span key={o.id}>
+                      {i > 0 && " · "}
+                      <Link
+                        to={`/book?len=${len}&d=${o.date}&m=${o.id}&s=${o.s}`}
+                        viewTransition
+                      >
+                        {o.shortName} о {fmtMin(o.s)}
+                      </Link>
+                    </span>
+                  ))}
                 </p>
               )}
-              <div
-                className="chip-row animate"
-                key={len}
-                style={{ marginTop: 10 }}
-              >
-                {nearest.map((x) => (
-                  <Link
-                    key={`${x.slug}-${x.s}`}
-                    className="chip"
-                    to={`/book?len=${len}&d=${x.date}&m=${x.id}&s=${x.s}`}
-                  >
-                    {fmtMin(x.s)}
-                    <small>{x.shortName}</small>
-                  </Link>
-                ))}
-              </div>
-            </>
+              {!canBookNow && !blocked && (
+                <p className="nearest-others">
+                  Усі {MAX_ACTIVE} записи вже зайняті.
+                </p>
+              )}
+            </div>
           ) : (
             <p className="empty-note">
               На {durationLabel(len)} вільного часу немає ні сьогодні, ні
