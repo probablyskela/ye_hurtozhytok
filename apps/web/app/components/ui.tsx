@@ -423,7 +423,7 @@ export function Port({ free }: { free: boolean }) {
 
 /** The team behind the app: one quiet line, never a banner. */
 export const TEAM_CREDIT =
-  "Зроблено командою Софії Полупан, кандидатки на голову студради.";
+  "Зроблено командою Софії Полупан — кандидатки на посаду голови студради.";
 
 export function Credit({ children }: { children?: ReactNode }) {
   return (
