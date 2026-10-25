@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 
-import { Icon, TopBar } from "~/components/ui";
+import { Credit, Icon, TopBar } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
 import { MAX_ACTIVE, durationLabel, fmtMin } from "~/lib/booking";
 import { upcomingFor } from "~/lib/bookings.server";
@@ -83,6 +83,7 @@ export default function Bookings({ loaderData }: Route.ComponentProps) {
         <Icon name="plus" />
         Записатися
       </Link>
+      <Credit />
     </>
   );
 }

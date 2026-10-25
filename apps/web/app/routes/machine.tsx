@@ -1,7 +1,7 @@
 import { PillGroup } from "~/components/pill-group";
 import { Form, Link, data } from "react-router";
 
-import { Icon, TopBar } from "~/components/ui";
+import { Credit, Icon, TopBar } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
 import {
   BUFFER_MIN,
@@ -298,6 +298,7 @@ export default function MachineDay({
           {NO_SHOW_MIN} хвилин від початку, пралку може взяти будь-хто.
         </span>
       </div>
+      <Credit />
     </>
   );
 }

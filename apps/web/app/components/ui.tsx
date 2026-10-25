@@ -420,3 +420,17 @@ export function Port({ free }: { free: boolean }) {
     <span className={`port ${free ? "free" : "busy"}`} aria-hidden="true" />
   );
 }
+
+/** The team behind the app: one quiet line, never a banner. */
+export const TEAM_CREDIT =
+  "Зроблено командою Софії Полупан, кандидатки на голову студради.";
+
+export function Credit({ children }: { children?: ReactNode }) {
+  return (
+    <p className="credit">
+      {children}
+      {children && <br />}
+      {TEAM_CREDIT}
+    </p>
+  );
+}

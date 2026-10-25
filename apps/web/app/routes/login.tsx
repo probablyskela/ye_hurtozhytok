@@ -1,6 +1,6 @@
 import { Form, redirect } from "react-router";
 
-import { DayStrip, Icon, TopBar } from "~/components/ui";
+import { Credit, DayStrip, Icon, TopBar } from "~/components/ui";
 import { BUFFER_MIN } from "~/lib/booking";
 import {
   devLogin,
@@ -166,11 +166,7 @@ export default function Login({
             Підійде лише адреса @lpnu.ua. Ми отримаємо імʼя та пошту, а кімнату
             ви вкажете самі.
           </p>
-          <p className="credit">
-            Незалежний студентський проєкт команди Софії Полупан.
-            <br />
-            Не є державним чи університетським сервісом.
-          </p>
+          <Credit>Не є державним чи університетським сервісом.</Credit>
         </div>
       </div>
     </main>

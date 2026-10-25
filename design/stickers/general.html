@@ -55,6 +55,7 @@
         min-height: 0;
         display: grid;
         grid-template-columns: 1fr 52mm;
+        grid-template-rows: 1fr auto;
         gap: 8mm;
         align-items: center;
         background: linear-gradient(
@@ -118,7 +119,7 @@
         background: #fff;
         border-radius: 4mm;
         padding: 4mm;
-        box-shadow: 0 2mm 5mm rgb(31 45 90 / 0.15);
+        border: 0.3mm solid #dfe3ea;
         text-align: center;
       }
       .qr img {
@@ -132,10 +133,17 @@
         font-weight: 600;
         color: #525a6b;
       }
-      .url {
-        margin-top: 3mm;
-        font-size: 3.2mm;
-        color: #626a7c;
+      .foot {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: space-between;
+        gap: 4mm;
+        margin-top: -3mm;
+        font-size: 2.9mm;
+        color: #6b7283;
+      }
+      .foot .credit {
+        text-align: right;
       }
     </style>
   </head>
@@ -173,11 +181,17 @@
             <li>Пралки на 4 і 6 поверхах, з 06:00 до 24:00</li>
             <li>Обираєте пралку й час, нагадаємо за 15 хвилин</li>
           </ul>
-          <div class="url">ehurtozhytok.pages.dev</div>
         </div>
         <div class="qr">
           <img src="qr-home.svg" alt="QR-код застосунку" /><span
             >Відкрити єГуртожиток</span
+          >
+        </div>
+        <div class="foot">
+          <span>ehurtozhytok.pages.dev</span
+          ><span class="credit"
+            >Зроблено командою Софії Полупан, кандидатки на голову
+            студради</span
           >
         </div>
       </article>
@@ -193,11 +207,17 @@
             <li>Пралки на 4 і 6 поверхах, з 06:00 до 24:00</li>
             <li>Обираєте пралку й час, нагадаємо за 15 хвилин</li>
           </ul>
-          <div class="url">ehurtozhytok.pages.dev</div>
         </div>
         <div class="qr">
           <img src="qr-home.svg" alt="QR-код застосунку" /><span
             >Відкрити єГуртожиток</span
+          >
+        </div>
+        <div class="foot">
+          <span>ehurtozhytok.pages.dev</span
+          ><span class="credit"
+            >Зроблено командою Софії Полупан, кандидатки на голову
+            студради</span
           >
         </div>
       </article>
@@ -213,11 +233,17 @@
             <li>Пралки на 4 і 6 поверхах, з 06:00 до 24:00</li>
             <li>Обираєте пралку й час, нагадаємо за 15 хвилин</li>
           </ul>
-          <div class="url">ehurtozhytok.pages.dev</div>
         </div>
         <div class="qr">
           <img src="qr-home.svg" alt="QR-код застосунку" /><span
             >Відкрити єГуртожиток</span
+          >
+        </div>
+        <div class="foot">
+          <span>ehurtozhytok.pages.dev</span
+          ><span class="credit"
+            >Зроблено командою Софії Полупан, кандидатки на голову
+            студради</span
           >
         </div>
       </article>

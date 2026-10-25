@@ -2,7 +2,7 @@ import { Form, Link } from "react-router";
 
 import { ProfileForm } from "~/components/profile-form";
 import { ReminderSwitch } from "~/components/reminder-switch";
-import { Icon, TopBar } from "~/components/ui";
+import { Credit, Icon, TopBar } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
 import { isCouncil } from "~/lib/permissions";
 import { initials } from "~/lib/profile";
@@ -129,12 +129,10 @@ export default function Profile({
           Вийти
         </button>
       </Form>
-      <p className="credit">
+      <Credit>
         Кімнату й імʼя в Telegram бачать лише ті, хто увійшов через пошту
         Політехніки.
-        <br />
-        Незалежний студентський проєкт команди Софії Полупан.
-      </p>
+      </Credit>
     </>
   );
 }

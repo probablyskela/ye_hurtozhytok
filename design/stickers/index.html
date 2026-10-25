@@ -57,6 +57,7 @@
         padding: 8mm 9mm;
         display: grid;
         grid-template-columns: 1fr 52mm;
+        grid-template-rows: 1fr auto;
         gap: 8mm;
         align-items: center;
         background: linear-gradient(
@@ -119,7 +120,7 @@
         background: #fff;
         border-radius: 4mm;
         padding: 4mm;
-        box-shadow: 0 2mm 5mm rgb(31 45 90 / 0.15);
+        border: 0.3mm solid #dfe3ea;
         text-align: center;
       }
       .qr img {
@@ -133,12 +134,17 @@
         font-weight: 600;
         color: #525a6b;
       }
-      .url {
-        position: absolute;
-        left: 9mm;
-        bottom: 5mm;
-        font-size: 3mm;
-        color: #626a7c;
+      .foot {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: space-between;
+        gap: 4mm;
+        margin-top: -3mm;
+        font-size: 2.9mm;
+        color: #6b7283;
+      }
+      .foot .credit {
+        text-align: right;
       }
       .cover .machine {
         font-size: 13mm;
@@ -184,7 +190,13 @@
             >Розклад цієї пралки</span
           >
         </div>
-        <div class="url">ehurtozhytok.pages.dev/machines/4</div>
+        <div class="foot">
+          <span>ehurtozhytok.pages.dev/machines/4</span
+          ><span class="credit"
+            >Зроблено командою Софії Полупан, кандидатки на голову
+            студради</span
+          >
+        </div>
       </article>
       <article class="sticker">
         <div>
@@ -204,7 +216,13 @@
             >Розклад цієї пралки</span
           >
         </div>
-        <div class="url">ehurtozhytok.pages.dev/machines/6-1</div>
+        <div class="foot">
+          <span>ehurtozhytok.pages.dev/machines/6-1</span
+          ><span class="credit"
+            >Зроблено командою Софії Полупан, кандидатки на голову
+            студради</span
+          >
+        </div>
       </article>
       <article class="sticker">
         <div>
@@ -224,7 +242,13 @@
             >Розклад цієї пралки</span
           >
         </div>
-        <div class="url">ehurtozhytok.pages.dev/machines/6-2</div>
+        <div class="foot">
+          <span>ehurtozhytok.pages.dev/machines/6-2</span
+          ><span class="credit"
+            >Зроблено командою Софії Полупан, кандидатки на голову
+            студради</span
+          >
+        </div>
       </article>
     </section>
 
@@ -246,7 +270,13 @@
             >Відкрити єГуртожиток</span
           >
         </div>
-        <div class="url">ehurtozhytok.pages.dev</div>
+        <div class="foot">
+          <span>ehurtozhytok.pages.dev</span
+          ><span class="credit"
+            >Зроблено командою Софії Полупан, кандидатки на голову
+            студради</span
+          >
+        </div>
       </article>
       <article class="sticker cover">
         <div>
@@ -265,7 +295,13 @@
             >Відкрити єГуртожиток</span
           >
         </div>
-        <div class="url">ehurtozhytok.pages.dev</div>
+        <div class="foot">
+          <span>ehurtozhytok.pages.dev</span
+          ><span class="credit"
+            >Зроблено командою Софії Полупан, кандидатки на голову
+            студради</span
+          >
+        </div>
       </article>
     </section>
   </body>

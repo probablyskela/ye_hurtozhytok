@@ -1,7 +1,7 @@
 import { PillGroup } from "~/components/pill-group";
 import { Form, Link } from "react-router";
 
-import { DayStrip, Port, StripScale, Ticket } from "~/components/ui";
+import { Credit, DayStrip, Port, StripScale, Ticket } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
 import {
   DURATIONS,
@@ -335,6 +335,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           )}
         </section>
       </div>
+      <Credit />
     </>
   );
 }
