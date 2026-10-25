@@ -67,7 +67,10 @@ export function ProfileForm({
           </small>
         </div>
         <div className="field-row">
-          <label htmlFor="tg">Імʼя користувача в Telegram</label>
+          <label htmlFor="tg">
+            Імʼя користувача в Telegram{" "}
+            <span className="opt">необовʼязково</span>
+          </label>
           <div className="affix">
             <span aria-hidden="true">@</span>
             <input
@@ -88,7 +91,7 @@ export function ProfileForm({
             style={errors?.telegram ? { color: "var(--danger)" } : undefined}
           >
             {errors?.telegram ??
-              "Щоб вам могли написати, якщо пралка звільнилась раніше чи ви забули білизну. Необовʼязково."}
+              "Щоб вам могли написати, якщо пралка звільнилась раніше чи ви забули білизну. Можна лишити порожнім."}
           </small>
         </div>
         <button className="btn btn-primary block" type="submit" disabled={busy}>

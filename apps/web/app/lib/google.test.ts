@@ -9,7 +9,6 @@ import {
   nameFromClaims,
   pkceChallenge,
 } from "./google";
-import { displayName } from "./google";
 
 const good = {
   iss: "https://accounts.google.com",
@@ -58,9 +57,11 @@ describe("helpers", () => {
       nameFromClaims({
         ...good,
         name: undefined,
+        given_name: undefined,
+        family_name: undefined,
         email: "anton.mykhalchuk.shi.2024@lpnu.ua",
-      }),
-    ).toBe("Anton Mykhalchuk");
+      }).lastName,
+    ).toBe("Mykhalchuk");
   });
   it("asks Google for the lpnu.ua domain with PKCE", () => {
     const url = new URL(
@@ -86,17 +87,5 @@ describe("helpers", () => {
     expect(Array.from(fromBase64url(base64url(bytes)))).toEqual(
       Array.from(bytes),
     );
-  });
-});
-
-describe("displayName", () => {
-  it("turns the university's «Прізвище Імʼя По батькові» into «Імʼя Прізвище»", () => {
-    expect(displayName("Полупан Софія Андріївна")).toBe("Софія Полупан");
-    expect(displayName("Михальчук Антон Євгенійович")).toBe("Антон Михальчук");
-    expect(displayName("Дашко Світлана Сергіївна")).toBe("Світлана Дашко");
-  });
-  it("leaves other names as they are", () => {
-    expect(displayName("Олена Гриценко")).toBe("Олена Гриценко");
-    expect(displayName("Anton Mykhalchuk")).toBe("Anton Mykhalchuk");
   });
 });

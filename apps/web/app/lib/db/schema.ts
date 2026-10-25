@@ -21,7 +21,12 @@ export const residents = sqliteTable(
     // Stable Google account id ("sub"); "dev:<email>" for local development sign-in.
     googleSub: text("google_sub").notNull(),
     email: text("email").notNull(),
+    // «Імʼя Прізвище», kept for display and sorting; the parts are below.
     name: text("name").notNull(),
+    firstName: text("first_name"),
+    lastName: text("last_name"),
+    // From the Polytechnic directory; shown only to the council.
+    patronymic: text("patronymic"),
     // Three digits; null until the person fills in the profile.
     room: text("room"),
     // Telegram username without "@", optional, so others can reach the person.

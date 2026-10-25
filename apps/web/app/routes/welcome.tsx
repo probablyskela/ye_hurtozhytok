@@ -14,7 +14,11 @@ export const meta: Route.MetaFunction = () => [
 export async function loader({ request, context }: Route.LoaderArgs) {
   const resident = await requireResident(request, context.cloudflare.env);
   if (resident.room) throw redirect("/");
-  return { name: resident.name, telegram: resident.telegram };
+  return {
+    name: resident.name,
+    firstName: resident.firstName ?? resident.name.split(" ")[0],
+    telegram: resident.telegram,
+  };
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -30,7 +34,7 @@ export default function Welcome({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const first = vocative(loaderData.name.split(" ")[0]);
+  const first = vocative(loaderData.firstName);
   return (
     <main className="page bare">
       <TopBar />

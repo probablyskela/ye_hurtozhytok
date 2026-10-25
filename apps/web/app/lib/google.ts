@@ -1,4 +1,5 @@
 /** Google OpenID Connect pieces that need no network: URLs and claim checks. */
+import { parseName, type PersonName } from "./names";
 
 export const ALLOWED_DOMAIN = "lpnu.ua";
 export const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -51,26 +52,13 @@ export function isUniversityEmail(email: string): boolean {
 }
 
 /** "anton.mykhalchuk.shi.2024@lpnu.ua" → "Anton Mykhalchuk" when the token has no name. */
-/**
- * The university directory gives «Прізвище Імʼя По батькові». People see each
- * other as «Імʼя Прізвище», without the patronymic.
- */
-export function displayName(full: string): string {
-  const parts = full.trim().split(/\s+/);
-  const patronymic = /(ович|евич|йович|івна|ївна|овна)$/i;
-  if (parts.length === 3 && patronymic.test(parts[2]))
-    return `${parts[1]} ${parts[0]}`;
-  return parts.join(" ");
-}
-
-export function nameFromClaims(claims: GoogleClaims): string {
-  const name = claims.name?.trim();
-  if (name) return displayName(name);
-  const local = (claims.email ?? "").split("@")[0].split(".").slice(0, 2);
-  return (
-    local.map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(" ") ||
-    "Мешканець"
-  );
+export function nameFromClaims(claims: GoogleClaims): PersonName {
+  return parseName({
+    name: claims.name,
+    givenName: claims.given_name,
+    familyName: claims.family_name,
+    email: claims.email,
+  });
 }
 
 export function authUrl(p: {

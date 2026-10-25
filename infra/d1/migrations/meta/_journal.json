@@ -15,6 +15,13 @@
       "when": 1792926146947,
       "tag": "0001_machines",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792934681110,
+      "tag": "0002_name_parts",
+      "breakpoints": true
     }
   ]
 }

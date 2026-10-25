@@ -41,6 +41,9 @@ export async function listResidents(env: Env) {
     .select({
       id: residents.id,
       name: residents.name,
+      firstName: residents.firstName,
+      lastName: residents.lastName,
+      patronymic: residents.patronymic,
       email: residents.email,
       room: residents.room,
       telegram: residents.telegram,
@@ -48,7 +51,7 @@ export async function listResidents(env: Env) {
       blocked: residents.blocked,
     })
     .from(residents)
-    .orderBy(asc(residents.room), asc(residents.name))
+    .orderBy(asc(residents.room), asc(residents.lastName), asc(residents.name))
     .all();
 }
 

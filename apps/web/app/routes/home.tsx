@@ -26,8 +26,8 @@ import {
 import { usePolling } from "~/lib/use-polling";
 import type { Route } from "./+types/home";
 
-function greeting(name: string) {
-  const first = vocative(name.split(" ")[0]);
+function greeting(firstName: string) {
+  const first = vocative(firstName);
   return first ? `Привіт, ${first}` : "Привіт!";
 }
 
@@ -72,6 +72,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const first = upcoming[0];
   return {
     name: resident.name,
+    firstName: resident.firstName ?? resident.name.split(" ")[0],
     blocked: resident.blocked,
     now,
     len,
@@ -142,6 +143,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     navigation.state !== "idle" && navigation.formAction?.startsWith("/book");
   const {
     name,
+    firstName,
     blocked,
     len,
     nearest,
@@ -172,7 +174,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         </Link>
       </div>
       <h2 className="title" style={{ marginBottom: 16 }}>
-        {greeting(name)}
+        {greeting(firstName)}
       </h2>
       {blocked && (
         <p className="error-note" role="alert">

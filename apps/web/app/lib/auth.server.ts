@@ -3,6 +3,7 @@ import { createCookieSessionStorage, redirect } from "react-router";
 
 import { activity, getDb } from "./db";
 import { residents, type Resident } from "./db/schema";
+import { parseName, shortName, type PersonName } from "./names";
 import {
   GOOGLE_JWKS_URL,
   GOOGLE_TOKEN_URL,
@@ -116,10 +117,16 @@ async function startSession(request: Request, env: Env, resident: Resident) {
 /** Finds the person by Google `sub` or creates them; keeps name and email fresh. */
 async function upsertResident(
   env: Env,
-  data: { sub: string; email: string; name: string },
+  data: { sub: string; email: string; person: PersonName },
 ): Promise<Resident> {
   const db = getDb(env);
   const now = Date.now();
+  const names = {
+    name: shortName(data.person),
+    firstName: data.person.firstName,
+    lastName: data.person.lastName,
+    patronymic: data.person.patronymic,
+  };
   const existing = await db
     .select()
     .from(residents)
@@ -128,23 +135,23 @@ async function upsertResident(
   if (existing) {
     await db
       .update(residents)
-      .set({ email: data.email, name: data.name, updatedAt: now })
+      .set({ email: data.email, ...names, updatedAt: now })
       .where(eq(residents.id, existing.id));
-    return { ...existing, email: data.email, name: data.name };
+    return { ...existing, email: data.email, ...names };
   }
   const created = await db
     .insert(residents)
     .values({
       googleSub: data.sub,
       email: data.email,
-      name: data.name,
+      ...names,
       createdAt: now,
       updatedAt: now,
     })
     // Two first sign-ins at once: the second one just takes the row.
     .onConflictDoUpdate({
       target: residents.googleSub,
-      set: { email: data.email, name: data.name, updatedAt: now },
+      set: { email: data.email, ...names, updatedAt: now },
     })
     .returning()
     .get();
@@ -251,7 +258,7 @@ export async function finishGoogleLogin(
   const resident = await upsertResident(env, {
     sub: claims.sub,
     email: claims.email!.toLowerCase(),
-    name: nameFromClaims(claims),
+    person: nameFromClaims(claims),
   });
   const headers = new Headers();
   headers.append("Set-Cookie", await startSession(request, env, resident));
@@ -267,7 +274,7 @@ export async function devLogin(
   const resident = await upsertResident(env, {
     sub: `dev:${data.email.toLowerCase()}`,
     email: data.email.toLowerCase(),
-    name: data.name,
+    person: parseName({ name: data.name, email: data.email }),
   });
   return new Headers({
     "Set-Cookie": await startSession(request, env, resident),

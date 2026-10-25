@@ -7,6 +7,7 @@ import {
 
 import { TopBar } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
+import { fullName } from "~/lib/names";
 import { canBlock, isCouncil } from "~/lib/permissions";
 import { listResidents, setBlocked } from "~/lib/residents.server";
 import type { Route } from "./+types/council";
@@ -23,7 +24,18 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     throw new Response("Ця сторінка лише для студради.", { status: 403 });
   const people = await listResidents(env);
   return {
-    people: people.map((p) => ({ ...p, canBlock: canBlock(me, p) })),
+    people: people.map((p) => ({
+      ...p,
+      full:
+        p.lastName || p.firstName
+          ? fullName({
+              firstName: p.firstName ?? "",
+              lastName: p.lastName ?? "",
+              patronymic: p.patronymic,
+            })
+          : p.name,
+      canBlock: canBlock(me, p),
+    })),
   };
 }
 
@@ -63,7 +75,7 @@ export default function Council({
   const people = loaderData.people.filter(
     (p) =>
       !q ||
-      `${p.name} ${p.room ?? ""} ${p.email} ${p.telegram ?? ""}`
+      `${p.full} ${p.room ?? ""} ${p.email} ${p.telegram ?? ""}`
         .toLowerCase()
         .includes(q),
   );
@@ -101,7 +113,7 @@ export default function Council({
           <div className="list-row" key={p.id}>
             <span style={{ flex: 1, minWidth: 0 }}>
               <b>
-                {p.name}{" "}
+                {p.full}{" "}
                 {p.role === "council" && (
                   <span className="council-tag">студрада</span>
                 )}
