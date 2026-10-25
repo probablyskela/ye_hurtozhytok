@@ -181,7 +181,7 @@ export function Field() {
 
 export function BackButton({ to }: { to: string }) {
   return (
-    <Link className="icon-btn" to={to} aria-label="Назад">
+    <Link className="icon-btn" to={to} aria-label="Назад" viewTransition>
       <Icon name="back" />
     </Link>
   );
@@ -311,7 +311,11 @@ export function Ticket({
   footRight,
   status,
   big,
+  vtName,
+  celebrate,
 }: {
+  vtName?: string;
+  celebrate?: boolean;
   to?: string;
   heading: string;
   startMin: number;
@@ -327,6 +331,13 @@ export function Ticket({
       <svg className="porthole" aria-hidden="true">
         <use href="#porthole" />
       </svg>
+      {celebrate && (
+        <span className="splash" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+        </span>
+      )}
       {status && (
         <div className="ticket-top">
           <span className="ticket-tag">
@@ -353,17 +364,21 @@ export function Ticket({
       </div>
     </>
   );
-  const cls = `ticket${big ? " big" : " compact"}`;
+  const cls = `ticket${big ? " big" : " compact"}${celebrate ? " celebrate" : ""}`;
+  const vt = vtName ? { viewTransitionName: vtName } : undefined;
   return to ? (
     <Link
       className={cls}
       to={to}
-      style={{ display: "block", textDecoration: "none" }}
+      viewTransition
+      style={{ display: "block", textDecoration: "none", ...vt }}
     >
       {body}
     </Link>
   ) : (
-    <div className={cls}>{body}</div>
+    <div className={cls} style={vt}>
+      {body}
+    </div>
   );
 }
 
@@ -375,6 +390,7 @@ export function TabBar({
   return (
     <nav className="tabbar" aria-label="Розділи">
       <Link
+        viewTransition
         className="tab"
         to="/"
         aria-current={active === "home" ? "page" : undefined}
@@ -382,11 +398,12 @@ export function TabBar({
         <Icon name="home" />
         Головна
       </Link>
-      <Link className="tab-main" to="/book">
+      <Link className="tab-main" to="/book" viewTransition>
         <Icon name="plus" />
         Записатися
       </Link>
       <Link
+        viewTransition
         className="tab"
         to="/bookings"
         aria-current={active === "bookings" ? "page" : undefined}

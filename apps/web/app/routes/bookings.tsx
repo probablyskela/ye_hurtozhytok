@@ -38,7 +38,12 @@ export default function Bookings({ loaderData }: Route.ComponentProps) {
       {list.length ? (
         <div className="glass" style={{ padding: "4px 0" }}>
           {list.map((b) => (
-            <Link className="list-row" to={`/bookings/${b.id}`} key={b.id}>
+            <Link
+              viewTransition
+              className="list-row"
+              to={`/bookings/${b.id}`}
+              key={b.id}
+            >
               <span
                 className="who-av"
                 style={

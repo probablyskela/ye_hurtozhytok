@@ -166,6 +166,8 @@ Scope note: the presentation canvas in `design/mockup/index.html` (phone bezels,
 - Black capsule primary buttons; everything is a pill or a generously rounded tile.
 - Fixel Display Black only for times and duration numerals; Fixel Text for everything else.
 - The day strip: each machine's day as a capsule ribbon with booked segments, hatched buffers and a coral now-marker.
+- The time scrubber: the day slides under a fixed ultramarine frame the size of the booking (18px per 15 minutes, native momentum scroll with snap points); the frame turns red on busy time and glides to the nearest free start when released.
+- Motion: view transitions between screens (the ticket morphs from home to its detail), tiles rise once on first appearance, the ticket catches light once, a ripple spreads from the porthole after booking, a busy machine's drum turns and a free one breathes, the now-marker pulses. Everything stops under reduced motion.
 - The porthole motif: ticket rings and machine state dots.
 - The facade mark: a black squircle holding a 3×3 grid of rounded windows — three lit white, five dim, one ultramarine («твоє вікно»).
 

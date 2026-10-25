@@ -153,6 +153,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         <section className="area-ticket">
           {next ? (
             <Ticket
+              vtName={`ticket-${next.id}`}
               to={`/bookings/${next.id}`}
               heading={next.heading}
               startMin={next.startMin}
@@ -192,6 +193,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
               const st = stateText(m.state, m.working);
               return (
                 <Link
+                  viewTransition
                   className="now-row"
                   to={`/machines/${m.slug}`}
                   key={m.slug}
@@ -247,7 +249,11 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                   Сьогодні вже немає — ось завтра:
                 </p>
               )}
-              <div className="chip-row" style={{ marginTop: 10 }}>
+              <div
+                className="chip-row animate"
+                key={len}
+                style={{ marginTop: 10 }}
+              >
                 {nearest.map((x) => (
                   <Link
                     key={`${x.slug}-${x.s}`}

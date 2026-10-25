@@ -13,7 +13,7 @@ npm run db:migrate:local
 npm run dev
 ```
 
-Поки `GOOGLE_CLIENT_ID` порожній, а `DEV_LOGIN=1`, на `http://127.0.0.1:5173/login (порт може бути інший, дивись вивід `npm run dev`)`
+Поки `GOOGLE_CLIENT_ID` порожній, а `DEV_LOGIN=1`, на `/login` (адресу показує `npm run dev`)
 є форма входу без Google: будь-яке імʼя й адреса `@lpnu.ua`. Ця форма працює
 лише на localhost і зникає, щойно задано Google-клієнт.
 

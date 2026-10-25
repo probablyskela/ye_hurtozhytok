@@ -129,6 +129,8 @@ export default function BookingPage({
 
       <Ticket
         big
+        vtName={`ticket-${b.id}`}
+        celebrate={isNew}
         status={status}
         heading={b.heading}
         startMin={b.startMin}
