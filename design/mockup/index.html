@@ -1,0 +1,1229 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>єГуртожиток · мокап</title>
+<meta name="description" content="Мокап першої версії єГуртожитку: запис на пралки гуртожитку №14 з телефона.">
+<meta name="theme-color" content="#dfeef5">
+<style>
+@font-face { font-family: "Fixel Text"; src: url("fonts/FixelText-Regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Fixel Text"; src: url("fonts/FixelText-Medium.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Fixel Text"; src: url("fonts/FixelText-SemiBold.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Fixel Text"; src: url("fonts/FixelText-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Fixel Display"; src: url("fonts/FixelDisplay-Black.woff2") format("woff2"); font-weight: 900; font-display: swap; }
+
+:root {
+  --ink: #101217;
+  --ink-2: #2b2f38;
+  --muted: #525a6b;
+  --faint: #626a7c;
+  --line: rgb(16 18 23 / 0.08);
+  --field-a: #cdeee2;
+  --field-b: #cfe0f9;
+  --field-c: #e4daf6;
+  --glass: rgb(255 255 255 / 0.56);
+  --glass-strong: rgb(255 255 255 / 0.78);
+  --mine: #2a37d8;
+  --mine-deep: #1b23a3;
+  --mine-soft: #e3e6ff;
+  --free: #0b6c61;
+  --free-soft: rgb(15 143 126 / 0.13);
+  --busy: rgb(16 18 23 / 0.16);
+  --now: #e5484d;
+  --danger: #c4282e;
+  --r-tile: 26px;
+  --r-row: 18px;
+  --ease: cubic-bezier(.32, .72, 0, 1);
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --shadow-glass:
+    inset 0 1px 1px rgb(255 255 255 / .95),
+    inset 0 -1px 1px rgb(255 255 255 / .35),
+    inset 0 -22px 34px -26px rgb(255 255 255 / .8),
+    0 1px 2px rgb(16 18 23 / .05),
+    0 20px 40px -24px rgb(31 45 90 / .28);
+  --shadow-gloss: inset 0 1px 0 #fff, 0 1px 2px rgb(16 18 23 / .08), 0 6px 16px -6px rgb(16 18 23 / .2);
+  --font: "Fixel Text", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-display: "Fixel Display", "Fixel Text", -apple-system, system-ui, sans-serif;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: #e6eef6;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--mine); color: #fff; }
+input, button, textarea { font: inherit; color: inherit; caret-color: var(--mine); }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--mine); outline-offset: 2px; border-radius: 12px; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgb(16 18 23 / .14); border-radius: 99px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ---------- presentation canvas ---------- */
+.canvas {
+  min-height: 100vh;
+  padding: 40px 32px 64px;
+  background:
+    radial-gradient(60% 50% at 10% 0%, rgb(216 243 234 / .9), transparent 70%),
+    radial-gradient(50% 50% at 95% 20%, rgb(235 227 248 / .9), transparent 70%),
+    radial-gradient(70% 60% at 50% 100%, rgb(217 231 251 / .95), transparent 70%),
+    #e9f0f7;
+}
+.canvas-head {
+  max-width: 1320px;
+  margin: 0 auto 36px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.canvas-head h1 {
+  margin: 14px 0 6px;
+  font-size: clamp(30px, 3.4vw, 44px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+  text-wrap: balance;
+}
+.canvas-head p { margin: 0; color: var(--muted); max-width: 60ch; }
+.jump {
+  display: flex; gap: 4px; padding: 4px;
+  border-radius: 999px; background: rgb(16 18 23 / .06);
+  flex-wrap: wrap;
+}
+.jump a {
+  padding: 8px 14px; border-radius: 999px;
+  color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500;
+  min-height: 36px; display: inline-flex; align-items: center;
+  transition: background .25s var(--ease), color .25s var(--ease);
+}
+.jump a:hover { background: rgb(255 255 255 / .6); color: var(--ink); }
+
+.phones {
+  max-width: 1320px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 48px 40px;
+}
+.shot { display: flex; flex-direction: column; align-items: center; gap: 14px; scroll-margin-top: 24px; }
+.shot figcaption { text-align: center; max-width: 340px; }
+.shot figcaption b { display: block; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.shot figcaption span { color: var(--muted); font-size: 13.5px; }
+figure { margin: 0; }
+
+.phone {
+  position: relative;
+  width: 390px;
+  height: 844px;
+  border-radius: 54px;
+  padding: 10px;
+  background: #0d0f14;
+  box-shadow: 0 50px 90px -40px rgb(24 32 70 / .55), 0 0 0 1px rgb(255 255 255 / .08) inset;
+}
+.screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 44px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #eef3f8;
+}
+.field {
+  position: absolute; inset: -20%;
+  z-index: -1;
+  background:
+    radial-gradient(45% 35% at 15% 10%, var(--field-a), transparent 70%),
+    radial-gradient(45% 40% at 90% 30%, var(--field-c), transparent 70%),
+    radial-gradient(60% 45% at 30% 85%, var(--field-b), transparent 70%),
+    #edf2f8;
+  animation: drift 26s ease-in-out infinite alternate;
+}
+@keyframes drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(-4%, 3%, 0) scale(1.06); }
+}
+.scroll {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 54px 16px 120px;
+  scrollbar-width: none;
+}
+.scroll::-webkit-scrollbar { display: none; }
+.status {
+  position: absolute; top: 0; left: 0; right: 0; height: 48px; z-index: 5;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 30px 0 34px; font-size: 15px; font-weight: 600;
+  pointer-events: none;
+}
+.status i { display: flex; gap: 5px; align-items: center; }
+.status svg { width: 17px; height: 12px; }
+
+/* ---------- shared product UI ---------- */
+.glass {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  backdrop-filter: blur(18px) saturate(170%);
+  box-shadow: var(--shadow-glass);
+  border-radius: var(--r-tile);
+}
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  min-height: 44px; margin-bottom: 18px;
+}
+.brand { display: inline-flex; align-items: center; gap: 9px; text-decoration: none; color: var(--ink); }
+.mark {
+  position: relative; width: 30px; height: 30px; border-radius: 9px;
+  background: linear-gradient(160deg, #2b2f38, #0d0f14);
+  display: grid; place-items: center;
+  color: #fff; font-family: var(--font-display); font-weight: 900; font-size: 19px; line-height: 1;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .18), 0 4px 10px -4px rgb(16 18 23 / .5);
+}
+.mark span { transform: translateY(-1px); }
+.mark::after {
+  content: ""; position: absolute; top: 5px; right: 5px; width: 6px; height: 6px; border-radius: 50%;
+  background: #5ee0c8; box-shadow: 0 0 0 1.5px #0d0f14;
+}
+.wordmark { font-weight: 700; font-size: 19px; letter-spacing: -0.035em; }
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--glass-strong); box-shadow: var(--shadow-gloss);
+  font-weight: 600; font-size: 14px; color: var(--ink-2);
+  border: 0;
+}
+.icon-btn {
+  width: 44px; height: 44px; border-radius: 50%; border: 0;
+  display: grid; place-items: center;
+  background: var(--glass-strong); box-shadow: var(--shadow-gloss);
+  color: var(--ink);
+  transition: transform .2s var(--ease);
+}
+.icon-btn:active { transform: scale(.94); }
+.ico { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.ico.sm { width: 18px; height: 18px; }
+
+h2.title {
+  margin: 0 0 4px; font-size: 28px; line-height: 1.1; letter-spacing: -0.035em; font-weight: 700;
+  text-wrap: balance;
+}
+.lede { margin: 0 0 20px; color: var(--muted); font-size: 15px; }
+.section-h {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  margin: 26px 4px 10px;
+}
+.section-h h3 { margin: 0; font-size: 18px; letter-spacing: -0.02em; font-weight: 700; }
+.section-h a, .link {
+  color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgb(16 18 23 / .25); font-weight: 600; font-size: 14px; text-decoration: none;
+  min-height: 44px; display: inline-flex; align-items: center;
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 52px; padding: 0 22px; border-radius: 999px; border: 0;
+  font-weight: 600; font-size: 16px; letter-spacing: -0.01em;
+  text-decoration: none;
+  transition: transform .2s var(--ease), filter .2s var(--ease), box-shadow .2s var(--ease);
+}
+.btn:active { transform: scale(.97); }
+.btn-primary {
+  color: #fff;
+  background: linear-gradient(180deg, #2b2f38, #0d0f14);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .16), 0 10px 22px -10px rgb(16 18 23 / .6);
+}
+.btn-primary:hover { filter: brightness(1.15); }
+.btn-primary[disabled] { background: rgb(16 18 23 / .18); color: rgb(16 18 23 / .45); box-shadow: none; cursor: not-allowed; }
+.btn-soft { background: var(--glass-strong); box-shadow: var(--shadow-gloss); color: var(--ink); }
+.btn-soft:hover { background: #fff; }
+.btn-ghost-danger { background: transparent; color: var(--danger); }
+.btn-ghost-danger:hover { background: rgb(196 40 46 / .07); }
+.btn.block { width: 100%; }
+
+.chip {
+  flex: none; color: var(--ink); text-decoration: none;
+  min-height: 44px; padding: 0 16px; border-radius: 999px; border: 0;
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--glass-strong); box-shadow: var(--shadow-gloss);
+  font-weight: 600; font-size: 15px; letter-spacing: -0.01em;
+  transition: background .25s var(--ease), color .25s var(--ease), transform .2s var(--ease);
+}
+.chip small { font-weight: 500; color: var(--muted); font-size: 13px; }
+.chip:active { transform: scale(.96); }
+.chip[aria-pressed="true"] { background: var(--mine); color: #fff; box-shadow: inset 0 1px 0 rgb(255 255 255 / .25), 0 8px 18px -8px rgb(42 55 216 / .7); }
+.chip[aria-pressed="true"] small { color: rgb(255 255 255 / .78); }
+.chip-row { display: flex; gap: 8px; overflow-x: auto; padding: 4px 4px 8px; margin: 0 -4px; scrollbar-width: none; }
+.chip-row::-webkit-scrollbar { display: none; }
+
+/* segmented control with gliding thumb */
+.seg {
+  position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+  padding: 3px; border-radius: 999px; background: rgb(16 18 23 / .07);
+}
+.seg button {
+  position: relative; z-index: 1; border: 0; background: transparent;
+  min-height: 40px; border-radius: 999px; padding: 0 10px;
+  font-weight: 500; font-size: 14px; color: var(--muted);
+  transition: color .3s var(--ease);
+  white-space: nowrap;
+}
+.seg button[aria-pressed="true"] { color: var(--ink); font-weight: 600; }
+.seg .thumb {
+  position: absolute; z-index: 0; top: 3px; bottom: 3px; left: 3px;
+  border-radius: 999px; background: #fff; box-shadow: var(--shadow-gloss);
+  transition: transform .42s var(--ease), width .42s var(--ease);
+}
+
+/* ---------- the booking document card (signature object) ---------- */
+.ticket {
+  position: relative; overflow: hidden;
+  border-radius: 28px; padding: 20px 20px 18px;
+  color: #fff;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgb(110 125 255 / .3), transparent 55%),
+    radial-gradient(80% 70% at 0% 100%, rgb(20 28 140 / .45), transparent 60%),
+    linear-gradient(155deg, #3442e6 0%, #2a37d8 45%, #1b23a3 100%);
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / .35),
+    inset 0 -30px 50px -40px rgb(160 180 255 / .7),
+    0 26px 44px -22px rgb(27 35 163 / .6);
+}
+.ticket .porthole {
+  position: absolute; right: -54px; top: -40px; width: 210px; height: 210px; opacity: .3; pointer-events: none;
+}
+.ticket-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; position: relative; }
+.ticket-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px 5px 8px; border-radius: 999px; background: rgb(255 255 255 / .16);
+  font-size: 13px; font-weight: 600;
+}
+.ticket-tag .dot { width: 7px; height: 7px; border-radius: 50%; background: #7ff0da; box-shadow: 0 0 0 3px rgb(127 240 218 / .25); }
+.ticket-when { position: relative; margin-top: 18px; font-size: 14px; color: rgb(255 255 255 / .8); font-weight: 500; }
+.ticket-time, .tnum, .chip, .sheet-text b, .tl-block .t, .strip-scale, .day b, .dur b, .tl-hour span, .status {
+  font-feature-settings: "tnum";
+}
+.ticket-time {
+  position: relative; display: flex; align-items: baseline; gap: 8px;
+  font-family: var(--font-display); font-weight: 900; font-size: 46px; line-height: 1; letter-spacing: -0.035em;
+  margin: 4px 0 2px;
+}
+.ticket-time .dash { font-family: var(--font); font-weight: 400; font-size: .6em; opacity: .6; align-self: center; transform: translateY(-.08em); }
+.ticket-machine { position: relative; font-size: 18px; font-weight: 600; letter-spacing: -0.015em; }
+.ticket-foot {
+  position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-top: 16px; padding-top: 14px; border-top: 1px solid rgb(255 255 255 / .18);
+  font-size: 14px; color: rgb(255 255 255 / .86);
+}
+.ticket-foot b { color: #fff; font-weight: 600; }
+.ticket-cta {
+  min-height: 44px; padding: 0 16px; border-radius: 999px; border: 0;
+  background: rgb(255 255 255 / .94); color: var(--mine-deep); font-weight: 600; font-size: 14px;
+  display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+  box-shadow: 0 6px 14px -6px rgb(0 0 0 / .35);
+}
+.ticket.big { padding: 24px 22px 22px; }
+.ticket.big .ticket-time { font-size: 48px; margin-top: 6px; }
+.ticket.big .porthole { width: 260px; height: 260px; right: -70px; top: -50px; }
+
+/* ---------- day strip (signature move) ---------- */
+.strip { position: relative; }
+.strip-track {
+  position: relative; height: 26px; border-radius: 999px; overflow: hidden;
+  background: var(--free-soft);
+  box-shadow: inset 0 0 0 1px rgb(15 143 126 / .12);
+}
+.seg-busy, .seg-buf, .seg-mine, .seg-past, .seg-pick { position: absolute; top: 0; bottom: 0; }
+.seg-busy { background: #b9c0cc; border-radius: 6px; }
+.seg-buf { background: repeating-linear-gradient(-45deg, rgb(16 18 23 / .1) 0 3px, transparent 3px 6px); }
+.seg-mine { background: linear-gradient(180deg, #4250ee, #2a37d8); border-radius: 6px; }
+.seg-past { left: 0; background: rgb(238 243 248 / .62); -webkit-backdrop-filter: grayscale(1); backdrop-filter: grayscale(1); }
+.seg-pick {
+  border-radius: 6px;
+  background: repeating-linear-gradient(-45deg, #2a37d8 0 6px, #3b49ea 6px 12px);
+  box-shadow: 0 0 0 2px #fff, 0 6px 14px -4px rgb(42 55 216 / .7);
+  transform-origin: left center;
+  transition: left .5s var(--ease), width .5s var(--ease);
+  animation: pick-in .55s var(--ease-out);
+}
+@keyframes pick-in { from { transform: scaleX(.2); opacity: 0; } to { transform: scaleX(1); opacity: 1; } }
+.strip-now {
+  position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--now); border-radius: 2px;
+}
+.strip-now::before {
+  content: ""; position: absolute; top: -4px; left: 50%; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%;
+  background: var(--now); box-shadow: 0 0 0 3px rgb(229 72 77 / .2);
+}
+.strip-scale { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11.5px; color: var(--faint); font-weight: 500; }
+
+/* machine tiles on home */
+.machines { display: grid; gap: 12px; }
+.machine {
+  display: block; padding: 16px 16px 14px; text-decoration: none; color: inherit;
+  transition: transform .3s var(--ease);
+}
+.machine:active { transform: scale(.985); }
+.machine-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.machine-name { font-weight: 700; font-size: 17px; letter-spacing: -0.02em; }
+.state {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600;
+  padding: 5px 10px; border-radius: 999px; white-space: nowrap;
+}
+.state::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.state.free { color: var(--free); background: var(--free-soft); }
+.state.busy { color: var(--ink-2); background: rgb(16 18 23 / .07); }
+.machine-sub { margin-top: 10px; font-size: 13.5px; color: var(--muted); }
+
+
+/* home: one panel, three ribbons */
+.ticket.compact { padding: 18px 18px 14px; }
+.ticket.compact .ticket-time { font-size: 42px; }
+.ticket.compact .ticket-foot { margin-top: 12px; padding-top: 10px; }
+.now-panel { padding: 8px 14px 12px; }
+.now-row {
+  display: grid; grid-template-columns: 22px 112px minmax(0, 1fr); gap: 10px; align-items: center;
+  min-height: 48px; text-decoration: none; color: inherit;
+}
+.now-row + .now-row { border-top: 1px solid var(--line); }
+.now-name b { display: block; font-size: 14.5px; font-weight: 700; letter-spacing: -0.015em; line-height: 1.2; }
+.now-name small { display: block; white-space: nowrap; font-size: 12.5px; color: var(--muted); font-weight: 500; }
+.now-name small.ok { color: var(--free); font-weight: 600; }
+.now-row .strip-track { height: 20px; }
+.now-scale { margin-left: 154px; }
+.port { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 2px currentColor; position: relative; }
+.port::after { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: currentColor; opacity: .85; }
+.port.free { color: var(--free); }
+.port.busy { color: #9aa2b1; }
+
+
+/* profile */
+.me { display: flex; align-items: center; gap: 14px; margin: 4px 4px 6px; }
+.me-av { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; flex: none;
+  background: linear-gradient(160deg, #2b2f38, #0d0f14); color: #fff; font-weight: 700; font-size: 22px; letter-spacing: -0.02em;
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / .2), 0 12px 24px -12px rgb(16 18 23 / .6); }
+.me > div b { display: block; font-size: 22px; letter-spacing: -0.03em; font-weight: 700; line-height: 1.15; }
+.me > div span { display: block; font-size: 13.5px; color: var(--muted); word-break: break-all; }
+.me-note { margin: 0 4px 16px 82px; font-size: 13px; color: var(--muted); }
+.form { padding: 18px 16px 16px; display: grid; gap: 18px; }
+.field-row { display: grid; gap: 6px; }
+.field-row label { font-size: 14px; font-weight: 600; padding-left: 4px; }
+.field-row small { font-size: 13px; color: var(--muted); padding-left: 4px; line-height: 1.4; }
+.field-row input, .affix {
+  min-height: 52px; width: 100%; border: 0; border-radius: 16px; padding: 0 16px;
+  background: rgb(255 255 255 / .8); box-shadow: inset 0 0 0 1px rgb(16 18 23 / .12);
+  font-size: 17px; font-weight: 600; letter-spacing: -0.01em;
+  transition: box-shadow .25s var(--ease), background .25s var(--ease);
+}
+.field-row input:focus { outline: none; background: #fff; box-shadow: inset 0 0 0 2px var(--ink), 0 0 0 4px rgb(16 18 23 / .08); }
+.affix { display: flex; align-items: center; gap: 2px; padding: 0 0 0 16px; }
+.affix span { color: var(--muted); font-weight: 600; font-size: 17px; }
+.affix input { box-shadow: none; padding-left: 0; background: transparent; min-height: 50px; }
+.affix:focus-within { background: #fff; box-shadow: inset 0 0 0 2px var(--ink), 0 0 0 4px rgb(16 18 23 / .08); }
+.affix input:focus { box-shadow: none; background: transparent; }
+.field-row input:user-invalid { box-shadow: inset 0 0 0 2px var(--danger); }
+.preview-who { margin-top: 18px; padding: 0 4px; }
+.preview-who small { display: block; font-size: 13px; color: var(--muted); margin-bottom: 10px; font-weight: 500; }
+.preview-who .tl-block.who-demo { position: relative; inset: auto; z-index: auto; }
+.tl-block .c a, .who-demo a { color: inherit; font-weight: 600; text-underline-offset: 2px; }
+
+/* tab bar */
+.tabbar {
+  position: absolute; left: 12px; right: 12px; bottom: 14px; z-index: 6;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  padding: 6px; border-radius: 30px;
+  background: rgb(255 255 255 / .62);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+  box-shadow: var(--shadow-glass);
+}
+.tab {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  min-height: 52px; justify-content: center; border-radius: 22px;
+  color: var(--muted); text-decoration: none; font-size: 12px; font-weight: 600;
+}
+.tab[aria-current="page"] { color: var(--ink); }
+.tab-main {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 52px; padding: 0 22px; border-radius: 999px;
+  background: linear-gradient(180deg, #2b2f38, #0d0f14); color: #fff;
+  font-weight: 600; font-size: 15px; text-decoration: none;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .16), 0 10px 20px -10px rgb(16 18 23 / .7);
+}
+
+/* booking flow */
+.durations { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.dur {
+  min-height: 72px; border: 0; border-radius: 20px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
+  background: var(--glass-strong); box-shadow: var(--shadow-gloss);
+  transition: background .3s var(--ease), color .3s var(--ease), transform .2s var(--ease);
+}
+.dur b { font-family: var(--font-display); font-weight: 900; font-size: 24px; line-height: 1.05; letter-spacing: -0.03em; }
+.dur span { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.dur:hover { background: #fff; }
+.dur:active { transform: scale(.96); }
+.dur[aria-checked="true"] { background: var(--mine); color: #fff; box-shadow: inset 0 1px 0 rgb(255 255 255 / .25), 0 10px 20px -10px rgb(42 55 216 / .75); }
+.dur[aria-checked="true"] span { color: rgb(255 255 255 / .8); }
+
+.days { display: flex; gap: 6px; overflow-x: auto; padding: 4px 4px 8px; margin: 0 -4px; scrollbar-width: none; }
+.days::-webkit-scrollbar { display: none; }
+.day {
+  flex: none; width: 66px; min-height: 64px; border-radius: 18px; border: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  background: var(--glass-strong); box-shadow: var(--shadow-gloss);
+  transition: background .3s var(--ease), color .3s var(--ease);
+}
+.day small { font-size: 12px; color: var(--muted); font-weight: 600; }
+.day b { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; }
+.day[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.day[aria-pressed="true"] small { color: rgb(255 255 255 / .7); }
+
+.slots { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.slot-machine { padding: 16px; }
+.slot-machine .machine-head { margin-bottom: 10px; }
+.slot-machine .chip-row { margin-top: 12px; }
+.empty-note {
+  margin-top: 12px; display: flex; gap: 10px; align-items: flex-start;
+  font-size: 14px; color: var(--muted); padding: 10px 12px; border-radius: 14px; background: rgb(16 18 23 / .04);
+}
+.empty-note .ico { color: var(--faint); margin-top: 1px; }
+
+.sheet {
+  position: absolute; left: 12px; right: 12px; bottom: 14px; z-index: 6;
+  padding: 14px 14px 14px 18px; border-radius: 28px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: rgb(255 255 255 / .72);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+  box-shadow: var(--shadow-glass);
+}
+.sheet-text { min-width: 0; }
+.sheet-text small { display: block; font-size: 13px; color: var(--muted); font-weight: 500; }
+.sheet-text b { display: block; font-size: 17px; letter-spacing: -0.02em; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.quota {
+  display: flex; align-items: center; gap: 10px; margin: 18px 4px 0; font-size: 13.5px; color: var(--muted);
+}
+.quota-dots { display: flex; gap: 4px; }
+.quota-dots i { width: 18px; height: 6px; border-radius: 99px; background: rgb(16 18 23 / .12); }
+.quota-dots i.on { background: var(--ink-2); }
+
+/* machine day timeline */
+.day-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.day-head h2 { margin: 0; font-size: 24px; letter-spacing: -0.03em; font-weight: 700; line-height: 1.15; }
+.day-head .state { margin-top: 4px; }
+.timeline { position: relative; margin-top: 14px; padding: 14px 14px 14px 0; }
+.tl-grid { position: relative; margin-left: 52px; }
+.tl-hour {
+  position: absolute; left: -52px; right: 0; height: 0;
+  border-top: 1px dashed rgb(16 18 23 / .08);
+}
+.tl-hour span { position: absolute; left: 10px; top: -9px; font-size: 12px; color: var(--faint); font-weight: 600; }
+.tl-block {
+  position: absolute; z-index: 2; left: 0; right: 0; border-radius: 16px; padding: 9px 12px;
+  display: flex; flex-direction: column; justify-content: center; overflow: hidden;
+}
+.tl-block .t { font-size: 12.5px; font-weight: 600; opacity: .7; }
+.tl-block .n { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.tl-block .c { font-size: 13px; opacity: .75; }
+.tl-busy { background: rgb(255 255 255 / .7); box-shadow: var(--shadow-gloss); }
+.tl-mine { background: linear-gradient(160deg, #3b49ea, #1b23a3); color: #fff; box-shadow: 0 14px 26px -14px rgb(27 35 163 / .8); }
+.tl-mine .t, .tl-mine .c { opacity: .85; }
+.tl-free {
+  border: 1.5px dashed rgb(15 127 113 / .45); background: rgb(15 143 126 / .06); color: var(--free);
+  flex-direction: row; align-items: center; justify-content: space-between; gap: 10px;
+  text-decoration: none;
+}
+.tl-free .n { font-size: 14.5px; }
+.tl-free .plus {
+  width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none;
+  background: var(--free); color: #fff;
+}
+.tl-buf {
+  position: absolute; left: 0; right: 0;
+  background: repeating-linear-gradient(-45deg, rgb(16 18 23 / .07) 0 3px, transparent 3px 7px);
+  border-radius: 6px;
+}
+.tl-now { position: absolute; left: -10px; right: -4px; height: 0; border-top: 2px solid var(--now); z-index: 1; }
+.tl-now::after { content: ""; position: absolute; left: 0; width: 10px; top: -2px; border-top: 2px solid var(--now); z-index: 3; }
+.tl-now::before {
+  content: "13:40"; position: absolute; left: -44px; top: -11px;
+  font-size: 11.5px; font-weight: 700; color: #fff; background: var(--now); padding: 2px 6px; border-radius: 99px;
+}
+.past-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 12px 16px; border-radius: 16px; background: rgb(16 18 23 / .04);
+  font-size: 13.5px; color: var(--muted);
+}
+.rule {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px 16px; font-size: 14px; color: var(--ink-2); line-height: 1.45;
+}
+.rule .ico { color: var(--ink-2); margin-top: 1px; }
+
+/* sign-in */
+.signin { display: flex; flex-direction: column; min-height: 100%; }
+.signin-hero { margin: 34px 4px 22px; }
+.signin-hero h2 {
+  margin: 0 0 12px; font-weight: 700;
+  font-size: 44px; line-height: 1; letter-spacing: -0.04em; text-wrap: balance;
+}
+.signin-hero p { margin: 0; color: var(--muted); font-size: 16px; max-width: 32ch; }
+.preview { padding: 16px; }
+.preview-row { display: grid; grid-template-columns: 76px 1fr; gap: 10px; align-items: center; }
+.preview-row + .preview-row { margin-top: 12px; }
+.preview-row span { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.preview .strip-track { height: 20px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 14px; font-size: 12.5px; color: var(--muted); }
+.legend i { display: inline-block; width: 14px; height: 8px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
+.signin-actions { margin-top: auto; padding-top: 28px; }
+.helper { margin: 12px 8px 0; text-align: center; font-size: 13.5px; color: var(--muted); }
+.credit {
+  margin: 22px 4px 0; padding-top: 14px; border-top: 1px solid var(--line);
+  font-size: 12.5px; color: var(--faint); text-align: center; line-height: 1.5;
+}
+
+/* booking detail */
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.notify { padding: 16px; display: flex; gap: 14px; align-items: flex-start; margin-top: 14px; }
+.notify-ico { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: rgb(16 18 23 / .06); color: var(--ink-2); flex: none; }
+.notify b { display: block; font-size: 15.5px; letter-spacing: -0.01em; }
+.notify p { margin: 2px 0 10px; font-size: 13.5px; color: var(--muted); }
+.switch {
+  position: relative; width: 51px; height: 31px; border-radius: 99px; border: 0; flex: none; margin-left: auto;
+  background: rgb(16 18 23 / .16); transition: background .3s var(--ease);
+}
+.switch::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%;
+  background: #fff; box-shadow: 0 3px 8px rgb(0 0 0 / .18); transition: transform .35s var(--ease);
+}
+.switch[aria-checked="true"] { background: var(--free); }
+.switch[aria-checked="true"]::after { transform: translateX(20px); }
+.rules { margin-top: 14px; padding: 4px 0; }
+.rules .rule + .rule { border-top: 1px solid var(--line); }
+.who { margin-top: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+.who-av { width: 40px; height: 40px; border-radius: 50%; background: #fff; box-shadow: var(--shadow-gloss); display: grid; place-items: center; font-weight: 700; font-size: 14px; flex: none; }
+.who b { display: block; font-size: 15px; }
+.who span { font-size: 13.5px; color: var(--muted); }
+
+.toast {
+  position: absolute; left: 50%; top: 58px; z-index: 8; transform: translate(-50%, -20px); opacity: 0;
+  padding: 10px 16px; border-radius: 999px; background: var(--ink); color: #fff; font-size: 14px; font-weight: 600;
+  display: inline-flex; gap: 8px; align-items: center; white-space: nowrap;
+  transition: transform .45s var(--ease), opacity .3s var(--ease);
+  pointer-events: none;
+}
+.toast.show { transform: translate(-50%, 0); opacity: 1; }
+
+.note {
+  max-width: 1320px; margin: 40px auto 0; text-align: center; color: var(--muted); font-size: 13.5px;
+}
+
+/* ---------- small screens: show screens edge to edge ---------- */
+@media (max-width: 560px) {
+  .canvas { padding: 20px 0 40px; }
+  .canvas-head { padding: 0 16px; margin-bottom: 24px; }
+  .jump { width: 100%; }
+  .phones { gap: 36px; }
+  .shot { width: 100%; }
+  .jump { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .jump a { flex: none; }
+  .phone { width: 100%; height: auto; padding: 0; border-radius: 0; background: transparent; box-shadow: none; }
+  .screen { border-radius: 0; height: auto; overflow: clip; }
+  .status { display: none; }
+  .scroll { height: auto; overflow: visible; padding: 16px 16px 24px; }
+  .scroll[style] { padding-bottom: 24px !important; }
+  .tabbar, .sheet { position: sticky; left: auto; right: auto; margin: 0 12px; bottom: 14px; }
+  .shot figcaption { padding: 0 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass, .tabbar, .sheet { background: #fbfcfd; -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-washer" viewBox="0 0 24 24"><rect x="4" y="2.8" width="16" height="18.4" rx="3.5"/><circle cx="12" cy="13" r="4.6"/><path d="M9.6 13.6c1.1-.9 2.3.9 4.8 0"/><path d="M7.5 6h3"/><circle cx="16" cy="6" r=".6" fill="currentColor"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.8 20c1.2-3.6 4-5.3 7.2-5.3s6 1.7 7.2 5.3"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M14.5 5.5 8 12l6.5 6.5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.5 1.5H5z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.8" y="5" width="16.4" height="15.2" rx="3.2"/><path d="M3.8 9.8h16.4M8.3 3v4M15.7 3v4"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3.2"/><path d="m4 7 8 6 8-6"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3 6 13.5h5.2L10.5 21 18 10.4h-5.3z"/></symbol>
+  <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M8.5 3.8 4 6.2l1.8 4 2-.9V20h8.4V9.3l2 .9 1.8-4-4.5-2.4a3.6 3.6 0 0 1-7 0z"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3.5s-6 6.4-6 10.6a6 6 0 0 0 12 0c0-4.2-6-10.6-6-10.6z"/></symbol>
+  <symbol id="i-slider" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M12 11v5.2M12 7.8v.2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5.5 12.5 4 4 9-9.5"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 4v16M5 20h14M6 8h12M6 8l-3 6a3 3 0 0 0 6 0zM18 8l-3 6a3 3 0 0 0 6 0z"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9.5 5.5 6.5 6.5-6.5 6.5"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19z"/></symbol>
+  <symbol id="porthole" viewBox="0 0 200 200"><circle cx="100" cy="100" r="96" fill="none" stroke="#fff" stroke-width="2"/><circle cx="100" cy="100" r="74" fill="none" stroke="#fff" stroke-width="10"/><circle cx="100" cy="100" r="52" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M58 112c18-14 30 12 56 0s26-12 34-6" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+</svg>
+
+<main class="canvas">
+  <header class="canvas-head">
+    <div>
+      <a class="brand" href="#" aria-label="єГуртожиток">
+        <span class="mark" aria-hidden="true"><span>є</span></span>
+        <span class="wordmark">єГуртожиток</span>
+      </a>
+      <h1>Запис на пралки — мокап першої версії</h1>
+      <p>Шість екранів телефона. Сьогодні неділя, 25 жовтня, 13:40. Імена, кімнати й записи вигадані для прикладу. Вибір тривалості, дня й часу працює.</p>
+    </div>
+    <nav class="jump" aria-label="Екрани">
+      <a href="#s-signin">Вхід</a>
+      <a href="#s-home">Головна</a>
+      <a href="#s-book">Запис</a>
+      <a href="#s-machine">Пралка</a>
+      <a href="#s-ticket">Мій запис</a>
+      <a href="#s-profile">Профіль</a>
+    </nav>
+  </header>
+
+  <div class="phones">
+
+    <!-- 1. SIGN IN -->
+    <figure class="shot" id="s-signin">
+      <div class="phone"><div class="screen">
+        <div class="field" aria-hidden="true"></div>
+        <div class="status" aria-hidden="true">13:40<i><svg viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg></i></div>
+        <div class="scroll"><div class="signin">
+          <div class="topbar">
+            <a class="brand" href="#"><span class="mark" aria-hidden="true"><span>є</span></span><span class="wordmark">єГуртожиток</span></a>
+          </div>
+          <div class="signin-hero">
+            <h2>Пралки без зошита</h2>
+            <p>Записуйтеся на конкретну пралку й час. Нагадаємо за 15 хвилин до початку.</p>
+          </div>
+          <div class="glass preview" aria-label="Приклад: сьогодні на пралках">
+            <div class="preview-row"><span>4 поверх</span><div class="strip" data-strip="m4" data-mini></div></div>
+            <div class="preview-row"><span>6 пов., №1</span><div class="strip" data-strip="m61" data-mini></div></div>
+            <div class="preview-row"><span>6 пов., №2</span><div class="strip" data-strip="m62" data-mini></div></div>
+            <div class="legend">
+              <span><i style="background:var(--free-soft);box-shadow:inset 0 0 0 1px rgb(15 143 126 / .3)"></i>вільно</span>
+              <span><i style="background:#b9c0cc"></i>зайнято</span>
+              <span><i style="background:repeating-linear-gradient(-45deg, rgb(16 18 23 / .25) 0 2px, transparent 2px 4px)"></i>запас 15 хв</span>
+              <span><i style="background:var(--mine)"></i>ваш запис</span>
+              <span><i style="background:var(--now)"></i>зараз</span>
+            </div>
+          </div>
+          <div class="signin-actions">
+            <a class="btn btn-primary block" href="#s-home"><svg class="ico"><use href="#i-mail"/></svg>Увійти через пошту Політехніки</a>
+            <p class="helper">Підійде лише адреса @lpnu.ua. Ми отримаємо ім’я та пошту, а кімнату ви вкажете самі.</p>
+            <p class="credit">Незалежний студентський проєкт команди Софії Полупан.<br>Не є державним чи університетським сервісом.</p>
+          </div>
+        </div></div>
+      </div></div>
+      <figcaption><b>Вхід</b><span>Одна кнопка: корпоративна пошта Політехніки, без паролів і реєстрації.</span></figcaption>
+    </figure>
+
+    <!-- 2. HOME -->
+    <figure class="shot" id="s-home">
+      <div class="phone"><div class="screen">
+        <div class="field" aria-hidden="true"></div>
+        <div class="status" aria-hidden="true">13:40<i><svg viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg></i></div>
+        <div class="scroll">
+          <div class="topbar">
+            <a class="brand" href="#"><span class="mark" aria-hidden="true"><span>є</span></span><span class="wordmark">єГуртожиток</span></a>
+            <a class="avatar" href="#s-profile" aria-label="Профіль: Олена Гриценко" style="text-decoration:none">ОГ</a>
+          </div>
+          <h2 class="title" style="margin-bottom:16px">Привіт, Олено</h2>
+
+          <a class="ticket compact" href="#s-ticket" style="display:block;text-decoration:none">
+            <svg class="porthole" aria-hidden="true"><use href="#porthole"/></svg>
+            <div class="ticket-when" style="margin-top:0">Сьогодні, неділя</div>
+            <div class="ticket-time">18:00<span class="dash">–</span>20:00</div>
+            <div class="ticket-machine">6 поверх, №1</div>
+            <div class="ticket-foot"><span>Почнеться через <b>4 год 20 хв</b></span><span class="ticket-cta">Деталі<svg class="ico sm"><use href="#i-chev"/></svg></span></div>
+          </a>
+
+          <div class="section-h" style="margin-top:20px"><h3>Пралки зараз</h3><a href="#s-machine">Розклад</a></div>
+          <div class="glass now-panel">
+            <a class="now-row" href="#s-machine">
+              <span class="port free" aria-hidden="true"></span>
+              <span class="now-name"><b>4 поверх</b><small class="ok">вільна до 15:30</small></span>
+              <div class="strip" data-strip="m4" data-mini></div>
+            </a>
+            <a class="now-row" href="#s-machine">
+              <span class="port busy" aria-hidden="true"></span>
+              <span class="now-name"><b>6 пов., №1</b><small>зайнята до 14:30</small></span>
+              <div class="strip" data-strip="m61" data-mini></div>
+            </a>
+            <a class="now-row" href="#s-machine">
+              <span class="port busy" aria-hidden="true"></span>
+              <span class="now-name"><b>6 пов., №2</b><small>зайнята до 15:00</small></span>
+              <div class="strip" data-strip="m62" data-mini></div>
+            </a>
+            <div class="strip-scale now-scale"><span>08</span><span>12</span><span>16</span><span>20</span><span>22</span></div>
+          </div>
+
+          <div class="section-h"><h3>Найближчий вільний час</h3></div>
+          <div class="seg" data-seg="home-dur" role="group" aria-label="Тривалість">
+            <span class="thumb" aria-hidden="true"></span>
+            <button type="button" data-dur="30">30 хв</button>
+            <button type="button" data-dur="60">1 год</button>
+            <button type="button" data-dur="90">1,5 год</button>
+            <button type="button" data-dur="120" aria-pressed="true">2 год</button>
+            <button type="button" data-dur="150">2,5 год</button>
+          </div>
+          <div class="chip-row" id="home-nearest" style="margin-top:10px"></div>
+        </div>
+        <nav class="tabbar" aria-label="Розділи">
+          <a class="tab" href="#s-home" aria-current="page"><svg class="ico"><use href="#i-home"/></svg>Головна</a>
+          <a class="tab-main" href="#s-book"><svg class="ico"><use href="#i-plus"/></svg>Записатися</a>
+          <a class="tab" href="#s-ticket"><svg class="ico"><use href="#i-cal"/></svg>Мої записи</a>
+        </nav>
+      </div></div>
+      <figcaption><b>Головна</b><span>Ваш запис як картка-документ, вільний час на всіх пралках і день кожної пралки однією смугою.</span></figcaption>
+    </figure>
+
+    <!-- 3. BOOKING FLOW -->
+    <figure class="shot" id="s-book">
+      <div class="phone"><div class="screen">
+        <div class="field" aria-hidden="true"></div>
+        <div class="status" aria-hidden="true">13:40<i><svg viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg></i></div>
+        <div class="toast" id="toast" role="status"><svg class="ico sm"><use href="#i-check"/></svg><span></span></div>
+        <div class="scroll" style="padding-bottom:140px">
+          <div class="topbar">
+            <a class="icon-btn" href="#s-home" aria-label="Назад"><svg class="ico"><use href="#i-back"/></svg></a>
+          </div>
+          <h2 class="title">Записатися</h2>
+          <p class="lede">Оберіть, скільки прати, день і вільний час.</p>
+          <div class="section-h" style="margin-top:0"><h3>Скільки прати</h3></div>
+
+          <div class="durations" role="radiogroup" aria-label="Скільки прати">
+            <button class="dur" role="radio" aria-checked="false" data-len="30"><b>30</b><span>хв</span></button>
+            <button class="dur" role="radio" aria-checked="false" data-len="60"><b>1</b><span>год</span></button>
+            <button class="dur" role="radio" aria-checked="false" data-len="90"><b>1,5</b><span>год</span></button>
+            <button class="dur" role="radio" aria-checked="true" data-len="120"><b>2</b><span>год</span></button>
+            <button class="dur" role="radio" aria-checked="false" data-len="150"><b>2,5</b><span>год</span></button>
+          </div>
+
+          <div class="section-h"><h3>Коли</h3></div>
+          <div class="days" id="days" role="group" aria-label="День"></div>
+
+          <div class="section-h"><h3>Вільний час</h3></div>
+          <div class="slots" id="slots"></div>
+
+          <div class="quota"><span class="quota-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i></span>Ще можна мати 1 запис із 3</div>
+        </div>
+        <div class="sheet" id="sheet">
+          <div class="sheet-text"><small id="sheet-small">6 поверх, №1 · сьогодні</small><b id="sheet-big">15:00–17:00</b></div>
+          <button class="btn btn-primary" id="sheet-btn" type="button">Записатися</button>
+        </div>
+      </div></div>
+      <figcaption><b>Запис</b><span>Обираєте, скільки прати, а застосунок показує лише ті початки, з яких запис уміщується повністю.</span></figcaption>
+    </figure>
+
+    <!-- 4. MACHINE DAY -->
+    <figure class="shot" id="s-machine">
+      <div class="phone"><div class="screen">
+        <div class="field" aria-hidden="true"></div>
+        <div class="status" aria-hidden="true">13:40<i><svg viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg></i></div>
+        <div class="scroll">
+          <div class="topbar">
+            <a class="icon-btn" href="#s-home" aria-label="Назад"><svg class="ico"><use href="#i-back"/></svg></a>
+          </div>
+          <div class="day-head">
+            <div>
+              <h2>6 поверх, №1</h2>
+              <span class="state busy">Зайнята до 14:30</span>
+            </div>
+          </div>
+          <div class="seg" data-seg="machine-day" role="group" aria-label="День">
+            <span class="thumb" aria-hidden="true"></span>
+            <button type="button" aria-pressed="true">Сьогодні</button>
+            <button type="button">Завтра</button>
+            <button type="button">Вт, 27</button>
+          </div>
+
+          <div class="glass timeline" style="margin-top:14px">
+            <div class="past-row" style="margin:0 0 14px 14px"><span>08:00–13:00 уже минуло</span><svg class="ico sm"><use href="#i-clock"/></svg></div>
+            <div class="tl-grid" id="tl"></div>
+          </div>
+
+          <div class="glass rule" style="margin-top:14px">
+            <svg class="ico"><use href="#i-info"/></svg>
+            <span>Між записами є 15 хвилин запасу. Якщо людини немає 15 хвилин від початку, пралку може взяти будь-хто.</span>
+          </div>
+        </div>
+        <nav class="tabbar" aria-label="Розділи">
+          <a class="tab" href="#s-home" aria-current="page"><svg class="ico"><use href="#i-home"/></svg>Головна</a>
+          <a class="tab-main" href="#s-book"><svg class="ico"><use href="#i-plus"/></svg>Записатися</a>
+          <a class="tab" href="#s-ticket"><svg class="ico"><use href="#i-cal"/></svg>Мої записи</a>
+        </nav>
+      </div></div>
+      <figcaption><b>Пралка</b><span>Сюди веде QR-наліпка на пралці: хто пере зараз, коли звільниться і де вільне вікно.</span></figcaption>
+    </figure>
+
+    <!-- 5. TICKET / BOOKING DETAIL -->
+    <figure class="shot" id="s-ticket">
+      <div class="phone"><div class="screen">
+        <div class="field" aria-hidden="true"></div>
+        <div class="status" aria-hidden="true">13:40<i><svg viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg></i></div>
+        <div class="scroll">
+          <div class="topbar">
+            <a class="icon-btn" href="#s-home" aria-label="Назад"><svg class="ico"><use href="#i-back"/></svg></a>
+            <span style="font-weight:600;font-size:16px">Мій запис</span>
+            <span style="width:44px"></span>
+          </div>
+
+          <div class="ticket big">
+            <svg class="porthole" aria-hidden="true"><use href="#porthole"/></svg>
+            <div class="ticket-top"><span class="ticket-tag"><span class="dot"></span>Підтверджено</span></div>
+            <div class="ticket-when">Сьогодні, неділя, 25 жовтня</div>
+            <div class="ticket-time">18:00<span class="dash">–</span>20:00</div>
+            <div class="ticket-machine">6 поверх, №1</div>
+            <div class="ticket-foot"><span>2 години</span><span>через <b>4 год 20 хв</b></span></div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-soft" type="button"><svg class="ico sm"><use href="#i-cal"/></svg>У календар</button>
+            <button class="btn btn-ghost-danger" type="button">Скасувати</button>
+          </div>
+
+          <div class="glass notify">
+            <span class="notify-ico"><svg class="ico"><use href="#i-bell"/></svg></span>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:12px"><b>Нагадати за 15 хвилин</b><button class="switch" role="switch" aria-checked="true" aria-label="Нагадати за 15 хвилин"></button></div>
+              <p>На iPhone нагадування працюють, коли єГуртожиток додано на початковий екран: «Поділитися» → «На початковий екран».</p>
+            </div>
+          </div>
+
+          <div class="section-h"><h3>Ваш другий запис</h3></div>
+          <a class="glass who" href="#s-ticket" style="text-decoration:none;color:inherit">
+            <span class="who-av" style="background:var(--mine-soft);color:var(--mine)"><svg class="ico sm"><use href="#i-clock"/></svg></span>
+            <div style="flex:1"><b>Вт, 27 жовтня · 09:00–09:30</b><span>4 поверх · 30 хв</span></div>
+            <svg class="ico sm" style="color:var(--faint)"><use href="#i-chev"/></svg>
+          </a>
+
+          <div class="glass rules">
+            <div class="rule"><svg class="ico"><use href="#i-clock"/></svg><span>Під час прання можна звільнити пралку раніше, і решта часу стане вільною для інших.</span></div>
+            <div class="rule"><svg class="ico"><use href="#i-user"/></svg><span>Інші бачать ваше ім’я, кімнату й ім’я в Telegram, якщо ви його вказали, як раніше в зошиті.</span></div>
+          </div>
+        </div>
+        <nav class="tabbar" aria-label="Розділи">
+          <a class="tab" href="#s-home"><svg class="ico"><use href="#i-home"/></svg>Головна</a>
+          <a class="tab-main" href="#s-book"><svg class="ico"><use href="#i-plus"/></svg>Записатися</a>
+          <a class="tab" href="#s-ticket" aria-current="page"><svg class="ico"><use href="#i-cal"/></svg>Мої записи</a>
+        </nav>
+      </div></div>
+      <figcaption><b>Мій запис</b><span>Картку можна показати, якщо пралку хтось зайняв. Тут же нагадування і скасування.</span></figcaption>
+    </figure>
+
+    <!-- 6. PROFILE -->
+    <figure class="shot" id="s-profile">
+      <div class="phone"><div class="screen">
+        <div class="field" aria-hidden="true"></div>
+        <div class="status" aria-hidden="true">13:40<i><svg viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg></i></div>
+        <div class="scroll">
+          <div class="topbar">
+            <a class="icon-btn" href="#s-home" aria-label="Назад"><svg class="ico"><use href="#i-back"/></svg></a>
+            <span style="font-weight:600;font-size:16px">Профіль</span>
+            <span style="width:44px"></span>
+          </div>
+
+          <div class="me">
+            <span class="me-av" aria-hidden="true">ОГ</span>
+            <div>
+              <b>Олена Гриценко</b>
+              <span>olena.hrytsenko.shi.2024@lpnu.ua</span>
+            </div>
+          </div>
+          <p class="me-note">Ім’я та пошта беруться з акаунта Політехніки.</p>
+
+          <form class="glass form" action="#s-profile" onsubmit="return false">
+            <div class="field-row">
+              <label for="room">Кімната</label>
+              <input id="room" name="room" inputmode="numeric" pattern="[0-9]{3}" maxlength="3" value="612" required autocomplete="off">
+              <small>Три цифри, як на дверях. Обов’язково.</small>
+            </div>
+            <div class="field-row">
+              <label for="tg">Ім’я користувача в Telegram</label>
+              <div class="affix"><span aria-hidden="true">@</span><input id="tg" name="telegram" value="olena_hr" autocomplete="off" autocapitalize="off" spellcheck="false" pattern="[A-Za-z0-9_]{5,32}"></div>
+              <small>Щоб вам могли написати, якщо пралка звільнилась раніше чи ви забули білизну. Необов’язково.</small>
+            </div>
+            <button class="btn btn-primary block" type="submit" id="save-profile">Зберегти</button>
+          </form>
+
+          <div class="preview-who">
+            <small>Так вас бачать інші біля запису</small>
+            <div class="tl-block tl-busy who-demo"><span class="t">18:00–20:00</span><span class="n">Олена Гриценко</span><span class="c">кімната <span id="pv-room">612</span><span id="pv-tg"> · <a href="#s-profile">@olena_hr</a></span></span></div>
+          </div>
+
+          <div class="glass rules">
+            <div class="rule"><svg class="ico"><use href="#i-bell"/></svg><span style="flex:1">Нагадування за 15 хвилин</span><button class="switch" role="switch" aria-checked="true" aria-label="Нагадування за 15 хвилин"></button></div>
+            <div class="rule"><svg class="ico"><use href="#i-mail"/></svg><span style="flex:1">Листом, якщо сповіщення на телефоні не працюють</span><button class="switch" role="switch" aria-checked="true" aria-label="Нагадування листом"></button></div>
+          </div>
+
+          <button class="btn btn-ghost-danger block" type="button" style="margin-top:14px">Вийти</button>
+          <p class="credit">Кімнату й ім’я в Telegram бачать лише ті, хто увійшов через пошту Політехніки.</p>
+        </div>
+        <nav class="tabbar" aria-label="Розділи">
+          <a class="tab" href="#s-home"><svg class="ico"><use href="#i-home"/></svg>Головна</a>
+          <a class="tab-main" href="#s-book"><svg class="ico"><use href="#i-plus"/></svg>Записатися</a>
+          <a class="tab" href="#s-ticket"><svg class="ico"><use href="#i-cal"/></svg>Мої записи</a>
+        </nav>
+      </div></div>
+      <figcaption><b>Профіль</b><span>Кімната обов’язкова, ім’я користувача в Telegram — за бажанням, щоб із вами могли зв’язатися. Першого разу цей екран відкривається одразу після входу.</span></figcaption>
+    </figure>
+  </div>
+  <p class="note">Години роботи пралень ще уточнюються; у мокапі для прикладу взято 08:00–22:00.</p>
+</main>
+
+<script>
+(() => {
+  const OPEN = 8 * 60, CLOSE = 22 * 60, NOW = 13 * 60 + 40, BUF = 15;
+  const pad = n => String(n).padStart(2, "0");
+  const fmt = m => `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
+  const len = m => m < 60 ? `${m} хв` : `${String(m / 60).replace(".", ",")} год`;
+  const t = s => { const [h, m] = s.split(":").map(Number); return h * 60 + m; };
+
+  const machines = [
+    { id: "m4", name: "4 поверх", short: "4 пов." },
+    { id: "m61", name: "6 поверх, №1", short: "6 пов., №1" },
+    { id: "m62", name: "6 поверх, №2", short: "6 пов., №2" },
+  ];
+  const b = (s, e, who, room, mine, tg) => ({ s: t(s), e: t(e), who, room, mine: !!mine, tg });
+  // Synthetic sample data. Day 0 is today, Sunday 25 October.
+  const days = [
+    { label: "Сьогодні", wd: "Нд", d: 25, data: {
+      m4: [b("09:00","11:00","Іван Мельник","407"), b("11:15","12:45","Марта Гнатів","415"), b("15:30","17:30","Денис Ткач","402"), b("19:00","21:00","Юлія Бойко","419")],
+      m61: [b("12:30","14:30","Остап Савчук","608",0,"ostap_s"), b("18:00","20:00","Олена Гриценко","612",1), b("20:15","21:45","Ірина Лисенко","603")],
+      m62: [b("13:00","15:00","Марко Дячук","621"), b("15:15","17:45","Андрій Романюк","617"), b("18:30","20:30","Віра Шевчук","611")],
+    }},
+    { label: "Завтра", wd: "Пн", d: 26, data: {
+      m4: [b("08:00","10:00","Тарас Гуменюк","404"), b("18:00","20:00","Іван Мельник","407")],
+      m61: [b("10:00","12:00","Ірина Лисенко","603"), b("17:00","19:30","Остап Савчук","608")],
+      m62: [b("09:30","11:30","Марта Гнатів","415"), b("19:00","21:00","Андрій Романюк","617")],
+    }},
+    { wd: "Вт", d: 27, data: {
+      m4: [b("09:00","09:30","Олена Гриценко","612",1), b("16:00","18:00","Денис Ткач","402")],
+      m61: [b("12:00","14:00","Віра Шевчук","611")],
+      m62: [b("18:00","20:30","Марко Дячук","621")],
+    }},
+    { wd: "Ср", d: 28, data: { m4: [b("19:00","21:00","Юлія Бойко","419")], m61: [], m62: [b("08:30","10:30","Тарас Гуменюк","404")] } },
+    { wd: "Чт", d: 29, data: { m4: [], m61: [b("18:00","20:00","Ірина Лисенко","603")], m62: [] } },
+    { wd: "Пт", d: 30, data: { m4: [b("17:00","19:00","Іван Мельник","407")], m61: [b("19:00","21:00","Остап Савчук","608")], m62: [b("18:00","20:00","Віра Шевчук","611")] } },
+    { wd: "Сб", d: 31, data: { m4: [b("10:00","12:00","Марта Гнатів","415")], m61: [b("10:00","12:30","Андрій Романюк","617")], m62: [b("11:00","13:00","Денис Ткач","402")] } },
+  ];
+
+  function freeStarts(dayIdx, mid, dur) {
+    const list = days[dayIdx].data[mid];
+    const from = dayIdx === 0 ? Math.ceil(NOW / 15) * 15 : OPEN;
+    const out = [];
+    for (let s = from; s + dur <= CLOSE; s += 15) {
+      if (list.every(x => s + dur <= x.s - BUF || s >= x.e + BUF)) out.push(s);
+    }
+    return out;
+  }
+
+  const pct = m => ((m - OPEN) / (CLOSE - OPEN) * 100).toFixed(3) + "%";
+  const wid = (a, z) => ((z - a) / (CLOSE - OPEN) * 100).toFixed(3) + "%";
+
+  function renderStrip(el, dayIdx, pick) {
+    const mid = el.dataset.strip;
+    const mini = el.hasAttribute("data-mini");
+    const list = days[dayIdx].data[mid];
+    let h = '<div class="strip-track">';
+    for (const x of list) {
+      if (x.s - BUF >= OPEN) h += `<span class="seg-buf" style="left:${pct(x.s - BUF)};width:${wid(x.s - BUF, x.s)}"></span>`;
+      if (x.e + BUF <= CLOSE) h += `<span class="seg-buf" style="left:${pct(x.e)};width:${wid(x.e, x.e + BUF)}"></span>`;
+    }
+    for (const x of list) {
+      h += `<span class="${x.mine ? "seg-mine" : "seg-busy"}" style="left:${pct(x.s)};width:${wid(x.s, x.e)}"></span>`;
+    }
+    if (dayIdx === 0) h += `<span class="seg-past" style="width:${wid(OPEN, NOW)}"></span>`;
+    if (pick && pick.mid === mid) h += `<span class="seg-pick" style="left:${pct(pick.s)};width:${wid(pick.s, pick.s + pick.dur)}"></span>`;
+    h += "</div>";
+    if (dayIdx === 0) h += `<span class="strip-now" style="left:${pct(NOW)}"></span>`;
+    if (!mini) h += '<div class="strip-scale"><span>08</span><span>12</span><span>16</span><span>20</span><span>22</span></div>';
+    el.innerHTML = h;
+    el.setAttribute("role", "img");
+    el.setAttribute("aria-label", `${machines.find(m => m.id === mid).name}: ` + (list.length ? "зайнято " + list.map(x => `${fmt(x.s)}–${fmt(x.e)}`).join(", ") : "увесь день вільно"));
+  }
+  document.querySelectorAll("[data-strip]").forEach(el => renderStrip(el, 0));
+
+  // segmented controls with a gliding thumb
+  function seg(root, onPick) {
+    const thumb = root.querySelector(".thumb");
+    const btns = [...root.querySelectorAll("button")];
+    let ready = false;
+    const place = () => {
+      const on = btns.find(x => x.getAttribute("aria-pressed") === "true") || btns[0];
+      if (!ready) thumb.style.transition = "none";
+      thumb.style.width = on.offsetWidth + "px";
+      thumb.style.transform = `translateX(${on.offsetLeft - 3}px)`;
+      if (!ready) { thumb.offsetWidth; thumb.style.transition = ""; ready = true; }
+    };
+    if ("ResizeObserver" in window) new ResizeObserver(() => { ready = false; place(); }).observe(root);
+    btns.forEach(x => x.addEventListener("click", () => {
+      btns.forEach(y => y.setAttribute("aria-pressed", String(y === x)));
+      if (!x.hasAttribute("aria-pressed")) x.setAttribute("aria-pressed", "true");
+      place(); onPick && onPick(x);
+    }));
+    btns.forEach(x => x.hasAttribute("aria-pressed") || x.setAttribute("aria-pressed", "false"));
+    requestAnimationFrame(place);
+    window.addEventListener("resize", place);
+    document.fonts && document.fonts.ready.then(place);
+  }
+
+  // home: nearest free time across machines
+  const nearest = document.getElementById("home-nearest");
+  function renderNearest(dur) {
+    const all = [];
+    machines.forEach(m => freeStarts(0, m.id, dur).forEach(s => all.push({ s, m })));
+    all.sort((a, z) => a.s - z.s);
+    nearest.innerHTML = all.length
+      ? all.slice(0, 6).map(x => `<a class="chip" href="#s-book">${fmt(x.s)}<small>${x.m.short}</small></a>`).join("")
+      : '<span class="empty-note"><svg class="ico sm"><use href="#i-info"/></svg>Сьогодні вже немає вільного часу на таку тривалість. Спробуйте завтра.</span>';
+  }
+  seg(document.querySelector('[data-seg="home-dur"]'), x => renderNearest(+x.dataset.dur));
+  renderNearest(120);
+  seg(document.querySelector('[data-seg="machine-day"]'));
+
+  // booking flow
+  const state = { dur: 120, day: 0, pick: { mid: "m61", s: t("15:00"), dur: 120 } };
+  const daysEl = document.getElementById("days");
+  daysEl.innerHTML = days.map((d, i) =>
+    `<button class="day" type="button" data-day="${i}" aria-pressed="${i === 0}" aria-label="${d.label || d.wd + ", " + d.d + " жовтня"}"><small>${i === 0 ? "Сьогодні" : i === 1 ? "Завтра" : d.wd}</small><b>${d.d}</b></button>`
+  ).join("");
+  daysEl.addEventListener("click", e => {
+    const btn = e.target.closest(".day"); if (!btn) return;
+    state.day = +btn.dataset.day; state.pick = null;
+    daysEl.querySelectorAll(".day").forEach(x => x.setAttribute("aria-pressed", String(x === btn)));
+    renderSlots();
+  });
+  document.querySelectorAll(".dur").forEach(p => p.addEventListener("click", () => {
+    document.querySelectorAll(".dur").forEach(x => x.setAttribute("aria-checked", String(x === p)));
+    state.dur = +p.dataset.len;
+    if (state.pick) {
+      const ok = freeStarts(state.day, state.pick.mid, state.dur).includes(state.pick.s);
+      state.pick = ok ? { ...state.pick, dur: state.dur } : null;
+    }
+    renderSlots();
+  }));
+
+  const slotsEl = document.getElementById("slots");
+  function renderSlots() {
+    slotsEl.innerHTML = machines.map(m => {
+      const starts = freeStarts(state.day, m.id, state.dur);
+      const chips = starts.map(s => {
+        const on = state.pick && state.pick.mid === m.id && state.pick.s === s;
+        return `<button class="chip" type="button" data-mid="${m.id}" data-s="${s}" aria-pressed="${on}">${fmt(s)}</button>`;
+      }).join("");
+      const count = starts.length;
+      const badge = count ? `<span class="state free">${count} ${count === 1 ? "початок" : count < 5 ? "початки" : "початків"}</span>` : `<span class="state busy">Немає місця</span>`;
+      return `<div class="glass slot-machine" data-machine="${m.id}">
+        <div class="machine-head"><span class="machine-name">${m.name}</span>${badge}</div>
+        <div class="strip" data-strip="${m.id}"></div>
+        ${count ? `<div class="chip-row">${chips}</div>` :
+          `<div class="empty-note"><svg class="ico sm"><use href="#i-info"/></svg><span>${state.day === 0 ? "Сьогодні" : "Цього дня"} тут немає вікна на ${len(state.dur)}. Спробуйте іншу пралку чи день.</span></div>`}
+      </div>`;
+    }).join("");
+    slotsEl.querySelectorAll("[data-strip]").forEach(el => renderStrip(el, state.day, state.pick));
+    renderSheet();
+  }
+  slotsEl.addEventListener("click", e => {
+    const c = e.target.closest(".chip"); if (!c) return;
+    const prev = state.pick;
+    state.pick = { mid: c.dataset.mid, s: +c.dataset.s, dur: state.dur };
+    slotsEl.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", String(x === c)));
+    // glide the picked segment inside its strip instead of re-rendering everything
+    const box = slotsEl.querySelector(`[data-machine="${state.pick.mid}"] [data-strip]`);
+    const seg = box.querySelector(".seg-pick");
+    if (seg && prev && prev.mid === state.pick.mid) {
+      seg.style.left = pct(state.pick.s); seg.style.width = wid(state.pick.s, state.pick.s + state.dur);
+    } else {
+      slotsEl.querySelectorAll(".seg-pick").forEach(x => x.remove());
+      renderStrip(box, state.day, state.pick);
+    }
+    renderSheet();
+  });
+
+  const sheetSmall = document.getElementById("sheet-small"), sheetBig = document.getElementById("sheet-big"), sheetBtn = document.getElementById("sheet-btn");
+  function renderSheet() {
+    if (!state.pick) {
+      sheetSmall.textContent = len(state.dur);
+      sheetBig.textContent = "Оберіть час";
+      sheetBtn.disabled = true; return;
+    }
+    const m = machines.find(x => x.id === state.pick.mid);
+    const d = days[state.day];
+    sheetSmall.textContent = `${m.name} · ${state.day === 0 ? "сьогодні" : state.day === 1 ? "завтра" : d.wd.toLowerCase() + ", " + d.d}`;
+    sheetBig.textContent = `${fmt(state.pick.s)}–${fmt(state.pick.s + state.dur)}`;
+    sheetBtn.disabled = false;
+  }
+  const toast = document.getElementById("toast");
+  sheetBtn.addEventListener("click", () => {
+    if (!state.pick) return;
+    toast.querySelector("span").textContent = `Записано: ${fmt(state.pick.s)}–${fmt(state.pick.s + state.dur)}`;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2200);
+  });
+  renderSlots();
+
+  // machine day timeline for 6 поверх, №1 (today), from 13:00
+  const tl = document.getElementById("tl");
+  const T0 = 13 * 60, PX = 1.15;
+  const y = m => (m - T0) * PX;
+  const list = days[0].data.m61;
+  let h = "";
+  for (let hr = 13; hr <= 22; hr++) h += `<div class="tl-hour" style="top:${y(hr * 60)}px"><span>${pad(hr)}:00</span></div>`;
+  for (const x of list) {
+    if (x.e + BUF > T0) h += `<div class="tl-buf" style="top:${y(Math.max(T0, x.e))}px;height:${(Math.min(CLOSE, x.e + BUF) - Math.max(T0, x.e)) * PX}px"></div>`;
+    if (x.s - BUF >= T0) h += `<div class="tl-buf" style="top:${y(x.s - BUF)}px;height:${BUF * PX}px"></div>`;
+  }
+  for (const x of list) {
+    const top = y(Math.max(T0, x.s)) + 2, ht = (x.e - Math.max(T0, x.s)) * PX - 4;
+    h += x.mine
+      ? `<a class="tl-block tl-mine" href="#s-ticket" style="top:${top}px;height:${ht}px;text-decoration:none"><span class="t">${fmt(x.s)}–${fmt(x.e)}</span><span class="n">Ваш запис</span><span class="c">2 години</span></a>`
+      : `<div class="tl-block tl-busy" style="top:${top}px;height:${ht}px"><span class="t">${fmt(x.s)}–${fmt(x.e)}</span><span class="n">${x.who}</span><span class="c">кімната ${x.room}${x.tg ? ` · <a href="#s-machine">@${x.tg}</a>` : ""}</span></div>`;
+  }
+  // free gap 14:45–17:45
+  const fs = t("14:45"), fe = t("17:45");
+  h += `<a class="tl-block tl-free" href="#s-book" style="top:${y(fs) + 2}px;height:${(fe - fs) * PX - 4}px"><span><span class="n" style="display:block">Вільно ${fmt(fs)}–${fmt(fe)}</span><span class="c">Можна записатися на 30 хв – 2 год 30 хв</span></span><span class="plus"><svg class="ico sm"><use href="#i-plus"/></svg></span></a>`;
+  h += `<div class="tl-now" style="top:${y(NOW)}px"></div>`;
+  tl.innerHTML = h;
+  tl.style.height = y(CLOSE) + 8 + "px";
+
+
+  // profile: live preview of how others see you
+  const roomIn = document.getElementById("room"), tgIn = document.getElementById("tg");
+  const pvRoom = document.getElementById("pv-room"), pvTg = document.getElementById("pv-tg");
+  const syncPv = () => {
+    pvRoom.textContent = roomIn.value || "—";
+    const v = tgIn.value.replace(/^@/, "").trim();
+    pvTg.innerHTML = v ? ` · <a href="#s-profile">@${v.replace(/[^A-Za-z0-9_]/g, "")}</a>` : "";
+  };
+  roomIn.addEventListener("input", () => { roomIn.value = roomIn.value.replace(/\D/g, "").slice(0, 3); syncPv(); });
+  tgIn.addEventListener("input", syncPv);
+  document.getElementById("save-profile").addEventListener("click", () => {
+    const b = document.getElementById("save-profile");
+    b.textContent = roomIn.value.length === 3 ? "Збережено" : "Вкажіть кімнату";
+    setTimeout(() => (b.textContent = "Зберегти"), 1800);
+  });
+
+  // reminder switch
+  document.querySelectorAll(".switch").forEach(s => s.addEventListener("click", () => s.setAttribute("aria-checked", String(s.getAttribute("aria-checked") !== "true"))));
+})();
+</script>
+</body>
+</html>

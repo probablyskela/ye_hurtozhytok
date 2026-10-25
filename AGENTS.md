@@ -8,7 +8,8 @@ for a specific time instead of writing into paper notebooks. Three machines:
 one on the 4th floor, two on the 6th (№1 and №2). Later: announcements, a
 transparent student-council task board, online payment for laundry.
 
-Residents sign in through a Telegram bot; there is no approval step.
+Residents sign in with their Lviv Polytechnic Google account (@lpnu.ua); there is
+no approval step.
 
 ## Source Of Truth
 
@@ -49,4 +50,4 @@ docs in the same change.
 ## Git Hygiene
 
 - Commit after every completed change with a Conventional Commit message.
-- Never commit `.dev.vars` or Cloudflare / Telegram / VAPID secrets.
+- Never commit `.dev.vars` or Cloudflare / Google OAuth / VAPID secrets.

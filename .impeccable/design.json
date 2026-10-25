@@ -1,0 +1,544 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-25T10:50:34+00:00",
+  "title": "Design System: єГуртожиток",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "neutral",
+        "displayName": "Graphite Ink",
+        "canonical": "#101217",
+        "tonalRamp": [
+          "oklch(15% 0.011 268)",
+          "oklch(26% 0.011 268)",
+          "oklch(38% 0.011 268)",
+          "oklch(49% 0.011 268)",
+          "oklch(61% 0.011 268)",
+          "oklch(72% 0.011 268)",
+          "oklch(84% 0.011 268)",
+          "oklch(95% 0.011 268)"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Slate",
+        "canonical": "#2b2f38",
+        "tonalRamp": [
+          "oklch(15% 0.017 266)",
+          "oklch(26% 0.017 266)",
+          "oklch(38% 0.017 266)",
+          "oklch(49% 0.017 266)",
+          "oklch(61% 0.017 266)",
+          "oklch(72% 0.017 266)",
+          "oklch(84% 0.017 266)",
+          "oklch(95% 0.017 266)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Slate",
+        "canonical": "#525a6b",
+        "tonalRamp": [
+          "oklch(15% 0.020 265)",
+          "oklch(26% 0.020 265)",
+          "oklch(38% 0.020 265)",
+          "oklch(49% 0.026 265)",
+          "oklch(61% 0.026 265)",
+          "oklch(72% 0.020 265)",
+          "oklch(84% 0.020 265)",
+          "oklch(95% 0.020 265)"
+        ]
+      },
+      "faint": {
+        "role": "neutral",
+        "displayName": "Faint Slate",
+        "canonical": "#626a7c",
+        "tonalRamp": [
+          "oklch(15% 0.020 266)",
+          "oklch(26% 0.020 266)",
+          "oklch(38% 0.020 266)",
+          "oklch(49% 0.027 266)",
+          "oklch(61% 0.027 266)",
+          "oklch(72% 0.020 266)",
+          "oklch(84% 0.020 266)",
+          "oklch(95% 0.020 266)"
+        ]
+      },
+      "field-mint": {
+        "role": "neutral",
+        "displayName": "Field Mint",
+        "canonical": "#cdeee2",
+        "tonalRamp": [
+          "oklch(15% 0.020 172)",
+          "oklch(26% 0.020 172)",
+          "oklch(38% 0.025 172)",
+          "oklch(49% 0.034 172)",
+          "oklch(61% 0.034 172)",
+          "oklch(72% 0.025 172)",
+          "oklch(84% 0.020 172)",
+          "oklch(95% 0.020 172)"
+        ]
+      },
+      "field-sky": {
+        "role": "neutral",
+        "displayName": "Field Sky",
+        "canonical": "#cfe0f9",
+        "tonalRamp": [
+          "oklch(15% 0.020 258)",
+          "oklch(26% 0.020 258)",
+          "oklch(38% 0.026 258)",
+          "oklch(49% 0.034 258)",
+          "oklch(61% 0.034 258)",
+          "oklch(72% 0.026 258)",
+          "oklch(84% 0.020 258)",
+          "oklch(95% 0.020 258)"
+        ]
+      },
+      "field-lilac": {
+        "role": "neutral",
+        "displayName": "Field Lilac",
+        "canonical": "#e4daf6",
+        "tonalRamp": [
+          "oklch(15% 0.020 302)",
+          "oklch(26% 0.020 302)",
+          "oklch(38% 0.026 302)",
+          "oklch(49% 0.035 302)",
+          "oklch(61% 0.035 302)",
+          "oklch(72% 0.026 302)",
+          "oklch(84% 0.020 302)",
+          "oklch(95% 0.020 302)"
+        ]
+      },
+      "field-base": {
+        "role": "neutral",
+        "displayName": "Field Base",
+        "canonical": "#edf2f8",
+        "tonalRamp": [
+          "oklch(15% 0.010 253)",
+          "oklch(26% 0.010 253)",
+          "oklch(38% 0.010 253)",
+          "oklch(49% 0.010 253)",
+          "oklch(61% 0.010 253)",
+          "oklch(72% 0.010 253)",
+          "oklch(84% 0.010 253)",
+          "oklch(95% 0.010 253)"
+        ]
+      },
+      "mine": {
+        "role": "primary",
+        "displayName": "Ultramarine Yours",
+        "canonical": "#2a37d8",
+        "tonalRamp": [
+          "oklch(15% 0.048 269)",
+          "oklch(26% 0.102 269)",
+          "oklch(38% 0.157 269)",
+          "oklch(49% 0.211 269)",
+          "oklch(61% 0.211 269)",
+          "oklch(72% 0.157 269)",
+          "oklch(84% 0.102 269)",
+          "oklch(95% 0.048 269)"
+        ]
+      },
+      "mine-deep": {
+        "role": "primary",
+        "displayName": "Deep Ultramarine",
+        "canonical": "#1b23a3",
+        "tonalRamp": [
+          "oklch(15% 0.040 269)",
+          "oklch(26% 0.085 269)",
+          "oklch(38% 0.130 269)",
+          "oklch(49% 0.175 269)",
+          "oklch(61% 0.175 269)",
+          "oklch(72% 0.130 269)",
+          "oklch(84% 0.085 269)",
+          "oklch(95% 0.040 269)"
+        ]
+      },
+      "mine-soft": {
+        "role": "primary",
+        "displayName": "Pale Ultramarine",
+        "canonical": "#e3e6ff",
+        "tonalRamp": [
+          "oklch(15% 0.020 280)",
+          "oklch(26% 0.020 280)",
+          "oklch(38% 0.022 280)",
+          "oklch(49% 0.030 280)",
+          "oklch(61% 0.030 280)",
+          "oklch(72% 0.022 280)",
+          "oklch(84% 0.020 280)",
+          "oklch(95% 0.020 280)"
+        ]
+      },
+      "free": {
+        "role": "secondary",
+        "displayName": "Pool Teal Free",
+        "canonical": "#0b6c61",
+        "tonalRamp": [
+          "oklch(15% 0.020 183)",
+          "oklch(26% 0.035 183)",
+          "oklch(38% 0.054 183)",
+          "oklch(49% 0.073 183)",
+          "oklch(61% 0.073 183)",
+          "oklch(72% 0.054 183)",
+          "oklch(84% 0.035 183)",
+          "oklch(95% 0.020 183)"
+        ]
+      },
+      "free-tint": {
+        "role": "secondary",
+        "displayName": "Aqua Tint (fills only)",
+        "canonical": "#0f8f7e",
+        "tonalRamp": [
+          "oklch(15% 0.021 180)",
+          "oklch(26% 0.044 180)",
+          "oklch(38% 0.068 180)",
+          "oklch(49% 0.091 180)",
+          "oklch(61% 0.091 180)",
+          "oklch(72% 0.068 180)",
+          "oklch(84% 0.044 180)",
+          "oklch(95% 0.021 180)"
+        ]
+      },
+      "booked": {
+        "role": "neutral",
+        "displayName": "Opaque Booked Grey",
+        "canonical": "#b9c0cc",
+        "tonalRamp": [
+          "oklch(15% 0.019 261)",
+          "oklch(26% 0.019 261)",
+          "oklch(38% 0.019 261)",
+          "oklch(49% 0.019 261)",
+          "oklch(61% 0.019 261)",
+          "oklch(72% 0.019 261)",
+          "oklch(84% 0.019 261)",
+          "oklch(95% 0.019 261)"
+        ]
+      },
+      "booked-port": {
+        "role": "neutral",
+        "displayName": "Booked Port Grey",
+        "canonical": "#9aa2b1",
+        "tonalRamp": [
+          "oklch(15% 0.020 263)",
+          "oklch(26% 0.020 263)",
+          "oklch(38% 0.020 263)",
+          "oklch(49% 0.021 263)",
+          "oklch(61% 0.021 263)",
+          "oklch(72% 0.020 263)",
+          "oklch(84% 0.020 263)",
+          "oklch(95% 0.020 263)"
+        ]
+      },
+      "now": {
+        "role": "tertiary",
+        "displayName": "Coral Now",
+        "canonical": "#e5484d",
+        "tonalRamp": [
+          "oklch(15% 0.039 23)",
+          "oklch(26% 0.083 23)",
+          "oklch(38% 0.127 23)",
+          "oklch(49% 0.171 23)",
+          "oklch(61% 0.171 23)",
+          "oklch(72% 0.127 23)",
+          "oklch(84% 0.083 23)",
+          "oklch(95% 0.039 23)"
+        ]
+      },
+      "danger": {
+        "role": "neutral",
+        "displayName": "Danger Red",
+        "canonical": "#c4282e",
+        "tonalRamp": [
+          "oklch(15% 0.038 25)",
+          "oklch(26% 0.082 25)",
+          "oklch(38% 0.126 25)",
+          "oklch(49% 0.169 25)",
+          "oklch(61% 0.169 25)",
+          "oklch(72% 0.126 25)",
+          "oklch(84% 0.082 25)",
+          "oklch(95% 0.038 25)"
+        ]
+      },
+      "porthole-mint": {
+        "role": "neutral",
+        "displayName": "Porthole Mint",
+        "canonical": "#5ee0c8",
+        "tonalRamp": [
+          "oklch(15% 0.024 179)",
+          "oklch(26% 0.051 179)",
+          "oklch(38% 0.079 179)",
+          "oklch(49% 0.106 179)",
+          "oklch(61% 0.106 179)",
+          "oklch(72% 0.079 179)",
+          "oklch(84% 0.051 179)",
+          "oklch(95% 0.024 179)"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "White",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(15% 0.000 90)",
+          "oklch(26% 0.000 90)",
+          "oklch(38% 0.000 90)",
+          "oklch(49% 0.000 90)",
+          "oklch(61% 0.000 90)",
+          "oklch(72% 0.000 90)",
+          "oklch(84% 0.000 90)",
+          "oklch(95% 0.000 90)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display-time": {
+        "displayName": "Display — time",
+        "purpose": "Start–end time on the booking card only (42/46/48px)."
+      },
+      "display-duration": {
+        "displayName": "Display — duration",
+        "purpose": "Numerals on duration options."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Screen titles (24px on machine day; sign-in hero 44px)."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Section headings and tile names."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running copy and ledes."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "State pills, sublabels, helper text."
+      }
+    },
+    "shadows": [
+      {
+        "name": "glass",
+        "value": "inset 0 1px 1px rgb(255 255 255 / .95), inset 0 -1px 1px rgb(255 255 255 / .35), inset 0 -22px 34px -26px rgb(255 255 255 / .8), 0 1px 2px rgb(16 18 23 / .05), 0 20px 40px -24px rgb(31 45 90 / .28)",
+        "purpose": "Glass tiles, tab bar, action sheet."
+      },
+      {
+        "name": "gloss",
+        "value": "inset 0 1px 0 #fff, 0 1px 2px rgb(16 18 23 / .08), 0 6px 16px -6px rgb(16 18 23 / .2)",
+        "purpose": "Chips, options, avatars, icon buttons, segmented thumb, other people's timeline blocks."
+      },
+      {
+        "name": "ticket",
+        "value": "inset 0 1px 1px rgb(255 255 255 / .35), inset 0 -30px 50px -40px rgb(160 180 255 / .7), 0 26px 44px -22px rgb(27 35 163 / .6)",
+        "purpose": "The booking card."
+      },
+      {
+        "name": "capsule",
+        "value": "inset 0 1px 0 rgb(255 255 255 / .16), 0 10px 22px -10px rgb(16 18 23 / .6)",
+        "purpose": "Black primary buttons and the central tab."
+      },
+      {
+        "name": "selected-mine",
+        "value": "inset 0 1px 0 rgb(255 255 255 / .25), 0 8px 18px -8px rgb(42 55 216 / .7)",
+        "purpose": "Selected chip and duration (yours)."
+      }
+    ],
+    "glass": [
+      {
+        "name": "tile",
+        "value": "rgb(255 255 255 / .56); backdrop-filter: blur(18px) saturate(170%)",
+        "purpose": "Glass tiles."
+      },
+      {
+        "name": "control",
+        "value": "rgb(255 255 255 / .78)",
+        "purpose": "Chips, options, soft buttons."
+      },
+      {
+        "name": "bar",
+        "value": "rgb(255 255 255 / .62–.72); backdrop-filter: blur(22px) saturate(180%)",
+        "purpose": "Tab bar and action sheet."
+      },
+      {
+        "name": "reduced-transparency",
+        "value": "#fbfcfd, no backdrop-filter",
+        "purpose": "Fallback under prefers-reduced-transparency."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease",
+        "value": "cubic-bezier(.32, .72, 0, 1)",
+        "purpose": "Default for state changes, press scales (0.94–0.985), segmented thumb glide (0.42s)."
+      },
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(.16, 1, .3, 1)",
+        "purpose": "Your segment scaling into the day strip (0.55s)."
+      },
+      {
+        "name": "field-drift",
+        "value": "26s ease-in-out infinite alternate",
+        "purpose": "Slow drift of the background field."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation/transition none",
+        "purpose": "All motion off under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "design-width",
+        "value": "390px"
+      },
+      {
+        "name": "min-width",
+        "value": "360px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Black capsule for the one main action on a screen.",
+      "html": "<button class=\"ds-btn-primary\">Записатися</button>",
+      "css": ":host{--ink:#101217;--ink-2:#2b2f38;--muted:#525a6b;--mine:#2a37d8;--mine-deep:#1b23a3;--free:#0b6c61;--free-soft:rgb(15 143 126 / .13);--now:#e5484d;--danger:#c4282e;--glass:rgb(255 255 255 / .56);--glass-strong:rgb(255 255 255 / .78);--ease:cubic-bezier(.32,.72,0,1);--shadow-glass:inset 0 1px 1px rgb(255 255 255 / .95),inset 0 -1px 1px rgb(255 255 255 / .35),inset 0 -22px 34px -26px rgb(255 255 255 / .8),0 1px 2px rgb(16 18 23 / .05),0 20px 40px -24px rgb(31 45 90 / .28);--shadow-gloss:inset 0 1px 0 #fff,0 1px 2px rgb(16 18 23 / .08),0 6px 16px -6px rgb(16 18 23 / .2);font-family:'Fixel Text',-apple-system,system-ui,sans-serif;color:var(--ink);} .ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 22px;border:0;border-radius:999px;font:600 16px/1 'Fixel Text',system-ui,sans-serif;letter-spacing:-0.01em;color:#fff;background:linear-gradient(180deg,#2b2f38,#0d0f14);box-shadow:inset 0 1px 0 rgb(255 255 255 / .16),0 10px 22px -10px rgb(16 18 23 / .6);transition:transform .2s var(--ease),filter .2s var(--ease);cursor:pointer}.ds-btn-primary:hover{filter:brightness(1.15)}.ds-btn-primary:active{transform:scale(.97)}.ds-btn-primary:focus-visible{outline:2px solid var(--mine);outline-offset:2px}"
+    },
+    {
+      "name": "Soft Button",
+      "kind": "button",
+      "refersTo": "button-soft",
+      "description": "Glass capsule for secondary actions such as adding to the calendar.",
+      "html": "<button class=\"ds-btn-soft\">У календар</button>",
+      "css": ":host{--ink:#101217;--ink-2:#2b2f38;--muted:#525a6b;--mine:#2a37d8;--mine-deep:#1b23a3;--free:#0b6c61;--free-soft:rgb(15 143 126 / .13);--now:#e5484d;--danger:#c4282e;--glass:rgb(255 255 255 / .56);--glass-strong:rgb(255 255 255 / .78);--ease:cubic-bezier(.32,.72,0,1);--shadow-glass:inset 0 1px 1px rgb(255 255 255 / .95),inset 0 -1px 1px rgb(255 255 255 / .35),inset 0 -22px 34px -26px rgb(255 255 255 / .8),0 1px 2px rgb(16 18 23 / .05),0 20px 40px -24px rgb(31 45 90 / .28);--shadow-gloss:inset 0 1px 0 #fff,0 1px 2px rgb(16 18 23 / .08),0 6px 16px -6px rgb(16 18 23 / .2);font-family:'Fixel Text',-apple-system,system-ui,sans-serif;color:var(--ink);} .ds-btn-soft{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 22px;border:0;border-radius:999px;font:600 16px/1 'Fixel Text',system-ui,sans-serif;color:var(--ink);background:var(--glass-strong);box-shadow:var(--shadow-gloss);transition:background .2s var(--ease),transform .2s var(--ease);cursor:pointer}.ds-btn-soft:hover{background:#fff}.ds-btn-soft:active{transform:scale(.97)}.ds-btn-soft:focus-visible{outline:2px solid var(--mine);outline-offset:2px}"
+    },
+    {
+      "name": "Ghost Danger Button",
+      "kind": "button",
+      "refersTo": "button-ghost-danger",
+      "description": "Text-only destructive action (cancel a booking).",
+      "html": "<button class=\"ds-btn-danger\">Скасувати</button>",
+      "css": ":host{--ink:#101217;--ink-2:#2b2f38;--muted:#525a6b;--mine:#2a37d8;--mine-deep:#1b23a3;--free:#0b6c61;--free-soft:rgb(15 143 126 / .13);--now:#e5484d;--danger:#c4282e;--glass:rgb(255 255 255 / .56);--glass-strong:rgb(255 255 255 / .78);--ease:cubic-bezier(.32,.72,0,1);--shadow-glass:inset 0 1px 1px rgb(255 255 255 / .95),inset 0 -1px 1px rgb(255 255 255 / .35),inset 0 -22px 34px -26px rgb(255 255 255 / .8),0 1px 2px rgb(16 18 23 / .05),0 20px 40px -24px rgb(31 45 90 / .28);--shadow-gloss:inset 0 1px 0 #fff,0 1px 2px rgb(16 18 23 / .08),0 6px 16px -6px rgb(16 18 23 / .2);font-family:'Fixel Text',-apple-system,system-ui,sans-serif;color:var(--ink);} .ds-btn-danger{min-height:52px;padding:0 22px;border:0;border-radius:999px;background:transparent;color:var(--danger);font:600 16px/1 'Fixel Text',system-ui,sans-serif;cursor:pointer;transition:background .2s var(--ease)}.ds-btn-danger:hover{background:rgb(196 40 46 / .07)}.ds-btn-danger:focus-visible{outline:2px solid var(--mine);outline-offset:2px}"
+    },
+    {
+      "name": "Time Chips",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Free start times; the selected start becomes yours in ultramarine.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"false\">15:00</button><button class=\"ds-chip\" aria-pressed=\"true\">15:15</button><button class=\"ds-chip\" aria-pressed=\"false\">15:30</button></div>",
+      "css": ":host{--ink:#101217;--ink-2:#2b2f38;--muted:#525a6b;--mine:#2a37d8;--mine-deep:#1b23a3;--free:#0b6c61;--free-soft:rgb(15 143 126 / .13);--now:#e5484d;--danger:#c4282e;--glass:rgb(255 255 255 / .56);--glass-strong:rgb(255 255 255 / .78);--ease:cubic-bezier(.32,.72,0,1);--shadow-glass:inset 0 1px 1px rgb(255 255 255 / .95),inset 0 -1px 1px rgb(255 255 255 / .35),inset 0 -22px 34px -26px rgb(255 255 255 / .8),0 1px 2px rgb(16 18 23 / .05),0 20px 40px -24px rgb(31 45 90 / .28);--shadow-gloss:inset 0 1px 0 #fff,0 1px 2px rgb(16 18 23 / .08),0 6px 16px -6px rgb(16 18 23 / .2);font-family:'Fixel Text',-apple-system,system-ui,sans-serif;color:var(--ink);} .ds-chips{display:flex;gap:8px}.ds-chip{min-height:44px;padding:0 16px;border:0;border-radius:999px;background:var(--glass-strong);box-shadow:var(--shadow-gloss);color:var(--ink);font:600 15px/1 'Fixel Text',system-ui,sans-serif;font-feature-settings:'tnum';cursor:pointer;transition:background .25s var(--ease),color .25s var(--ease),transform .2s var(--ease)}.ds-chip:active{transform:scale(.96)}.ds-chip[aria-pressed=true]{background:var(--mine);color:#fff;box-shadow:inset 0 1px 0 rgb(255 255 255 / .25),0 8px 18px -8px rgb(42 55 216 / .7)}.ds-chip:focus-visible{outline:2px solid var(--mine);outline-offset:2px}"
+    },
+    {
+      "name": "Duration Options",
+      "kind": "custom",
+      "refersTo": "duration-option",
+      "description": "Five lengths with Fixel Display numerals; selected is ultramarine.",
+      "html": "<div class=\"ds-durs\"><button class=\"ds-dur\" aria-checked=\"false\"><b>30</b><span>хв</span></button><button class=\"ds-dur\" aria-checked=\"false\"><b>1</b><span>год</span></button><button class=\"ds-dur\" aria-checked=\"true\"><b>2</b><span>год</span></button></div>",
+      "css": ":host{--ink:#101217;--ink-2:#2b2f38;--muted:#525a6b;--mine:#2a37d8;--mine-deep:#1b23a3;--free:#0b6c61;--free-soft:rgb(15 143 126 / .13);--now:#e5484d;--danger:#c4282e;--glass:rgb(255 255 255 / .56);--glass-strong:rgb(255 255 255 / .78);--ease:cubic-bezier(.32,.72,0,1);--shadow-glass:inset 0 1px 1px rgb(255 255 255 / .95),inset 0 -1px 1px rgb(255 255 255 / .35),inset 0 -22px 34px -26px rgb(255 255 255 / .8),0 1px 2px rgb(16 18 23 / .05),0 20px 40px -24px rgb(31 45 90 / .28);--shadow-gloss:inset 0 1px 0 #fff,0 1px 2px rgb(16 18 23 / .08),0 6px 16px -6px rgb(16 18 23 / .2);font-family:'Fixel Text',-apple-system,system-ui,sans-serif;color:var(--ink);} .ds-durs{display:grid;grid-template-columns:repeat(3,72px);gap:6px}.ds-dur{min-height:72px;border:0;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--glass-strong);box-shadow:var(--shadow-gloss);color:var(--ink);cursor:pointer;transition:background .3s var(--ease),transform .2s var(--ease)}.ds-dur b{font:900 24px/1.05 'Fixel Display','Fixel Text',system-ui,sans-serif;letter-spacing:-0.03em}.ds-dur span{font:600 12.5px/1.3 'Fixel Text',system-ui,sans-serif;color:var(--muted)}.ds-dur:hover{background:#fff}.ds-dur:active{transform:scale(.96)}.ds-dur[aria-checked=true]{background:var(--mine);color:#fff;box-shadow:inset 0 1px 0 rgb(255 255 255 / .25),0 10px 20px -10px rgb(42 55 216 / .75)}.ds-dur[aria-checked=true] span{color:rgb(255 255 255 / .8)}.ds-dur:focus-visible{outline:2px solid var(--mine);outline-offset:2px}"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Profile field with label and help text.",
+      "html": "<label class=\"ds-field\"><span>Кімната</span><input value=\"612\"><small>Три цифри, як на дверях.</small></label>",
+      "css": ":host{--ink:#101217;--ink-2:#2b2f38;--muted:#525a6b;--mine:#2a37d8;--mine-deep:#1b23a3;--free:#0b6c61;--free-soft:rgb(15 143 126 / .13);--now:#e5484d;--danger:#c4282e;--glass:rgb(255 255 255 / .56);--glass-strong:rgb(255 255 255 / .78);--ease:cubic-bezier(.32,.72,0,1);--shadow-glass:inset 0 1px 1px rgb(255 255 255 / .95),inset 0 -1px 1px rgb(255 255 255 / .35),inset 0 -22px 34px -26px rgb(255 255 255 / .8),0 1px 2px rgb(16 18 23 / .05),0 20px 40px -24px rgb(31 45 90 / .28);--shadow-gloss:inset 0 1px 0 #fff,0 1px 2px rgb(16 18 23 / .08),0 6px 16px -6px rgb(16 18 23 / .2);font-family:'Fixel Text',-apple-system,system-ui,sans-serif;color:var(--ink);} .ds-field{display:grid;gap:6px;width:280px}.ds-field span{font:600 14px/1.3 'Fixel Text',system-ui,sans-serif;padding-left:4px}.ds-field small{font:400 13px/1.4 'Fixel Text',system-ui,sans-serif;color:var(--muted);padding-left:4px}.ds-field input{min-height:52px;border:0;border-radius:16px;padding:0 16px;background:rgb(255 255 255 / .8);box-shadow:inset 0 0 0 1px rgb(16 18 23 / .12);font:600 17px/1 'Fixel Text',system-ui,sans-serif;color:var(--ink);caret-color:var(--mine);transition:box-shadow .25s var(--ease),background .25s var(--ease)}.ds-field input:focus{outline:none;background:#fff;box-shadow:inset 0 0 0 2px var(--ink),0 0 0 4px rgb(16 18 23 / .08)}"
+    },
+    {
+      "name": "Booking Ticket",
+      "kind": "card",
+      "refersTo": "booking-ticket",
+      "description": "Signature: your booking as the one solid ultramarine object, with porthole rings.",
+      "html": "<a class=\"ds-ticket\" href=\"#\"><svg class=\"ds-port\" viewBox=\"0 0 200 200\" aria-hidden=\"true\"><circle cx=\"100\" cy=\"100\" r=\"96\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2\"/><circle cx=\"100\" cy=\"100\" r=\"74\" fill=\"none\" stroke=\"#fff\" stroke-width=\"10\"/><circle cx=\"100\" cy=\"100\" r=\"52\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.5\"/><path d=\"M58 112c18-14 30 12 56 0s26-12 34-6\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2\"/></svg><div class=\"ds-when\">Сьогодні, неділя</div><div class=\"ds-time\">18:00<span>–</span>20:00</div><div class=\"ds-mach\">6 поверх, №1</div><div class=\"ds-foot\"><span>Почнеться через <b>4 год 20 хв</b></span><span class=\"ds-cta\">Деталі</span></div></a>",
+      "css": ":host{--ink:#101217;--ink-2:#2b2f38;--muted:#525a6b;--mine:#2a37d8;--mine-deep:#1b23a3;--free:#0b6c61;--free-soft:rgb(15 143 126 / .13);--now:#e5484d;--danger:#c4282e;--glass:rgb(255 255 255 / .56);--glass-strong:rgb(255 255 255 / .78);--ease:cubic-bezier(.32,.72,0,1);--shadow-glass:inset 0 1px 1px rgb(255 255 255 / .95),inset 0 -1px 1px rgb(255 255 255 / .35),inset 0 -22px 34px -26px rgb(255 255 255 / .8),0 1px 2px rgb(16 18 23 / .05),0 20px 40px -24px rgb(31 45 90 / .28);--shadow-gloss:inset 0 1px 0 #fff,0 1px 2px rgb(16 18 23 / .08),0 6px 16px -6px rgb(16 18 23 / .2);font-family:'Fixel Text',-apple-system,system-ui,sans-serif;color:var(--ink);} .ds-ticket{position:relative;display:block;overflow:hidden;width:320px;border-radius:28px;padding:20px 20px 18px;color:#fff;text-decoration:none;background:radial-gradient(120% 90% at 100% 0%,rgb(110 125 255 / .3),transparent 55%),radial-gradient(80% 70% at 0% 100%,rgb(20 28 140 / .45),transparent 60%),linear-gradient(155deg,#3442e6 0%,#2a37d8 45%,#1b23a3 100%);box-shadow:inset 0 1px 1px rgb(255 255 255 / .35),inset 0 -30px 50px -40px rgb(160 180 255 / .7),0 26px 44px -22px rgb(27 35 163 / .6);transition:transform .3s var(--ease)}.ds-ticket:active{transform:scale(.985)}.ds-ticket:focus-visible{outline:2px solid var(--mine);outline-offset:3px}.ds-port{position:absolute;right:-54px;top:-40px;width:210px;height:210px;opacity:.3}.ds-when{position:relative;font:500 14px/1.4 'Fixel Text',system-ui,sans-serif;color:rgb(255 255 255 / .8)}.ds-time{position:relative;display:flex;align-items:baseline;gap:8px;margin:4px 0 2px;font:900 42px/1 'Fixel Display','Fixel Text',system-ui,sans-serif;letter-spacing:-0.035em;font-feature-settings:'tnum'}.ds-time span{font:400 .6em 'Fixel Text',system-ui,sans-serif;opacity:.6;align-self:center}.ds-mach{position:relative;font:600 18px/1.3 'Fixel Text',system-ui,sans-serif}.ds-foot{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid rgb(255 255 255 / .18);font:400 14px/1.3 'Fixel Text',system-ui,sans-serif;color:rgb(255 255 255 / .86)}.ds-foot b{color:#fff;font-weight:600}.ds-cta{min-height:44px;padding:0 16px;border-radius:999px;background:rgb(255 255 255 / .94);color:var(--mine-deep);font-weight:600;display:inline-flex;align-items:center}"
+    },
+    {
+      "name": "Machine Row with Day Strip",
+      "kind": "custom",
+      "refersTo": "glass-tile",
+      "description": "Signature: porthole state dot, machine name and state, and the day as a capsule ribbon with booked, buffer, yours and now.",
+      "html": "<div class=\"ds-tile\"><div class=\"ds-row\"><span class=\"ds-dot\"></span><span class=\"ds-name\"><b>4 поверх</b><small>вільна до 15:30</small></span><div class=\"ds-track\"><i class=\"ds-buf\" style=\"left:46%;width:4%\"></i><i class=\"ds-busy\" style=\"left:50%;width:16%\"></i><i class=\"ds-buf\" style=\"left:66%;width:4%\"></i><i class=\"ds-mine\" style=\"left:76%;width:14%\"></i><i class=\"ds-now\" style=\"left:40%\"></i></div></div></div>",
+      "css": ":host{--ink:#101217;--ink-2:#2b2f38;--muted:#525a6b;--mine:#2a37d8;--mine-deep:#1b23a3;--free:#0b6c61;--free-soft:rgb(15 143 126 / .13);--now:#e5484d;--danger:#c4282e;--glass:rgb(255 255 255 / .56);--glass-strong:rgb(255 255 255 / .78);--ease:cubic-bezier(.32,.72,0,1);--shadow-glass:inset 0 1px 1px rgb(255 255 255 / .95),inset 0 -1px 1px rgb(255 255 255 / .35),inset 0 -22px 34px -26px rgb(255 255 255 / .8),0 1px 2px rgb(16 18 23 / .05),0 20px 40px -24px rgb(31 45 90 / .28);--shadow-gloss:inset 0 1px 0 #fff,0 1px 2px rgb(16 18 23 / .08),0 6px 16px -6px rgb(16 18 23 / .2);font-family:'Fixel Text',-apple-system,system-ui,sans-serif;color:var(--ink);} .ds-tile{width:340px;padding:8px 14px 12px;border-radius:26px;background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(170%);backdrop-filter:blur(18px) saturate(170%);box-shadow:var(--shadow-glass)}.ds-row{display:grid;grid-template-columns:22px 104px minmax(0,1fr);gap:10px;align-items:center;min-height:48px}.ds-dot{width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--free);position:relative;color:var(--free)}.ds-dot::after{content:'';position:absolute;inset:6px;border-radius:50%;background:currentColor;opacity:.85}.ds-name b{display:block;font:700 14.5px/1.2 'Fixel Text',system-ui,sans-serif;letter-spacing:-0.015em}.ds-name small{display:block;font:600 12.5px/1.3 'Fixel Text',system-ui,sans-serif;color:var(--free)}.ds-track{position:relative;height:20px;border-radius:999px;overflow:visible;background:var(--free-soft);box-shadow:inset 0 0 0 1px rgb(15 143 126 / .12)}.ds-track i{position:absolute;top:0;bottom:0}.ds-busy{background:#b9c0cc;border-radius:6px}.ds-buf{background:repeating-linear-gradient(-45deg,rgb(16 18 23 / .1) 0 3px,transparent 3px 6px)}.ds-mine{background:linear-gradient(180deg,#4250ee,#2a37d8);border-radius:6px}.ds-track i.ds-now{top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--now);border-radius:2px}"
+    },
+    {
+      "name": "Tab Bar",
+      "kind": "nav",
+      "refersTo": "tab-main",
+      "description": "Floating glass bar with a central black «Записатися» capsule.",
+      "html": "<nav class=\"ds-tabbar\"><a class=\"ds-tab\" aria-current=\"page\" href=\"#\">Головна</a><a class=\"ds-tab-main\" href=\"#\">+ Записатися</a><a class=\"ds-tab\" href=\"#\">Мої записи</a></nav>",
+      "css": ":host{--ink:#101217;--ink-2:#2b2f38;--muted:#525a6b;--mine:#2a37d8;--mine-deep:#1b23a3;--free:#0b6c61;--free-soft:rgb(15 143 126 / .13);--now:#e5484d;--danger:#c4282e;--glass:rgb(255 255 255 / .56);--glass-strong:rgb(255 255 255 / .78);--ease:cubic-bezier(.32,.72,0,1);--shadow-glass:inset 0 1px 1px rgb(255 255 255 / .95),inset 0 -1px 1px rgb(255 255 255 / .35),inset 0 -22px 34px -26px rgb(255 255 255 / .8),0 1px 2px rgb(16 18 23 / .05),0 20px 40px -24px rgb(31 45 90 / .28);--shadow-gloss:inset 0 1px 0 #fff,0 1px 2px rgb(16 18 23 / .08),0 6px 16px -6px rgb(16 18 23 / .2);font-family:'Fixel Text',-apple-system,system-ui,sans-serif;color:var(--ink);} .ds-tabbar{width:366px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:6px;border-radius:30px;background:rgb(255 255 255 / .62);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);box-shadow:var(--shadow-glass)}.ds-tab{display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:22px;color:var(--muted);text-decoration:none;font:600 12px/1.2 'Fixel Text',system-ui,sans-serif}.ds-tab[aria-current=page]{color:var(--ink)}.ds-tab:hover{color:var(--ink)}.ds-tab-main{display:inline-flex;align-items:center;min-height:52px;padding:0 22px;border-radius:999px;background:linear-gradient(180deg,#2b2f38,#0d0f14);color:#fff;text-decoration:none;font:600 15px/1 'Fixel Text',system-ui,sans-serif;box-shadow:inset 0 1px 0 rgb(255 255 255 / .16),0 10px 20px -10px rgb(16 18 23 / .7)}.ds-tab:focus-visible,.ds-tab-main:focus-visible{outline:2px solid var(--mine);outline-offset:2px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Card in Your Pocket",
+    "overview": "A booking is a document you carry. Every screen is a calm instrument of white liquid glass floating over a soft, slowly drifting water-coloured field (mint, sky, lilac), and the resident's own booking is the one solid, saturated object on it: an ultramarine card with a porthole drawn into its corner. Everything else stays quiet so that \"yours\", \"free\" and \"now\" read in one glance from a hallway, one-handed.\n\nDensity is phone-first and generous: 16px screen margins, 44px minimum targets, one idea per glass tile. Language is clarity and craft in the spirit of Ukrainian state-services apps, without borrowing any of their identity: no state symbols, no Дія name or marks, nothing that suggests a government or university service. The UI is light only, Ukrainian only, with plain words and no loanwords («сповіщення», not «пуші»; «ім’я користувача в Telegram», not «нік»; «запис», not «бронь»). Campaign credit is a single modest, honest line in faint small text, never a banner.\n\nThe direction rejected the grey admin calendar grid and the paper-notebook costume; time is shown as capsule ribbons and soft blocks, not ruled cells.\n\nScope note: the presentation canvas in `design/mockup/index.html` (phone bezels, status bar, captions under each phone, the page heading and the jump navigation) is mockup chrome, not part of the product system. Do not carry its styles into the app.",
+    "keyCharacteristics": [
+      "White liquid-glass tiles (26px radius, rim light, long soft shadow) over a drifting pastel field.",
+      "One saturated object per screen: the ultramarine booking card, or the selected duration and start.",
+      "Black capsule primary buttons; everything is a pill or a generously rounded tile.",
+      "Fixel Display Black only for times and duration numerals; Fixel Text for everything else.",
+      "The day strip: each machine's day as a capsule ribbon with booked segments, hatched buffers and a coral now-marker.",
+      "The porthole motif: mark dot, ticket rings, machine state dots."
+    ],
+    "rules": [
+      {
+        "name": "The Three Signals Rule",
+        "body": "Ultramarine means yours, teal means free, coral means now. No colour takes a second job, and no fourth signal colour is added. Danger red appears only on destructive actions.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ultramarine Is Yours Rule",
+        "body": "Never use ultramarine for other people's bookings, for general accents, for headings or for decorative fills. If it is not the resident's own booking or own current choice, it is not ultramarine.",
+        "section": "colors"
+      },
+      {
+        "name": "The Opaque Booked Rule",
+        "body": "Booked time is an opaque grey (booked) segment, not a translucent tint; free time is the teal-tinted track it sits on.",
+        "section": "colors"
+      },
+      {
+        "name": "The Display Is For Numbers Rule",
+        "body": "Fixel Display Black sets times and duration numerals only — never headings, names or sentences.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Times Rule",
+        "body": "Times, dates in pickers, strip scales and chip times use tabular figures (`font-feature-settings: \"tnum\"`) so they do not jitter.",
+        "section": "typography"
+      },
+      {
+        "name": "The Sentence Case Rule",
+        "body": "No uppercase labels and no tracked-out small caps; hierarchy comes from size and weight.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Solid Object Rule",
+        "body": "Everything floats as glass; only the resident's booking is solid and saturated.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** keep ultramarine (mine) for the resident's own booking and own current choice only.",
+      "**Do** show free in teal (free) text and teal-tinted fills, booked as opaque grey (booked), and now in coral (now).",
+      "**Do** set times and duration numerals in Fixel Display Black with tabular figures; everything else in Fixel Text.",
+      "**Do** build surfaces as white glass tiles (26px radius) with the glass shadow over the pastel field, and provide the opaque fallback for reduced transparency.",
+      "**Do** make every interactive target at least 44px, and primary actions 52px black capsules.",
+      "**Do** use hatching for the 15-minute buffer flanks.",
+      "**Do** carry the porthole motif in the mark dot, ticket rings and machine state dots.",
+      "**Do** write plain Ukrainian with no loanwords, and keep the campaign credit to one modest, honest line in faint text."
+    ],
+    "donts": [
+      "**Don't** use ultramarine for other people's bookings, headings, links or decoration.",
+      "**Don't** use hatching for anything other than buffers.",
+      "**Don't** draw time as a grey ruled admin calendar grid or dress it up as a paper notebook.",
+      "**Don't** use state symbols (тризуб, national emblem), the Дія name or marks, or anything that implies a government or university service.",
+      "**Don't** add a dark theme; the product is light only.",
+      "**Don't** use square corners or hard offset shadows, and don't outline surfaces with borders (the dashed outline belongs to free timeline windows).",
+      "**Don't** set uppercase labels or put Fixel Display on words.",
+      "**Don't** carry the mockup canvas (phone bezels, captions, jump navigation) into the product."
+    ]
+  }
+}
