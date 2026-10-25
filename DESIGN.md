@@ -165,7 +165,8 @@ Scope note: the presentation canvas in `design/mockup/index.html` (phone bezels,
 - Black capsule primary buttons; everything is a pill or a generously rounded tile.
 - Fixel Display Black only for times and duration numerals; Fixel Text for everything else.
 - The day strip: each machine's day as a capsule ribbon with booked segments, hatched buffers and a coral now-marker.
-- The porthole motif: mark dot, ticket rings, machine state dots.
+- The porthole motif: ticket rings and machine state dots.
+- The facade mark: a black squircle holding a 3×3 grid of rounded windows — three lit white, five dim, one ultramarine («твоє вікно»).
 
 ## Colors
 
@@ -190,7 +191,7 @@ A cool pastel field under white glass, graphite ink, and exactly three signal co
 - **Opaque Booked Grey** (booked): booked segments in day strips, solid and opaque so they never read as a shade of free. **Booked Port Grey** (booked-port) is the porthole dot of a busy machine.
 - **Field Mint / Sky / Lilac / Base** (field-*): the three radial washes and the base of the background field.
 - **Danger Red** (danger): cancel actions and invalid input outlines only.
-- **Porthole Mint** (porthole-mint): the dot on the black squircle mark.
+- **Porthole Mint** (porthole-mint): the status dot inside ticket pills.
 
 Hairlines are ink at 8% alpha; glass is white at 56% (tiles) and 78% (controls).
 
@@ -249,9 +250,9 @@ Depth is glass, not stacking. Tiles and bars are translucent white with backdrop
 
 ## Shapes
 
-Soft and continuous: no square corners anywhere in the product. Glass tiles 26px, the booking card and action sheet 28px, the tab bar 30px, rows and day/duration options 18–20px, inputs 16px, timeline blocks 16px, segments inside a strip 6px. Every button, chip, state pill, segmented control and strip track is a full capsule (999px). The mark is a 30px black squircle (9px radius).
+Soft and continuous: no square corners anywhere in the product. Glass tiles 26px, the booking card and action sheet 28px, the tab bar 30px, rows and day/duration options 18–20px, inputs 16px, timeline blocks 16px, segments inside a strip 6px. Every button, chip, state pill, segmented control and strip track is a full capsule (999px). The mark is the facade: a 30px graphite squircle (23% radius) with a 3×3 grid of 4.5-radius windows — three white, five at 16% white, one ultramarine for «твоє вікно». It stays legible down to 32px; at 16px use it only with the wordmark beside it.
 
-Circles carry the porthole motif: the porthole dot on the mark, the concentric rings with a water line drawn into the top-right of the booking card (white strokes at 30% opacity), and the ringed state dot before each machine name.
+Circles carry the porthole motif: the concentric rings with a water line drawn into the top-right of the booking card (white strokes at 30% opacity), and the ringed state dot before each machine name.
 
 Hatching (−45° diagonal ink lines at 7–10% alpha) marks the 15-minute buffer on either side of a booking, in strips and on the timeline. Free windows on the timeline use a dashed teal outline.
 
@@ -309,7 +310,7 @@ Hours down the left in faint tabular labels with dashed 8% hairlines. Other peop
 - **Do** build surfaces as white glass tiles (26px radius) with the glass shadow over the pastel field, and provide the opaque fallback for reduced transparency.
 - **Do** make every interactive target at least 44px, and primary actions 52px black capsules.
 - **Do** use hatching for the 15-minute buffer flanks.
-- **Do** carry the porthole motif in the mark dot, ticket rings and machine state dots.
+- **Do** carry the porthole motif in the ticket rings and machine state dots, and use the facade mark (the one ultramarine window is the only colour in it).
 - **Do** write plain Ukrainian with no loanwords, and keep the campaign credit to one modest, honest line in faint text.
 
 ### Don't:

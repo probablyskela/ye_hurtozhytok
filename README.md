@@ -21,3 +21,4 @@ Drizzle ORM, Tailwind CSS v4. Той самий стек, що й в Опере�
 - [docs/VISION.md](docs/VISION.md) — що й навіщо робимо, правила запису.
 - [docs/system/README.md](docs/system/README.md) — архітектура, дані, вхід.
 - [CONTEXT.md](CONTEXT.md) — словник продукту.
+- [docs/launch-plan.md](docs/launch-plan.md) — план запуску першої версії.

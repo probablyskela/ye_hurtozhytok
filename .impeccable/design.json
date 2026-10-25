@@ -481,7 +481,7 @@
       "Black capsule primary buttons; everything is a pill or a generously rounded tile.",
       "Fixel Display Black only for times and duration numerals; Fixel Text for everything else.",
       "The day strip: each machine's day as a capsule ribbon with booked segments, hatched buffers and a coral now-marker.",
-      "The porthole motif: mark dot, ticket rings, machine state dots."
+      "The porthole motif: ticket rings and machine state dots. The mark is the facade: a graphite squircle with a 3×3 window grid, three white, five dim, one ultramarine."
     ],
     "rules": [
       {
@@ -527,7 +527,7 @@
       "**Do** build surfaces as white glass tiles (26px radius) with the glass shadow over the pastel field, and provide the opaque fallback for reduced transparency.",
       "**Do** make every interactive target at least 44px, and primary actions 52px black capsules.",
       "**Do** use hatching for the 15-minute buffer flanks.",
-      "**Do** carry the porthole motif in the mark dot, ticket rings and machine state dots.",
+      "**Do** carry the porthole motif in the ticket rings and machine state dots, and use the facade mark.",
       "**Do** write plain Ukrainian with no loanwords, and keep the campaign credit to one modest, honest line in faint text."
     ],
     "donts": [
