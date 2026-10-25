@@ -1,0 +1,9 @@
+# Cloudflare Pages project «ehurtozhytok» → https://ehurtozhytok.pages.dev
+# It only forwards every request to the «ehurtozhytok» Worker (apps/web) through a service binding.
+name = "ehurtozhytok"
+pages_build_output_dir = "./public"
+compatibility_date = "2026-04-01"
+
+[[services]]
+binding = "APP"
+service = "ehurtozhytok"

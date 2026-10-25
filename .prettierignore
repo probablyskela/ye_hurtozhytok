@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+.vite/
+.wrangler/
+.react-router/
+.mf/
+coverage/
+package-lock.json
+worker-configuration.d.ts
+infra/d1/migrations/meta/
+*.tsbuildinfo
+design/mockup/
+.claude/

@@ -1,0 +1,11 @@
+# Copy to .dev.vars for local development. Use long random strings.
+# In production set the same names with `npx wrangler secret put <NAME>`.
+SESSION_SECRET=change-me-to-a-long-random-string
+# Leave the Google values empty locally to use the development sign-in form.
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+# From `npm run vapid:keys`; the public key goes to VAPID_PUBLIC_KEY.
+VAPID_PRIVATE_KEY=
+VAPID_PUBLIC_KEY=
+# Local only: allows /login/dev. Never set in production.
+DEV_LOGIN=1

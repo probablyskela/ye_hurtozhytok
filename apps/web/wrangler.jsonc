@@ -1,0 +1,34 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "ehurtozhytok",
+  "main": "./workers/app.ts",
+  "compatibility_date": "2026-04-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true,
+  },
+  "upload_source_maps": true,
+  "vars": {
+    // Used for the Google sign-in redirect and in reminders sent from cron.
+    "APP_URL": "https://ehurtozhytok.pages.dev",
+    // Public half of the Web Push key pair; the private half is a secret.
+    "VAPID_PUBLIC_KEY": "",
+    "VAPID_SUBJECT": "https://ehurtozhytok.pages.dev",
+  },
+  // Every minute: sends reminders 15 minutes before a booking starts.
+  "triggers": {
+    "crons": ["* * * * *"],
+  },
+  // Public address is https://ehurtozhytok.pages.dev (apps/gateway forwards to this Worker).
+  "workers_dev": false,
+  "preview_urls": false,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ehurtozhytok",
+      // Replace with the id printed by `npx wrangler d1 create ehurtozhytok`.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "../../infra/d1/migrations",
+    },
+  ],
+}

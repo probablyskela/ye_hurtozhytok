@@ -1,0 +1,9 @@
+{
+  "name": "@ehurtozhytok/gateway",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cloudflare Pages front door that gives the app the ehurtozhytok.pages.dev address.",
+  "scripts": {
+    "deploy": "wrangler pages deploy public --project-name ehurtozhytok --branch main"
+  }
+}

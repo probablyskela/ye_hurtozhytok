@@ -1,0 +1,75 @@
+name: CI/CD
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npm run format
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  deploy:
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      # Not a secret: it only identifies the account. The API token is the secret.
+      CLOUDFLARE_ACCOUNT_ID: 45e040f2e5f89a29efd68ef2c84f0e90
+    steps:
+      - name: Check Cloudflare credentials
+        id: creds
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::warning::CLOUDFLARE_API_TOKEN secret is missing, skipping deploy. See docs/run-project.md."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.creds.outputs.ready == 'true'
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - if: steps.creds.outputs.ready == 'true'
+        uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - if: steps.creds.outputs.ready == 'true'
+        run: npm ci
+
+      - name: Apply D1 migrations
+        if: steps.creds.outputs.ready == 'true'
+        working-directory: apps/web
+        run: npx wrangler d1 migrations apply ehurtozhytok --remote
+
+      - name: Deploy app Worker
+        if: steps.creds.outputs.ready == 'true'
+        working-directory: apps/web
+        run: npm run deploy
+
+      - name: Deploy Pages gateway when it changed
+        if: steps.creds.outputs.ready == 'true'
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [ "$BEFORE" = "0000000000000000000000000000000000000000" ] \
+            || git diff --name-only "$BEFORE" "$GITHUB_SHA" | grep -q '^apps/gateway/'; then
+            cd apps/gateway && npm run deploy
+          else
+            echo "Gateway unchanged, skipping."
+          fi

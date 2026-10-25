@@ -28,7 +28,7 @@ typography:
     fontWeight: 900
     lineHeight: 1
     letterSpacing: "-0.035em"
-    fontFeature: "\"tnum\""
+    fontFeature: '"tnum"'
   display-duration:
     fontFamily: "Fixel Display, Fixel Text, -apple-system, system-ui, sans-serif"
     fontSize: "24px"
@@ -160,6 +160,7 @@ The direction rejected the grey admin calendar grid and the paper-notebook costu
 Scope note: the presentation canvas in `design/mockup/index.html` (phone bezels, status bar, captions under each phone, the page heading and the jump navigation) is mockup chrome, not part of the product system. Do not carry its styles into the app.
 
 **Key Characteristics:**
+
 - White liquid-glass tiles (26px radius, rim light, long soft shadow) over a drifting pastel field.
 - One saturated object per screen: the ultramarine booking card, or the selected duration and start.
 - Black capsule primary buttons; everything is a pill or a generously rounded tile.
@@ -173,17 +174,21 @@ Scope note: the presentation canvas in `design/mockup/index.html` (phone bezels,
 A cool pastel field under white glass, graphite ink, and exactly three signal colours that each mean one thing.
 
 ### Primary
+
 - **Ultramarine "Yours"** (mine): reserved for what belongs to the signed-in resident — the booking card, your segment in a day strip, your block in the machine timeline, the selected duration and the selected start. Also the focus outline, caret and text selection.
 - **Deep Ultramarine** (mine-deep): the dark end of the ticket gradient and the text colour of the white button on the ticket.
 - **Pale Ultramarine** (mine-soft): the icon well for "your other booking" rows.
 
 ### Secondary
+
 - **Pool Teal "Free"** (free): free state text, the free porthole dot, the plus button on a free timeline window, and the "on" state of switches. The lighter **Aqua tint** (free-tint) is used only as low-alpha fills and strokes (13% track fill, 6% window fill, dashed outline) — never as text.
 
 ### Tertiary
+
 - **Coral Now** (now): the now-marker only — the vertical line and dot on day strips, the horizontal line and time pill on the timeline.
 
 ### Neutral
+
 - **Graphite Ink** (ink): text, black capsule buttons (as a #2b2f38 → #0d0f14 gradient), selected day.
 - **Slate** (ink-2): secondary strong text, links, filled quota pips.
 - **Muted Slate** (muted): supporting copy, unselected tab and segment labels.
@@ -196,6 +201,7 @@ A cool pastel field under white glass, graphite ink, and exactly three signal co
 Hairlines are ink at 8% alpha; glass is white at 56% (tiles) and 78% (controls).
 
 ### Named Rules
+
 **The Three Signals Rule.** Ultramarine means yours, teal means free, coral means now. No colour takes a second job, and no fourth signal colour is added. Danger red appears only on destructive actions.
 
 **The Ultramarine Is Yours Rule.** Never use ultramarine for other people's bookings, for general accents, for headings or for decorative fills. If it is not the resident's own booking or own current choice, it is not ultramarine.
@@ -212,6 +218,7 @@ Both families are self-hosted (`design/mockup/fonts`).
 **Character:** A Ukrainian-made grotesque used plainly — tight negative tracking on headings, sentence case everywhere — with the Black display cut kept as a stamp for numbers you need to read across a room.
 
 ### Hierarchy
+
 - **Display — time** (900, 46px; 42px compact, 48px large; line-height 1; -0.035em; tabular): the start–end time on the booking card. The en dash between times drops to Fixel Text 400 at 0.6em.
 - **Display — duration** (900, 24px, 1.05, -0.03em): the numeral on duration options.
 - **Hero** (700, 44px, 1, -0.04em): sign-in headline only.
@@ -221,6 +228,7 @@ Both families are self-hosted (`design/mockup/fonts`).
 - **Label** (600, 13.5px): state pills, sublabels, helper text; scale ticks at 11.5–12px in faint.
 
 ### Named Rules
+
 **The Display Is For Numbers Rule.** Fixel Display Black sets times and duration numerals only — never headings, names or sentences.
 
 **The Tabular Times Rule.** Times, dates in pickers, strip scales and chip times use tabular figures (`font-feature-settings: "tnum"`) so they do not jitter.
@@ -240,12 +248,14 @@ The background field drifts slowly (26s, alternate). All motion collapses under 
 Depth is glass, not stacking. Tiles and bars are translucent white with backdrop blur (18–22px, saturate 170–180%) and a layered shadow that combines an inner rim light along the top edge, an inner glow near the bottom, and one long, soft, cool-tinted drop. Small controls (chips, day and duration options, avatars, icon buttons) use a lighter gloss shadow. The booking card carries its own ultramarine-tinted drop. There are no hard offset shadows and no borders around surfaces.
 
 ### Shadow Vocabulary
+
 - **Glass** (`inset 0 1px 1px rgb(255 255 255 / .95), inset 0 -1px 1px rgb(255 255 255 / .35), inset 0 -22px 34px -26px rgb(255 255 255 / .8), 0 1px 2px rgb(16 18 23 / .05), 0 20px 40px -24px rgb(31 45 90 / .28)`): tiles, tab bar, action sheet.
 - **Gloss** (`inset 0 1px 0 #fff, 0 1px 2px rgb(16 18 23 / .08), 0 6px 16px -6px rgb(16 18 23 / .2)`): chips, options, avatars, icon buttons, the segmented-control thumb, other people's timeline blocks.
 - **Ticket** (`inset 0 1px 1px rgb(255 255 255 / .35), inset 0 -30px 50px -40px rgb(160 180 255 / .7), 0 26px 44px -22px rgb(27 35 163 / .6)`): the booking card.
 - **Capsule** (`inset 0 1px 0 rgb(255 255 255 / .16), 0 10px 22px -10px rgb(16 18 23 / .6)`): black primary buttons and the central tab.
 
 ### Named Rules
+
 **The One Solid Object Rule.** Everything floats as glass; only the resident's booking is solid and saturated.
 
 ## Shapes
@@ -259,7 +269,9 @@ Hatching (−45° diagonal ink lines at 7–10% alpha) marks the 15-minute buffe
 ## Components
 
 ### Buttons
+
 Tactile capsules that compress slightly when pressed.
+
 - **Shape:** full capsule, 52px tall, 22px side padding, 16px/600 label.
 - **Primary:** graphite gradient (#2b2f38 → #0d0f14) with white text and the capsule shadow; brightens 15% on hover; scales to 0.97 on press. Disabled: ink at 18% with 45% ink text, no shadow.
 - **Soft:** strong glass with gloss shadow and ink text; becomes solid white on hover.
@@ -268,42 +280,51 @@ Tactile capsules that compress slightly when pressed.
 - **Focus:** 2px ultramarine outline with 2px offset across all controls.
 
 ### Chips
+
 - **Style:** strong glass capsule, 44px, 16px padding, 15px/600 time label with optional muted small text.
 - **State:** selected (`aria-pressed`) turns solid ultramarine with white text and an ultramarine glow — a selected start is "yours". Press scales to 0.96.
 
 ### Duration and Day Options
+
 - **Duration:** five equal tiles, 72px tall, 20px radius; Fixel Display numeral over a 12.5px muted unit. Selected turns ultramarine.
 - **Day:** 66×64px tiles, 18px radius; weekday in small muted text over the date. Selected turns graphite ink, not ultramarine — the day is a filter, not your booking.
 - **Segmented control:** capsule track at ink 7% with a white gliding thumb (0.42s); selected label in ink 600.
 
 ### Cards / Containers
+
 - **Glass tile:** 26px radius, white 56% with blur, glass shadow, no border, 16px padding. Rows inside a tile are divided by 8% ink hairlines.
 - **Booking ticket (signature):** 28px radius; ultramarine gradient (#3442e6 → mine → mine-deep) with two radial glows; porthole rings in the top-right; date line in 80% white, time in Display, machine name 18px/600; a foot row above a 18% white hairline with the countdown and a white «Деталі» capsule. Optional status pill (white 16%) with a mint porthole dot.
 - **Notes and past rows:** ink 4% fill, 14–16px radius, muted text, stroke icon in faint.
 
 ### Inputs / Fields
+
 - **Style:** 52px, 16px radius, white 80% with a 1px inset ink-12% ring; 17px/600 value; labels 14px/600 above, help text 13px muted below. A prefix field («@») keeps the prefix in muted.
 - **Focus:** solid white with a 2px inset ink ring and a 4px ink-8% halo.
 - **Error:** 2px inset danger-red ring.
 
 ### Navigation
+
 - **Top bar:** mark and wordmark (19px/700, −0.035em) left, 40px glass avatar right; inner screens use a 44px round glass back button.
 - **Tab bar:** floating glass bar (30px radius, white 62%, blur 22px) with three columns: «Головна», a central black capsule «Записатися» with a plus icon, «Мої записи». Tab labels 12px/600, muted; current page in ink.
 - **Action sheet:** in the booking flow the same floating glass shape (white 72%) shows the chosen machine and time with a primary button.
 
 ### Day Strip (signature)
+
 Each machine's day (08–22) as a capsule track: teal-tinted free fill; opaque grey booked segments (6px radius); hatched buffer flanks; your booking as an ultramarine segment; time already past veiled in pale grey; a 2px coral now-line with a dot. Height 26px full, 20px in compact rows; tabular 11.5px scale beneath. Choosing a start makes your segment glide into place (0.5s, scale-in from the left).
 
 ### Machine State
+
 - **Porthole dot:** 22px ring with a filled centre in teal (free) or booked-port grey (busy).
 - **State pill:** capsule, 13.5px/600, a 7px dot in current colour; free on teal 13% wash, busy on ink 7%.
 
 ### Machine Timeline
+
 Hours down the left in faint tabular labels with dashed 8% hairlines. Other people's bookings are white glass blocks (time, name, room and Telegram username); yours is an ultramarine block; free windows are dashed teal outlines with a round teal plus; buffers are hatched; now is a coral line with a coral time pill.
 
 ## Do's and Don'ts
 
 ### Do:
+
 - **Do** keep ultramarine (mine) for the resident's own booking and own current choice only.
 - **Do** show free in teal (free) text and teal-tinted fills, booked as opaque grey (booked), and now in coral (now).
 - **Do** set times and duration numerals in Fixel Display Black with tabular figures; everything else in Fixel Text.
@@ -314,6 +335,7 @@ Hours down the left in faint tabular labels with dashed 8% hairlines. Other peop
 - **Do** write plain Ukrainian with no loanwords, and keep the campaign credit to one modest, honest line in faint text.
 
 ### Don't:
+
 - **Don't** use ultramarine for other people's bookings, headings, links or decoration.
 - **Don't** use hatching for anything other than buffers.
 - **Don't** draw time as a grey ruled admin calendar grid or dress it up as a paper notebook.

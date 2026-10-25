@@ -1,0 +1,25 @@
+{
+  "name": "ye-hurtozhytok",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.19"
+  },
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @ehurtozhytok/web",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run typecheck",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "db:migrate:local": "npm run db:migrate:local --workspace @ehurtozhytok/web",
+    "council:add": "npm run council:add --workspace @ehurtozhytok/web --"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3"
+  }
+}

@@ -1,0 +1,110 @@
+import { Form, Link } from "react-router";
+
+import { ProfileForm } from "~/components/profile-form";
+import { ReminderSwitch } from "~/components/reminder-switch";
+import { Icon, TopBar } from "~/components/ui";
+import { requireProfile } from "~/lib/auth.server";
+import { isCouncil } from "~/lib/permissions";
+import { initials } from "~/lib/profile";
+import { saveProfile } from "~/lib/residents.server";
+import type { Route } from "./+types/profile";
+
+export const handle = { tab: "profile" };
+export const meta: Route.MetaFunction = () => [
+  { title: "Профіль · єГуртожиток" },
+];
+
+export async function loader({ request, context }: Route.LoaderArgs) {
+  const env = context.cloudflare.env;
+  const r = await requireProfile(request, env);
+  return {
+    name: r.name,
+    email: r.email,
+    room: r.room,
+    telegram: r.telegram,
+    council: isCouncil(r),
+    blocked: r.blocked,
+    vapidKey: env.VAPID_PUBLIC_KEY ?? "",
+  };
+}
+
+export async function action({ request, context }: Route.ActionArgs) {
+  const env = context.cloudflare.env;
+  const resident = await requireProfile(request, env);
+  const result = await saveProfile(env, resident, await request.formData());
+  return result.ok ? { saved: true as const } : { errors: result.errors };
+}
+
+export default function Profile({
+  loaderData,
+  actionData,
+}: Route.ComponentProps) {
+  const p = loaderData;
+  return (
+    <>
+      <TopBar back="/" title="Профіль" />
+      <div className="me">
+        <span className="me-av" aria-hidden="true">
+          {initials(p.name)}
+        </span>
+        <div>
+          <b>{p.name}</b>
+          <span>{p.email}</span>
+        </div>
+      </div>
+      <p className="me-note">Імʼя та пошта беруться з акаунта Політехніки.</p>
+      {p.blocked && (
+        <p className="error-note">
+          Студрада заблокувала ваш акаунт: записуватися зараз не можна.
+        </p>
+      )}
+
+      <ProfileForm
+        name={p.name}
+        room={p.room}
+        telegram={p.telegram}
+        errors={
+          actionData && "errors" in actionData ? actionData.errors : undefined
+        }
+        saved={!!actionData && "saved" in actionData}
+        submitLabel="Зберегти"
+      />
+
+      <ReminderSwitch vapidKey={p.vapidKey} />
+
+      {p.council && (
+        <Link
+          className="glass list-row"
+          to="/council"
+          style={{ marginTop: 14 }}
+        >
+          <span className="who-av">
+            <Icon name="shield" small />
+          </span>
+          <span style={{ flex: 1 }}>
+            <b>Студрада</b>
+            <span className="sub">Мешканці й блокування</span>
+          </span>
+          <Icon name="chev" small />
+        </Link>
+      )}
+
+      <Form method="post" action="/logout">
+        <button
+          className="btn btn-ghost-danger block"
+          type="submit"
+          style={{ marginTop: 14 }}
+        >
+          <Icon name="logout" small />
+          Вийти
+        </button>
+      </Form>
+      <p className="credit">
+        Кімнату й імʼя в Telegram бачать лише ті, хто увійшов через пошту
+        Політехніки.
+        <br />
+        Незалежний студентський проєкт команди Софії Полупан.
+      </p>
+    </>
+  );
+}
