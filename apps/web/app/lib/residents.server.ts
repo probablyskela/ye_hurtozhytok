@@ -1,7 +1,8 @@
-import { asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, gt, or, sql } from "drizzle-orm";
 
 import { activity, getDb } from "./db";
-import { residents, type Resident } from "./db/schema";
+import { bookings, residents, type Resident } from "./db/schema";
+import { kyivNow } from "./time";
 import { canBlock, type Actor } from "./permissions";
 import { PROFILE_ERRORS, normalizeRoom, normalizeTelegram } from "./profile";
 
@@ -75,6 +76,26 @@ export async function setBlocked(
       updatedAt: Date.now(),
     })
     .where(eq(residents.id, targetId));
+  if (blocked) {
+    const now = kyivNow();
+    await db
+      .update(bookings)
+      .set({
+        status: "cancelled",
+        cancelledAt: Date.now(),
+        cancelledBy: actor.id,
+      })
+      .where(
+        and(
+          eq(bookings.residentId, targetId),
+          eq(bookings.status, "active"),
+          or(
+            gt(bookings.date, now.date),
+            and(eq(bookings.date, now.date), gt(bookings.startMin, now.minute)),
+          ),
+        ),
+      );
+  }
   await activity(db, {
     actorId: actor.id,
     action: blocked ? "resident.blocked" : "resident.unblocked",

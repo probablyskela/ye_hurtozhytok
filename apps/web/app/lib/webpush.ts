@@ -56,6 +56,39 @@ export function p256Jwk(
 
 export type Subscription = { endpoint: string; p256dh: string; auth: string };
 
+/** Browser push services; the server never POSTs anywhere else. */
+const PUSH_HOSTS = [
+  /^fcm\.googleapis\.com$/,
+  /^updates\.push\.services\.mozilla\.com$/,
+  /^[a-z0-9-]+\.push\.services\.mozilla\.com$/,
+  /^web\.push\.apple\.com$/,
+  /^[a-z0-9-]+\.notify\.windows\.com$/,
+];
+
+export function isSubscription(value: unknown): value is Subscription {
+  const v = value as Partial<Subscription> | null;
+  if (
+    !v ||
+    typeof v.endpoint !== "string" ||
+    typeof v.p256dh !== "string" ||
+    typeof v.auth !== "string"
+  )
+    return false;
+  if (v.endpoint.length > 1000 || v.p256dh.length > 120 || v.auth.length > 40)
+    return false;
+  if (!/^[A-Za-z0-9_-]+$/.test(v.p256dh) || !/^[A-Za-z0-9_-]+$/.test(v.auth))
+    return false;
+  let url: URL;
+  try {
+    url = new URL(v.endpoint);
+  } catch {
+    return false;
+  }
+  return (
+    url.protocol === "https:" && PUSH_HOSTS.some((h) => h.test(url.hostname))
+  );
+}
+
 /**
  * Encrypts a payload for one subscription. `ephemeral` and `salt` exist only so
  * tests can reproduce the RFC 8291 example.

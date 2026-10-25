@@ -97,6 +97,12 @@ describe("validateRequest", () => {
   it("accepts a valid request", () => {
     expect(validateRequest(ok, now)).toBeNull();
   });
+  it("rejects malformed and impossible dates", () => {
+    expect(validateRequest({ ...ok, date: "2026-10-26x" }, now)).toBe("date");
+    expect(validateRequest({ ...ok, date: "2026-10-26 " }, now)).toBe("date");
+    expect(validateRequest({ ...ok, date: "abc" }, now)).toBe("date");
+    expect(validateRequest({ ...ok, date: "2026-02-30" }, now)).toBe("date");
+  });
   it("rejects lengths outside the five options", () => {
     expect(validateRequest({ ...ok, duration: 45 }, now)).toBe("duration");
     expect(validateRequest({ ...ok, duration: 180 }, now)).toBe("duration");

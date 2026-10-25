@@ -1,5 +1,8 @@
 // єГуртожиток service worker: offline read-only pages and booking reminders.
-const CACHE = "eh-v1";
+const CACHE = "eh-v2";
+// Only these pages are kept for offline reading; profile, bookings and the
+// council page are never cached, so nothing personal outlives a logout.
+const OFFLINE_OK = (path) => path === "/" || path.startsWith("/machines/");
 const OFFLINE_PAGES = ["/"];
 
 self.addEventListener("install", (event) => {
@@ -59,7 +62,7 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(req)
         .then((res) => {
-          if (res.ok) {
+          if (res.ok && OFFLINE_OK(url.pathname)) {
             const copy = res.clone();
             caches.open(CACHE).then((c) => c.put(req, copy));
           }
@@ -82,6 +85,10 @@ self.addEventListener("fetch", (event) => {
         ),
     );
   }
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data === "logout") event.waitUntil(caches.delete(CACHE));
 });
 
 self.addEventListener("push", (event) => {

@@ -141,8 +141,14 @@ async function upsertResident(
       createdAt: now,
       updatedAt: now,
     })
+    // Two first sign-ins at once: the second one just takes the row.
+    .onConflictDoUpdate({
+      target: residents.googleSub,
+      set: { email: data.email, name: data.name, updatedAt: now },
+    })
     .returning()
     .get();
+  if (created.createdAt !== now) return created;
   await activity(db, {
     actorId: created.id,
     action: "resident.joined",
@@ -191,7 +197,6 @@ const LOGIN_ERRORS = {
   generic: "Не вдалося увійти. Спробуйте ще раз.",
   domain:
     "Підходять лише акаунти Політехніки (@lpnu.ua). Увійдіть корпоративною поштою.",
-  blocked: "Ваш акаунт заблокувала студрада. Зверніться до неї.",
 };
 
 export async function finishGoogleLogin(
@@ -268,7 +273,11 @@ export async function logout(request: Request, env: Env) {
   const storage = sessionStorage(env, request);
   const session = await storage.getSession(request.headers.get("Cookie"));
   return redirect("/login", {
-    headers: { "Set-Cookie": await storage.destroySession(session) },
+    headers: {
+      "Set-Cookie": await storage.destroySession(session),
+      // Shared phones: drop cached pages of the person who just left.
+      "Clear-Site-Data": '"cache"',
+    },
   });
 }
 

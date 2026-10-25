@@ -119,6 +119,8 @@ export async function createBooking(
     now: { date: string; minute: number };
   },
 ): Promise<CreateResult> {
+  if (!Number.isInteger(input.machineId) || input.machineId <= 0)
+    return { ok: false, error: "machine" };
   const invalid = validateRequest(input, input.now);
   if (invalid) return { ok: false, error: invalid };
   const endMin = input.startMin + input.duration;

@@ -1,8 +1,13 @@
-import { eq, inArray } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 
 import { getDb } from "./db";
 import { pushSubscriptions } from "./db/schema";
 import { sendPush, type Subscription } from "./webpush";
+
+export { isSubscription } from "./webpush";
+
+/** Devices per person that get reminders; older ones are dropped. */
+export const MAX_DEVICES = 5;
 
 export function pushEnabled(env: Env): boolean {
   return !!env.VAPID_PUBLIC_KEY && !!env.VAPID_PRIVATE_KEY;
@@ -14,17 +19,6 @@ function vapid(env: Env) {
     privateKey: env.VAPID_PRIVATE_KEY!,
     subject: env.VAPID_SUBJECT || env.APP_URL,
   };
-}
-
-export function isSubscription(value: unknown): value is Subscription {
-  const v = value as Partial<Subscription> | null;
-  return (
-    !!v &&
-    typeof v.endpoint === "string" &&
-    v.endpoint.startsWith("https://") &&
-    typeof v.p256dh === "string" &&
-    typeof v.auth === "string"
-  );
 }
 
 export async function saveSubscription(
@@ -39,6 +33,18 @@ export async function saveSubscription(
       target: pushSubscriptions.endpoint,
       set: { residentId, p256dh: sub.p256dh, auth: sub.auth },
     });
+  const db = getDb(env);
+  const mine = await db
+    .select({ id: pushSubscriptions.id })
+    .from(pushSubscriptions)
+    .where(eq(pushSubscriptions.residentId, residentId))
+    .orderBy(desc(pushSubscriptions.createdAt))
+    .all();
+  const extra = mine.slice(MAX_DEVICES).map((r) => r.id);
+  if (extra.length)
+    await db
+      .delete(pushSubscriptions)
+      .where(inArray(pushSubscriptions.id, extra));
 }
 
 export async function deleteSubscription(

@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { base64url, fromBase64url } from "./google";
-import { encryptPayload, p256Jwk, vapidAuthorization } from "./webpush";
+import {
+  encryptPayload,
+  isSubscription,
+  p256Jwk,
+  vapidAuthorization,
+} from "./webpush";
 
 // RFC 8291, Appendix A.
 const rfc = {
@@ -78,5 +83,50 @@ describe("VAPID", () => {
       new TextEncoder().encode(`${h}.${c}`),
     );
     expect(ok).toBe(true);
+  });
+});
+
+describe("isSubscription", () => {
+  const sub = {
+    p256dh: "BCVxsr7N_eNgVRqvHtD0zTZsEc6",
+    auth: "BTBZMqHH6r4Tts7J_aSIgg",
+  };
+  it("accepts the browsers' push services", () => {
+    expect(
+      isSubscription({
+        ...sub,
+        endpoint: "https://fcm.googleapis.com/fcm/send/abc",
+      }),
+    ).toBe(true);
+    expect(
+      isSubscription({ ...sub, endpoint: "https://web.push.apple.com/QGx" }),
+    ).toBe(true);
+    expect(
+      isSubscription({
+        ...sub,
+        endpoint: "https://updates.push.services.mozilla.com/wpush/v2/x",
+      }),
+    ).toBe(true);
+  });
+  it("refuses any other host, plain http and oversized keys", () => {
+    expect(
+      isSubscription({ ...sub, endpoint: "https://example.com/hook" }),
+    ).toBe(false);
+    expect(
+      isSubscription({
+        ...sub,
+        endpoint: "https://fcm.googleapis.com.evil.com/x",
+      }),
+    ).toBe(false);
+    expect(
+      isSubscription({ ...sub, endpoint: "http://fcm.googleapis.com/x" }),
+    ).toBe(false);
+    expect(
+      isSubscription({
+        ...sub,
+        auth: "x".repeat(100),
+        endpoint: "https://fcm.googleapis.com/x",
+      }),
+    ).toBe(false);
   });
 });

@@ -89,7 +89,37 @@ export default function Profile({
         </Link>
       )}
 
-      <Form method="post" action="/logout">
+      <Form
+        method="post"
+        action="/logout"
+        reloadDocument
+        onSubmit={async (e) => {
+          const form = e.currentTarget;
+          if (form.dataset.done) return;
+          e.preventDefault();
+          try {
+            const reg = await navigator.serviceWorker?.getRegistration();
+            const sub = await reg?.pushManager.getSubscription();
+            if (sub) {
+              await fetch("/push", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  op: "unsubscribe",
+                  endpoint: sub.endpoint,
+                }),
+              });
+              await sub.unsubscribe();
+            }
+            reg?.active?.postMessage("logout");
+            for (const key of await caches.keys()) await caches.delete(key);
+          } catch {
+            // Logging out must never fail because of the cache or push.
+          }
+          form.dataset.done = "1";
+          form.requestSubmit();
+        }}
+      >
         <button
           className="btn btn-ghost-danger block"
           type="submit"

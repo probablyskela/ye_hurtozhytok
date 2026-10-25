@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 
 import { fmtMin } from "./booking";
 import { dueReminders } from "./bookings.server";
@@ -21,23 +21,32 @@ export async function runEveryMinute(env: Env, scheduledTime: number) {
   });
   if (due.length === 0) return;
 
-  // Mark first so a slow push never sends the same reminder twice.
-  await getDb(env)
+  // Claim first: only rows this run marks are sent, so overlapping runs never double up.
+  const claimed = await getDb(env)
     .update(bookings)
     .set({ remindedAt: scheduledTime })
     .where(
-      inArray(
-        bookings.id,
-        due.map((b) => b.id),
+      and(
+        inArray(
+          bookings.id,
+          due.map((b) => b.id),
+        ),
+        isNull(bookings.remindedAt),
       ),
-    );
+    )
+    .returning({ id: bookings.id });
+  const mine = new Set(claimed.map((c) => c.id));
 
-  for (const b of due) {
-    await notify(env, [b.residentId], {
-      title: `Прання о ${fmtMin(b.startMin)}`,
-      body: `${b.machineName}, ${fmtMin(b.startMin)}–${fmtMin(b.endMin)}. Якщо не прийдете за 15 хвилин, пралку може взяти інший.`,
-      url: `/bookings/${b.id}`,
-    });
+  for (const b of due.filter((d) => mine.has(d.id))) {
+    try {
+      await notify(env, [b.residentId], {
+        title: `Прання о ${fmtMin(b.startMin)}`,
+        body: `${b.machineName}, ${fmtMin(b.startMin)}–${fmtMin(b.endMin)}. Якщо не прийдете за 15 хвилин, пралку може взяти інший.`,
+        url: `/bookings/${b.id}`,
+      });
+    } catch (error) {
+      console.error("reminder failed", b.id, error);
+    }
   }
 }
 

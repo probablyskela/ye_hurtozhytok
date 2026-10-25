@@ -2,7 +2,7 @@
  * Booking rules. Pure functions only: everything here is shared by loaders,
  * actions and the UI, and covered by tests.
  */
-import { addDays, daysBetween } from "./time";
+import { addDays, daysBetween, isDateKey } from "./time";
 
 /** Laundry hours, minutes from Kyiv midnight: 06:00 to 24:00. */
 export const OPEN_MIN = 6 * 60;
@@ -88,6 +88,7 @@ export function freeStarts(
 
 export type BookingError =
   | "duration"
+  | "date"
   | "grid"
   | "hours"
   | "past"
@@ -99,6 +100,7 @@ export type BookingError =
 
 export const BOOKING_ERRORS: Record<BookingError, string> = {
   duration: "Оберіть тривалість: 30 хв, 1, 1,5, 2 або 2,5 години.",
+  date: "Оберіть день зі списку.",
   grid: "Початок має бути кратним 5 хвилинам.",
   hours: "Пралки працюють з 06:00 до 24:00. Оберіть інший час.",
   past: "Цей час уже минув. Оберіть інший.",
@@ -114,6 +116,7 @@ export function validateRequest(
   req: { date: string; startMin: number; duration: number },
   now: { date: string; minute: number },
 ): BookingError | null {
+  if (!isDateKey(req.date) || addDays(req.date, 0) !== req.date) return "date";
   if (!isDuration(req.duration)) return "duration";
   if (!Number.isInteger(req.startMin) || req.startMin % STEP_MIN !== 0)
     return "grid";
