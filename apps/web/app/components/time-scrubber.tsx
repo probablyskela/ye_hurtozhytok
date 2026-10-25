@@ -16,8 +16,8 @@ import {
   type Slot,
 } from "~/lib/booking";
 
-/** Pixels per 15 minutes: an hour is 72px, big enough for a thumb. */
-const STEP_PX = 18;
+/** Pixels per 5-minute step: an hour is 96px, big enough for a thumb. */
+const STEP_PX = 8;
 const PX_PER_MIN = STEP_PX / STEP_MIN;
 const STEPS = (CLOSE_MIN - OPEN_MIN) / STEP_MIN;
 
@@ -35,7 +35,7 @@ export type ScrubberProps = {
 
 /**
  * The day scrolls under a fixed frame the size of the booking. Native
- * momentum scrolling with 15-minute snap points; if the frame comes to rest
+ * momentum scrolling with 5-minute snap points; if the frame comes to rest
  * on a busy time it glides to the nearest free start.
  */
 export function TimeScrubber({
@@ -191,7 +191,7 @@ export function TimeScrubber({
     [len, nearestValid, onChange, pad, scrollToStart],
   );
 
-  // A mouse wheel moves the day in 15-minute steps; trackpads keep their own sideways scroll.
+  // A mouse wheel moves the day one 5-minute step per notch; trackpads keep their own sideways scroll.
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -241,7 +241,7 @@ export function TimeScrubber({
     const el = e.currentTarget;
     el.releasePointerCapture(e.pointerId);
     suppressClick.current = d.moved;
-    // Snap to the nearest quarter hour where the drag ended.
+    // Snap to the nearest 5-minute step where the drag ended.
     const left = Math.round(el.scrollLeft / STEP_PX) * STEP_PX;
     el.style.scrollSnapType = "";
     if (d.moved) el.scrollTo({ left, behavior: "smooth" });

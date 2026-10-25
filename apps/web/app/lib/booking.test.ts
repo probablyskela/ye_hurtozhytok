@@ -44,12 +44,12 @@ describe("clashes", () => {
   const booked = [slot("12:30", "14:30")];
   it("keeps the buffer on both sides", () => {
     expect(clashes(slot("14:30", "15:00"), booked)).toBe(true);
-    expect(clashes(slot("14:45", "15:15"), booked)).toBe(false);
+    expect(clashes(slot("14:35", "15:05"), booked)).toBe(false);
     expect(clashes(slot("11:30", "12:30"), booked)).toBe(true);
-    expect(clashes(slot("11:30", "12:15"), booked)).toBe(false);
+    expect(clashes(slot("11:30", "12:25"), booked)).toBe(false);
   });
-  it("treats the buffer as exactly 15 minutes", () => {
-    expect(BUFFER_MIN).toBe(15);
+  it("treats the buffer as exactly 5 minutes", () => {
+    expect(BUFFER_MIN).toBe(5);
   });
 });
 
@@ -60,16 +60,15 @@ describe("freeStarts", () => {
     slot("20:15", "21:45"),
   ];
 
-  it("offers only starts where the whole booking fits", () => {
-    const starts = freeStarts(day, 120, t("13:40"));
-    expect(starts.map(fmtMin)).toEqual([
-      "14:45",
-      "15:00",
-      "15:15",
-      "15:30",
-      "15:45",
-      "22:00",
-    ]);
+  it("offers every 5-minute start where the whole booking fits", () => {
+    const starts = freeStarts(day, 120, t("13:40")).map(fmtMin);
+    // Right after the 12:30–14:30 booking plus 5 minutes, up to the last start
+    // that still ends 5 minutes before 18:00, then after 21:45.
+    expect(starts[0]).toBe("14:35");
+    expect(starts).toContain("15:55");
+    expect(starts).not.toContain("16:00");
+    expect(starts.slice(-3)).toEqual(["21:50", "21:55", "22:00"]);
+    expect(starts).toHaveLength(17 + 3);
   });
 
   it("starts at opening time on a future day", () => {
@@ -82,7 +81,7 @@ describe("freeStarts", () => {
   });
 
   it("rounds the current time up to the grid", () => {
-    expect(freeStarts([], 30, t("09:01"))[0]).toBe(t("09:15"));
+    expect(freeStarts([], 30, t("09:01"))[0]).toBe(t("09:05"));
     expect(freeStarts([], 30, t("09:00"))[0]).toBe(t("09:00"));
   });
 
@@ -102,7 +101,8 @@ describe("validateRequest", () => {
     expect(validateRequest({ ...ok, duration: 45 }, now)).toBe("duration");
     expect(validateRequest({ ...ok, duration: 180 }, now)).toBe("duration");
   });
-  it("rejects starts off the grid", () => {
+  it("accepts 5-minute starts and rejects anything finer", () => {
+    expect(validateRequest({ ...ok, startMin: t("14:35") }, now)).toBeNull();
     expect(validateRequest({ ...ok, startMin: t("14:47") }, now)).toBe("grid");
   });
   it("rejects times outside laundry hours", () => {
@@ -119,6 +119,7 @@ describe("validateRequest", () => {
   it("rejects the past but forgives a page opened a few minutes ago", () => {
     expect(validateRequest({ ...ok, startMin: t("13:00") }, now)).toBe("past");
     expect(validateRequest({ ...ok, startMin: t("13:30") }, now)).toBeNull();
+    expect(validateRequest({ ...ok, startMin: t("13:25") }, now)).toBe("past");
     expect(validateRequest({ ...ok, date: "2026-10-24" }, now)).toBe("past");
   });
   it("allows today plus six days", () => {
@@ -159,7 +160,7 @@ describe("freeWindows", () => {
       freeWindows(day, t("13:40")).map(
         (w) => `${fmtMin(w.startMin)}–${fmtMin(w.endMin)}`,
       ),
-    ).toEqual(["14:45–17:45", "22:00–24:00"]);
+    ).toEqual(["14:35–17:55", "21:50–24:00"]);
   });
 });
 

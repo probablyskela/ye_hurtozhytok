@@ -166,7 +166,7 @@ Scope note: the presentation canvas in `design/mockup/index.html` (phone bezels,
 - Black capsule primary buttons; everything is a pill or a generously rounded tile.
 - Fixel Display Black only for times and duration numerals; Fixel Text for everything else.
 - The day strip: each machine's day as a capsule ribbon with booked segments, hatched buffers and a coral now-marker.
-- The time scrubber: the day slides under a fixed ultramarine frame the size of the booking (18px per 15 minutes, native momentum scroll with snap points); the frame turns red on busy time and glides to the nearest free start when released.
+- The time scrubber: the day slides under a fixed ultramarine frame the size of the booking (8px per 5 minutes, 96px per hour, native momentum scroll with snap points); the frame turns red on busy time and glides to the nearest free start when released.
 - Motion: view transitions between screens (the ticket morphs from home to its detail), tiles rise once on first appearance, the ticket catches light once, a ripple spreads from the porthole after booking, a busy machine's drum turns and a free one breathes, the now-marker pulses. Everything stops under reduced motion.
 - The porthole motif: ticket rings and machine state dots.
 - The facade mark: a black squircle holding a 3×3 grid of rounded windows — three lit white, five dim, one ultramarine («твоє вікно»).
@@ -266,7 +266,7 @@ Soft and continuous: no square corners anywhere in the product. Glass tiles 26px
 
 Circles carry the porthole motif: the concentric rings with a water line drawn into the top-right of the booking card (white strokes at 30% opacity), and the ringed state dot before each machine name.
 
-Hatching (−45° diagonal ink lines at 7–10% alpha) marks the 15-minute buffer on either side of a booking, in strips and on the timeline. Free windows on the timeline use a dashed teal outline.
+Hatching (−45° diagonal ink lines at 7–10% alpha) marks the 5-minute buffer on either side of a booking, in strips and on the timeline. Free windows on the timeline use a dashed teal outline.
 
 ## Components
 
@@ -332,7 +332,7 @@ Hours down the left in faint tabular labels with dashed 8% hairlines. Other peop
 - **Do** set times and duration numerals in Fixel Display Black with tabular figures; everything else in Fixel Text.
 - **Do** build surfaces as white glass tiles (26px radius) with the glass shadow over the pastel field, and provide the opaque fallback for reduced transparency.
 - **Do** make every interactive target at least 44px, and primary actions 52px black capsules.
-- **Do** use hatching for the 15-minute buffer flanks.
+- **Do** use hatching for the 5-minute buffer flanks.
 - **Do** carry the porthole motif in the ticket rings and machine state dots, and use the facade mark (the one ultramarine window is the only colour in it).
 - **Do** write plain Ukrainian with no loanwords, and keep the campaign credit to one modest, honest line in faint text.
 

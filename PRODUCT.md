@@ -29,7 +29,7 @@ The app is built by the team of Софія Полупан, a candidate for head 
 ## Operating Context
 
 - Three Samsung machines: «4 поверх», «6 поверх, №1», «6 поверх, №2» (numbered stickers on the machines). Anyone may use any machine.
-- Booking: 15-minute start grid, 30 min to 2.5 h, 15-minute buffer between bookings, up to 3 unfinished bookings per person, up to 7 days ahead. The resident picks one of five lengths (30 min, 1, 1.5, 2, 2.5 h); the interface does not talk about machine programs.
+- Booking: 5-minute start grid, 30 min to 2.5 h, 5-minute buffer between bookings, up to 3 unfinished bookings per person, up to 7 days ahead. The resident picks one of five lengths (30 min, 1, 1.5, 2, 2.5 h); the interface does not talk about machine programs.
 - Sign-in with the university Google account (@lpnu.ua); the user rejected Telegram sign-in. Telegram nicks are how residents contact each other today, so a nick stays an optional profile field.
 - QR stickers on machines lead to that machine's page.
 - Reminders via Web Push in the installed PWA, with email to the @lpnu.ua address as fallback.

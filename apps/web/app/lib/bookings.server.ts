@@ -245,7 +245,7 @@ export async function cancelBooking(
   return true;
 }
 
-/** Ends a running booking at the next quarter hour so the rest becomes free. */
+/** Ends a running booking at the next 5-minute mark so the rest becomes free. */
 export async function releaseBooking(
   env: Env,
   actor: Actor,

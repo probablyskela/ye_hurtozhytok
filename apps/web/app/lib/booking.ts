@@ -7,10 +7,10 @@ import { addDays, daysBetween } from "./time";
 /** Laundry hours, minutes from Kyiv midnight: 06:00 to 24:00. */
 export const OPEN_MIN = 6 * 60;
 export const CLOSE_MIN = 24 * 60;
-/** Starts fall on a 15-minute grid. */
-export const STEP_MIN = 15;
+/** Starts fall on a 5-minute grid. */
+export const STEP_MIN = 5;
 /** Free gap kept between two bookings on one machine. */
-export const BUFFER_MIN = 15;
+export const BUFFER_MIN = 5;
 export const DURATIONS = [30, 60, 90, 120, 150] as const;
 export type Duration = (typeof DURATIONS)[number];
 export const DEFAULT_DURATION: Duration = 120;
@@ -18,6 +18,8 @@ export const DEFAULT_DURATION: Duration = 120;
 export const HORIZON_DAYS = 7;
 /** Bookings that have not ended yet, per person. */
 export const MAX_ACTIVE = 3;
+/** A page opened a few minutes ago may still book the start it showed. */
+export const PAST_GRACE_MIN = 10;
 /** Someone who has not come within this time loses the machine. */
 export const NO_SHOW_MIN = 15;
 
@@ -97,7 +99,7 @@ export type BookingError =
 
 export const BOOKING_ERRORS: Record<BookingError, string> = {
   duration: "Оберіть тривалість: 30 хв, 1, 1,5, 2 або 2,5 години.",
-  grid: "Початок має припадати на 00, 15, 30 чи 45 хвилин.",
+  grid: "Початок має бути кратним 5 хвилинам.",
   hours: "Пралки працюють з 06:00 до 24:00. Оберіть інший час.",
   past: "Цей час уже минув. Оберіть інший.",
   horizon: "Записатися можна лише на тиждень уперед.",
@@ -118,10 +120,7 @@ export function validateRequest(
   if (req.startMin < OPEN_MIN || req.startMin + req.duration > CLOSE_MIN)
     return "hours";
   const ahead = daysBetween(now.date, req.date);
-  if (
-    ahead < 0 ||
-    (ahead === 0 && req.startMin < ceilToStep(now.minute) - STEP_MIN)
-  )
+  if (ahead < 0 || (ahead === 0 && req.startMin < now.minute - PAST_GRACE_MIN))
     return "past";
   if (ahead >= HORIZON_DAYS) return "horizon";
   return null;

@@ -1,6 +1,7 @@
 import { Form, redirect } from "react-router";
 
 import { DayStrip, Icon, TopBar } from "~/components/ui";
+import { BUFFER_MIN } from "~/lib/booking";
 import {
   devLogin,
   devLoginEnabled,
@@ -104,7 +105,7 @@ export default function Login({
                     "repeating-linear-gradient(-45deg, rgb(16 18 23 / .25) 0 2px, transparent 2px 4px)",
                 }}
               />
-              запас 15 хв
+              запас {BUFFER_MIN} хв
             </span>
             <span>
               <i style={{ background: "var(--now)" }} />

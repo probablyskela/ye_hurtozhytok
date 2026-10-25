@@ -1975,12 +1975,12 @@ a.dur:hover {
     repeating-linear-gradient(
       90deg,
       rgb(16 18 23 / 0.28) 0 1.5px,
-      transparent 1.5px 72px
+      transparent 1.5px 96px
     ),
     repeating-linear-gradient(
       90deg,
       rgb(16 18 23 / 0.12) 0 1px,
-      transparent 1px 18px
+      transparent 1px 24px
     );
   background-size:
     calc(100% - var(--frame, 0px)) 12px,
