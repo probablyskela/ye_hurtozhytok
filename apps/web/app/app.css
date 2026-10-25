@@ -2382,3 +2382,32 @@ a.dur:hover {
     animation: none !important;
   }
 }
+
+/* Scrubber controls for mouse and keyboard */
+.scrub-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+.scrub-controls .scrub-hint {
+  margin: 0;
+  flex: 1;
+}
+.scrub-controls .icon-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.scrub-controls .icon-btn:not(:disabled):hover {
+  background: #fff;
+}
+@media (hover: hover) and (pointer: fine) {
+  .scrub-track {
+    cursor: grab;
+    user-select: none;
+  }
+  .scrub-band {
+    cursor: pointer;
+  }
+}

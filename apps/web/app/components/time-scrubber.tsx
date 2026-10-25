@@ -157,6 +157,96 @@ export function TimeScrubber({
     };
   }, [settle, startAt]);
 
+  /** Previous or next free start, for the arrow buttons and keys. */
+  const jump = useCallback(
+    (dir: 1 | -1) => {
+      const side = starts.filter((s) => (dir > 0 ? s > live : s < live));
+      const next = dir > 0 ? side[0] : side.at(-1);
+      if (next === undefined) return;
+      scrollToStart(next, true);
+      setLive(next);
+      onChange(next);
+    },
+    [live, onChange, scrollToStart, starts],
+  );
+
+  /** A click or tap on the day centres the booking there (or on the nearest free start). */
+  const placeAt = useCallback(
+    (clientX: number) => {
+      const el = ref.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const minute =
+        OPEN_MIN + (clientX - rect.left + el.scrollLeft - pad) / PX_PER_MIN;
+      const wanted = Math.round((minute - len / 2) / STEP_MIN) * STEP_MIN;
+      const target = nearestValid(
+        Math.min(CLOSE_MIN - len, Math.max(OPEN_MIN, wanted)),
+      );
+      if (target === null) return;
+      if (target !== wanted) setNudge((n) => n + 1);
+      scrollToStart(target, true);
+      setLive(target);
+      onChange(target);
+    },
+    [len, nearestValid, onChange, pad, scrollToStart],
+  );
+
+  // A mouse wheel moves the day in 15-minute steps; trackpads keep their own sideways scroll.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let acc = 0;
+    let target: number | null = null;
+    let idle = 0;
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      e.preventDefault();
+      acc += e.deltaY;
+      const steps = Math.trunc(acc / 100);
+      if (!steps) return;
+      acc -= steps * 100;
+      // Count from where the wheel is heading, not from a scroll still in flight.
+      const max = el.scrollWidth - el.clientWidth;
+      const from = target ?? Math.round(el.scrollLeft / STEP_PX) * STEP_PX;
+      target = Math.min(max, Math.max(0, from + steps * STEP_PX));
+      el.scrollTo({ left: target, behavior: "smooth" });
+      window.clearTimeout(idle);
+      idle = window.setTimeout(() => (target = null), 400);
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
+  // Mouse: grab and drag the day like on a phone.
+  const drag = useRef<{ x: number; left: number; moved: boolean } | null>(null);
+  const suppressClick = useRef(false);
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== "mouse" || e.button !== 0) return;
+    const el = e.currentTarget;
+    drag.current = { x: e.clientX, left: el.scrollLeft, moved: false };
+    el.style.scrollSnapType = "none";
+    el.setPointerCapture(e.pointerId);
+  };
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d) return;
+    const dx = e.clientX - d.x;
+    if (Math.abs(dx) > 3) d.moved = true;
+    e.currentTarget.scrollLeft = d.left - dx;
+  };
+  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d) return;
+    drag.current = null;
+    const el = e.currentTarget;
+    el.releasePointerCapture(e.pointerId);
+    suppressClick.current = d.moved;
+    // Snap to the nearest quarter hour where the drag ended.
+    const left = Math.round(el.scrollLeft / STEP_PX) * STEP_PX;
+    el.style.scrollSnapType = "";
+    if (d.moved) el.scrollTo({ left, behavior: "smooth" });
+  };
+
   const free = valid.has(live);
   const past =
     nowMin !== null && live < Math.ceil(nowMin / STEP_MIN) * STEP_MIN;
@@ -200,13 +290,18 @@ export function TimeScrubber({
               e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
             if (!dir) return;
             e.preventDefault();
-            const later = starts.filter((s) => (dir > 0 ? s > live : s < live));
-            const next = dir > 0 ? later[0] : later.at(-1);
-            if (next !== undefined) {
-              scrollToStart(next, true);
-              setLive(next);
-              onChange(next);
+            jump(dir);
+          }}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          onClick={(e) => {
+            if (suppressClick.current) {
+              suppressClick.current = false;
+              return;
             }
+            placeAt(e.clientX);
           }}
         >
           <div
@@ -282,7 +377,33 @@ export function TimeScrubber({
         <div className="scrub-fade left" aria-hidden="true" />
         <div className="scrub-fade right" aria-hidden="true" />
       </div>
-      <p className="scrub-hint">Тягніть шкалу, щоб обрати час</p>
+      <div className="scrub-controls">
+        <button
+          type="button"
+          className="icon-btn"
+          aria-label="Попередній вільний час"
+          onClick={() => jump(-1)}
+          disabled={!starts.some((x) => x < live)}
+        >
+          <svg className="ico" aria-hidden="true">
+            <use href="#i-back" />
+          </svg>
+        </button>
+        <p className="scrub-hint">
+          Тягніть шкалу або натисніть на вільне місце
+        </p>
+        <button
+          type="button"
+          className="icon-btn"
+          aria-label="Наступний вільний час"
+          onClick={() => jump(1)}
+          disabled={!starts.some((x) => x > live)}
+        >
+          <svg className="ico" aria-hidden="true">
+            <use href="#i-chev" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }
