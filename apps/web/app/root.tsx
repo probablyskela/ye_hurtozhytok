@@ -28,7 +28,7 @@ export const meta: Route.MetaFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="uk">
+    <html lang="uk" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta
@@ -46,7 +46,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Scripts />
         <script
           dangerouslySetInnerHTML={{
-            __html: `if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));`,
+            __html: `setTimeout(()=>document.documentElement.classList.add("booted"),1500);if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));`,
           }}
         />
       </body>

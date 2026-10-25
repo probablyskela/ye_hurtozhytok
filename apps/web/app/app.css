@@ -1846,7 +1846,6 @@ a.dur:hover {
 .pick-card {
   margin-top: 12px;
   padding: 16px;
-  overflow: hidden;
 }
 .select {
   min-height: 52px;
@@ -2107,57 +2106,60 @@ a.dur:hover {
 }
 
 /* ---------- motion ---------- */
-/* Page changes: the old screen sinks, the new one rises; tab bar and field stay put. */
+/* Page changes: a short, cheap crossfade with a small rise. No blur: blurring
+   a whole-screen snapshot flickers on phones. The tab bar stays put. */
 .tabbar {
   view-transition-name: tabbar;
 }
-.field {
-  view-transition-name: field;
-}
 ::view-transition-old(root) {
-  animation: vt-out 0.2s var(--ease) both;
+  animation: vt-out 0.16s ease-out both;
 }
 ::view-transition-new(root) {
-  animation: vt-in 0.42s var(--ease-out) both;
+  animation: vt-in 0.3s var(--ease-out) both;
 }
 ::view-transition-group(*) {
-  animation-duration: 0.45s;
+  animation-duration: 0.38s;
   animation-timing-function: var(--ease);
+}
+/* The ticket morphs between home and its detail without a double fade. */
+::view-transition-old(*):only-child,
+::view-transition-new(*):only-child {
+  animation-duration: 0.2s;
+}
+::view-transition-image-pair(*) {
+  isolation: auto;
 }
 @keyframes vt-out {
   to {
     opacity: 0;
-    transform: translateY(-6px) scale(0.99);
-    filter: blur(2px);
   }
 }
 @keyframes vt-in {
   from {
     opacity: 0;
-    transform: translateY(14px);
-    filter: blur(3px);
+    transform: translateY(8px);
   }
 }
 
-/* First appearance of tiles: a short rise, one after another. */
-.page .glass,
-.page .ticket,
-.page .now-panel {
+/* Tiles rise once, on the first load of the app only; later screens arrive
+   through the page transition alone, so nothing animates twice. */
+html:not(.booted) .page .glass,
+html:not(.booted) .page .ticket {
   animation: rise 0.5s var(--ease-out) both;
 }
-.page > :nth-child(3) {
+html:not(.booted) .page > :nth-child(3) {
   animation-delay: 0.04s;
 }
-.page > :nth-child(4) {
+html:not(.booted) .page > :nth-child(4) {
   animation-delay: 0.08s;
 }
-.page > :nth-child(5) {
+html:not(.booted) .page > :nth-child(5) {
   animation-delay: 0.12s;
 }
-.home-grid > :nth-child(2) .glass {
+html:not(.booted) .home-grid > :nth-child(2) .glass {
   animation-delay: 0.1s;
 }
-.home-grid > :nth-child(3) .glass {
+html:not(.booted) .home-grid > :nth-child(3) .glass {
   animation-delay: 0.16s;
 }
 @keyframes rise {
@@ -2167,7 +2169,7 @@ a.dur:hover {
   }
 }
 
-/* The ticket catches light once when it appears. */
+/* The ticket catches light once, on first load. */
 .ticket::after {
   content: "";
   position: absolute;
@@ -2181,6 +2183,9 @@ a.dur:hover {
     transparent 60%
   );
   transform: translateX(-120%);
+}
+html:not(.booted) .ticket::after,
+.ticket.celebrate::after {
   animation: sheen 1.4s 0.35s var(--ease) both;
 }
 @keyframes sheen {
@@ -2409,5 +2414,19 @@ a.dur:hover {
   }
   .scrub-band {
     cursor: pointer;
+  }
+}
+
+/* Horizontal rows scroll edge to edge and leave room for their shadows. */
+.chip-row,
+.days {
+  padding: 6px 16px 20px;
+  margin: -2px -16px -12px;
+  scroll-padding-inline: 16px;
+}
+@media (min-width: 1024px) {
+  .chip-row {
+    margin-inline: 0;
+    padding-inline: 0;
   }
 }
