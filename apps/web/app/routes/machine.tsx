@@ -1,23 +1,30 @@
 import { PillGroup } from "~/components/pill-group";
 import { Form, Link, data } from "react-router";
 
-import { Credit, Icon, TopBar } from "~/components/ui";
+import { Credit, DayStrip, Icon, TopBar } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
 import {
   BUFFER_MIN,
-  CLOSE_MIN,
   NO_SHOW_MIN,
-  OPEN_MIN,
+  bookableDays,
   durationLabel,
   fmtMin,
   freeWindows,
+  longestFit,
   machineNow,
 } from "~/lib/booking";
 import { cancelBooking } from "~/lib/bookings.server";
 import { machinesOn } from "~/lib/day.server";
 import { isCouncil } from "~/lib/permissions";
 import { notifyCancelledByCouncil } from "~/lib/scheduled.server";
-import { addDays, dayName, isDateKey, kyivNow } from "~/lib/time";
+import {
+  WEEKDAYS_SHORT,
+  dayName,
+  dayOfMonth,
+  isDateKey,
+  kyivNow,
+  weekdayIndex,
+} from "~/lib/time";
 import { usePolling } from "~/lib/use-polling";
 import type { Route } from "./+types/machine";
 
@@ -26,13 +33,11 @@ export const meta: Route.MetaFunction = ({ data }) => [
   { title: `${data?.machine.name ?? "Пралка"} · єГуртожиток` },
 ];
 
-const PX = 1.15;
-
 export async function loader({ request, params, context }: Route.LoaderArgs) {
   const env = context.cloudflare.env;
   const resident = await requireProfile(request, env);
   const now = kyivNow();
-  const tabs = [now.date, addDays(now.date, 1), addDays(now.date, 2)];
+  const tabs = bookableDays(now.date);
   const d = new URL(request.url).searchParams.get("d");
   const date = isDateKey(d) && tabs.includes(d) ? d : now.date;
   const machines = await machinesOn(env, date);
@@ -50,15 +55,12 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
     state: isToday ? machineNow(machine.bookings, now.minute) : null,
     date,
     today: now.date,
-    tabs,
+    tabs: tabs.map((k) => ({
+      key: k,
+      wd: WEEKDAYS_SHORT[weekdayIndex(k)],
+      day: dayOfMonth(k),
+    })),
     nowMin,
-    // The view starts at the last full hour before now, so the past does not take the screen.
-    fromMin: isToday
-      ? Math.max(
-          OPEN_MIN,
-          Math.min(Math.floor(now.minute / 60) * 60, CLOSE_MIN - 60),
-        )
-      : OPEN_MIN,
     bookings: machine.bookings.map((b) => ({
       id: b.id,
       startMin: b.startMin,
@@ -89,6 +91,12 @@ export async function action({ request, context }: Route.ActionArgs) {
   );
 }
 
+type Row =
+  | { kind: "booking"; startMin: number; endMin: number; b: Booking }
+  | { kind: "free"; startMin: number; endMin: number }
+  | { kind: "now"; startMin: number };
+type Booking = Route.ComponentProps["loaderData"]["bookings"][number];
+
 export default function MachineDay({
   loaderData,
   actionData,
@@ -101,15 +109,36 @@ export default function MachineDay({
     today,
     tabs,
     nowMin,
-    fromMin,
     bookings,
     windows,
     council,
   } = loaderData;
-  const y = (m: number) => (m - fromMin) * PX;
-  const visible = bookings.filter((b) => b.endMin > fromMin);
-  const hours: number[] = [];
-  for (let h = Math.ceil(fromMin / 60); h <= 24; h++) hours.push(h);
+
+  // Today, finished bookings fold away; everything else is one list in time order.
+  const past =
+    nowMin === null ? [] : bookings.filter((b) => b.endMin <= nowMin);
+  const rows: Row[] = [
+    ...bookings
+      .filter((b) => nowMin === null || b.endMin > nowMin)
+      .map((b) => ({
+        kind: "booking" as const,
+        startMin: b.startMin,
+        endMin: b.endMin,
+        b,
+      })),
+    ...windows.map((w) => ({
+      kind: "free" as const,
+      startMin: w.startMin,
+      endMin: w.endMin,
+    })),
+  ].sort((a, z) => a.startMin - z.startMin);
+  if (nowMin !== null) {
+    const at = rows.findIndex((r) => r.startMin > nowMin);
+    rows.splice(at === -1 ? rows.length : at, 0, {
+      kind: "now",
+      startMin: nowMin,
+    });
+  }
 
   let pill = { text: "", free: true };
   if (!machine.working) pill = { text: "Не працює", free: false };
@@ -126,17 +155,17 @@ export default function MachineDay({
   else if (state?.kind === "closed")
     pill = { text: "Зачинено до 06:00", free: false };
 
+  const mineIds = new Set(bookings.filter((b) => b.mine).map((b) => b.id));
+
   return (
     <>
       <TopBar back="/" />
       <div className="day-head">
         <div>
           <h2>{machine.name}</h2>
-          {pill.text && (
-            <span className={`state ${pill.free ? "free" : "busy"}`}>
-              {pill.text}
-            </span>
-          )}
+          <span className={`state ${pill.free ? "free" : "busy"}`}>
+            {pill.text || dayName(date, today)}
+          </span>
         </div>
       </div>
       {actionData && "ok" in actionData && (
@@ -150,145 +179,72 @@ export default function MachineDay({
         </p>
       )}
 
-      <PillGroup className="seg" label="День">
-        {tabs.map((t) => (
+      <PillGroup className="days" label="День">
+        {tabs.map((d, i) => (
           <Link
             data-pill-item
-            key={t}
-            to={`?d=${t}`}
+            key={d.key}
+            className="day"
+            to={`?d=${d.key}`}
             replace
             preventScrollReset
-            aria-current={t === date ? "true" : undefined}
+            aria-current={d.key === date ? "true" : undefined}
+            aria-label={dayName(d.key, today)}
           >
-            {dayName(t, today).replace(/, \d+ \S+$/, "")}
-            {t !== today && t !== tabs[1] ? `, ${Number(t.slice(8))}` : ""}
+            <small>{i === 0 ? "Сьогодні" : i === 1 ? "Завтра" : d.wd}</small>
+            <b>{d.day}</b>
           </Link>
         ))}
       </PillGroup>
 
-      <div className="glass timeline" style={{ marginTop: 14 }}>
-        {fromMin > OPEN_MIN && (
-          <div className="past-row" style={{ margin: "0 0 14px 14px" }}>
-            <span>06:00–{fmtMin(fromMin)} уже минуло</span>
-            <Icon name="clock" small />
-          </div>
+      <div className="glass day-overview">
+        <DayStrip
+          label={machine.name}
+          bookings={bookings}
+          mineIds={mineIds}
+          nowMin={nowMin}
+        />
+      </div>
+
+      <div className="agenda">
+        {past.length > 0 && (
+          <details className="agenda-past">
+            <summary>
+              Раніше сьогодні: {past.length}{" "}
+              {past.length === 1
+                ? "запис"
+                : past.length < 5
+                  ? "записи"
+                  : "записів"}
+            </summary>
+            {past.map((b) => (
+              <BookingRow key={b.id} b={b} council={false} faded />
+            ))}
+          </details>
         )}
-        <div className="tl-grid" style={{ height: y(CLOSE_MIN) + 8 }}>
-          {hours.map((h) => (
-            <div className="tl-hour" key={h} style={{ top: y(h * 60) }}>
-              <span>{String(h).padStart(2, "0")}:00</span>
+        {rows.map((r) =>
+          r.kind === "now" ? (
+            <div className="agenda-now" key="now">
+              <span>{fmtMin(r.startMin)}</span>
+              <i aria-hidden="true" />
+              зараз
             </div>
-          ))}
-          {visible.flatMap((b) => [
-            b.startMin - BUFFER_MIN >= fromMin ? (
-              <div
-                key={`a${b.id}`}
-                className="tl-buf"
-                style={{
-                  top: y(b.startMin - BUFFER_MIN),
-                  height: BUFFER_MIN * PX,
-                }}
-              />
-            ) : null,
-            b.endMin + BUFFER_MIN <= CLOSE_MIN ? (
-              <div
-                key={`z${b.id}`}
-                className="tl-buf"
-                style={{ top: y(b.endMin), height: BUFFER_MIN * PX }}
-              />
-            ) : null,
-          ])}
-          {visible.map((b) => {
-            const top = y(Math.max(fromMin, b.startMin)) + 2;
-            const height = (b.endMin - Math.max(fromMin, b.startMin)) * PX - 4;
-            const time = `${fmtMin(b.startMin)}–${fmtMin(b.endMin)}`;
-            return b.mine ? (
-              <Link
-                key={b.id}
-                className="tl-block tl-mine"
-                to={`/bookings/${b.id}`}
-                style={{ top, height, textDecoration: "none" }}
-              >
-                <span className="t">{time}</span>
-                {height > 34 && <span className="n">Ваш запис</span>}
-              </Link>
-            ) : (
-              <div
-                key={b.id}
-                className="tl-block tl-busy"
-                style={{ top, height }}
-              >
-                <span className="t">{time}</span>
-                {height > 34 && <span className="n">{b.name}</span>}
-                {height > 56 && (
-                  <span className="c">
-                    кімната {b.room ?? "—"}
-                    {b.telegram && (
-                      <>
-                        {" · "}
-                        <a
-                          href={`https://t.me/${b.telegram}`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          @{b.telegram}
-                        </a>
-                      </>
-                    )}
-                  </span>
-                )}
-                {council && (
-                  <Form method="post" replace preventScrollReset>
-                    <input type="hidden" name="intent" value="cancel" />
-                    <input type="hidden" name="id" value={b.id} />
-                    <button className="pill-btn danger" type="submit">
-                      Скасувати
-                    </button>
-                  </Form>
-                )}
-              </div>
-            );
-          })}
-          {windows
-            .filter((w) => w.endMin > fromMin)
-            .map((w) => {
-              const top = y(Math.max(fromMin, w.startMin)) + 2;
-              const height =
-                (w.endMin - Math.max(fromMin, w.startMin)) * PX - 4;
-              const max = Math.min(150, w.endMin - w.startMin);
-              const len = [150, 120, 90, 60, 30].find((d) => d <= max) ?? 30;
-              return (
-                <Link
-                  key={w.startMin}
-                  className="tl-block tl-free"
-                  to={`/book?d=${date}&m=${machine.id}&s=${w.startMin}&len=${len}`}
-                  style={{ top, height }}
-                  aria-label={`Вільно ${fmtMin(w.startMin)}–${fmtMin(w.endMin)}, записатися`}
-                >
-                  <span>
-                    <span className="n" style={{ display: "block" }}>
-                      Вільно {fmtMin(w.startMin)}–{fmtMin(w.endMin)}
-                    </span>
-                    {height > 44 && (
-                      <span className="c">
-                        Можна записатися до {durationLabel(max)}
-                      </span>
-                    )}
-                  </span>
-                  <span className="plus">
-                    <Icon name="plus" small />
-                  </span>
-                </Link>
-              );
-            })}
-          {nowMin !== null && nowMin >= fromMin && nowMin < CLOSE_MIN && (
-            <div
-              className="tl-now"
-              style={{ top: y(nowMin) }}
-              data-time={fmtMin(nowMin)}
+          ) : r.kind === "free" ? (
+            <FreeRow
+              key={`f${r.startMin}`}
+              startMin={r.startMin}
+              endMin={r.endMin}
+              date={date}
+              machineId={machine.id}
             />
+          ) : (
+            <BookingRow key={r.b.id} b={r.b} council={council} />
+          ),
+        )}
+        {rows.filter((r) => r.kind !== "now").length === 0 &&
+          past.length === 0 && (
+            <p className="empty">Цього дня пралка недоступна.</p>
           )}
-        </div>
       </div>
 
       <div className="glass rule" style={{ marginTop: 14 }}>
@@ -300,5 +256,104 @@ export default function MachineDay({
       </div>
       <Credit />
     </>
+  );
+}
+
+function Time({ startMin, endMin }: { startMin: number; endMin: number }) {
+  return (
+    <span className="agenda-time">
+      {fmtMin(startMin)}
+      <small>{fmtMin(endMin)}</small>
+    </span>
+  );
+}
+
+/** Who booked, always in full: name, room and Telegram, whatever the length. */
+function BookingRow({
+  b,
+  council,
+  faded,
+}: {
+  b: Booking;
+  council: boolean;
+  faded?: boolean;
+}) {
+  if (b.mine)
+    return (
+      <Link
+        className={`agenda-row is-mine${faded ? " is-past" : ""}`}
+        to={`/bookings/${b.id}`}
+        viewTransition
+      >
+        <Time startMin={b.startMin} endMin={b.endMin} />
+        <span className="agenda-body">
+          <b>Ваш запис</b>
+          <span>{durationLabel(b.endMin - b.startMin)}</span>
+        </span>
+        <Icon name="chev" small />
+      </Link>
+    );
+  return (
+    <div className={`agenda-row is-busy${faded ? " is-past" : ""}`}>
+      <Time startMin={b.startMin} endMin={b.endMin} />
+      <span className="agenda-body">
+        <b>{b.name}</b>
+        <span>
+          кімната {b.room ?? "—"}
+          {b.telegram && (
+            <>
+              {" · "}
+              <a
+                href={`https://t.me/${b.telegram}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                @{b.telegram}
+              </a>
+            </>
+          )}
+        </span>
+      </span>
+      {council && (
+        <Form method="post" replace preventScrollReset>
+          <input type="hidden" name="intent" value="cancel" />
+          <input type="hidden" name="id" value={b.id} />
+          <button className="pill-btn danger" type="submit">
+            Скасувати
+          </button>
+        </Form>
+      )}
+    </div>
+  );
+}
+
+function FreeRow({
+  startMin,
+  endMin,
+  date,
+  machineId,
+}: {
+  startMin: number;
+  endMin: number;
+  date: string;
+  machineId: number;
+}) {
+  const len = longestFit(endMin - startMin) ?? 30;
+  return (
+    <Link
+      className="agenda-row is-free"
+      to={`/book?d=${date}&m=${machineId}&s=${startMin}&len=${len}`}
+      viewTransition
+      aria-label={`Вільно ${fmtMin(startMin)}–${fmtMin(endMin)}, записатися`}
+    >
+      <Time startMin={startMin} endMin={endMin} />
+      <span className="agenda-body">
+        <b>Вільно</b>
+        <span>можна записатися до {durationLabel(len)}</span>
+      </span>
+      <span className="plus" aria-hidden="true">
+        <Icon name="plus" small />
+      </span>
+    </Link>
   );
 }

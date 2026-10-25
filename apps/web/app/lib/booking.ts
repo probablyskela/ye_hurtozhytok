@@ -35,7 +35,17 @@ export function fmtMin(minute: number): string {
 /** 30 → "30 хв", 90 → "1,5 год". */
 export function durationLabel(minutes: number): string {
   if (minutes < 60) return `${minutes} хв`;
+  if (minutes % 30 !== 0) {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return m ? `${h} год ${m} хв` : `${h} год`;
+  }
   return `${String(minutes / 60).replace(".", ",")} год`;
+}
+
+/** The longest booking length that fits a free window of `minutes`. */
+export function longestFit(minutes: number): number | null {
+  return [...DURATIONS].reverse().find((d) => d <= minutes) ?? null;
 }
 
 /** 120 → "2 години", 90 → "1,5 години", 60 → "1 година", 30 → "30 хвилин". */

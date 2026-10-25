@@ -9,6 +9,7 @@ import {
   durationLabel,
   durationWords,
   fmtMin,
+  longestFit,
   freeStarts,
   freeWindows,
   machineNow,
@@ -31,6 +32,10 @@ describe("labels", () => {
     expect(durationLabel(30)).toBe("30 хв");
     expect(durationLabel(90)).toBe("1,5 год");
     expect(durationLabel(120)).toBe("2 год");
+    expect(durationLabel(80)).toBe("1 год 20 хв");
+    expect(longestFit(80)).toBe(60);
+    expect(longestFit(200)).toBe(150);
+    expect(longestFit(20)).toBeNull();
     expect(durationWords(60)).toBe("1 година");
     expect(durationWords(150)).toBe("2,5 години");
   });
