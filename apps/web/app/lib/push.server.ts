@@ -31,7 +31,13 @@ export async function saveSubscription(
     .values({ residentId, ...sub, createdAt: Date.now() })
     .onConflictDoUpdate({
       target: pushSubscriptions.endpoint,
-      set: { residentId, p256dh: sub.p256dh, auth: sub.auth },
+      // A device that subscribes again counts as the newest one.
+      set: {
+        residentId,
+        p256dh: sub.p256dh,
+        auth: sub.auth,
+        createdAt: Date.now(),
+      },
     });
   const db = getDb(env);
   const mine = await db

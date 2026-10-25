@@ -11,6 +11,7 @@ import {
 } from "~/lib/bookings.server";
 import { bookingIcs } from "~/lib/ics";
 import { isCouncil } from "~/lib/permissions";
+import { notifyCancelledByCouncil } from "~/lib/scheduled.server";
 import { dayHeading, kyivMinuteToUtc, kyivNow } from "~/lib/time";
 import type { Route } from "./+types/booking";
 
@@ -81,10 +82,20 @@ export async function action({ request, params, context }: Route.ActionArgs) {
   const intent = (await request.formData()).get("intent");
   const now = kyivNow();
   if (intent === "cancel") {
+    const before = await bookingById(env, id);
     const ok = await cancelBooking(env, resident, id, now);
+    if (ok && before && before.residentId !== resident.id) {
+      // The council cancelled someone else's booking: tell that person, as on
+      // the machine page, and go back to the machine's day.
+      context.cloudflare.ctx.waitUntil(notifyCancelledByCouncil(env, id));
+      throw redirect(`/machines/${before.machineSlug}?d=${before.date}`);
+    }
     if (ok) throw redirect("/bookings");
     return data(
-      { error: "Не вдалося скасувати: запис уже закінчився або скасований." },
+      {
+        error:
+          "Не вдалося скасувати: запис уже почався, закінчився або скасований. Під час прання можна звільнити пралку раніше.",
+      },
       { status: 409 },
     );
   }
@@ -139,7 +150,7 @@ export default function BookingPage({
         footLeft={b.who ?? b.length}
         footRight={
           !ended && b.status === "active" && !running ? (
-            <span>{b.countdown.replace(/^через /, "через ")}</span>
+            <span>{b.countdown}</span>
           ) : undefined
         }
       />
@@ -163,22 +174,29 @@ export default function BookingPage({
               <Icon name="cal" small />У календар
             </a>
           )}
-          <Form
-            method="post"
-            replace
-            onSubmit={(e) => {
-              if (!confirm("Скасувати цей запис?")) e.preventDefault();
-            }}
-          >
-            <input type="hidden" name="intent" value="cancel" />
-            <button
-              className="btn btn-ghost-danger block"
-              type="submit"
-              disabled={busy}
+          {/* While washing, the owner frees the machine instead of cancelling. */}
+          {!(running && b.mine) ? (
+            <Form
+              method="post"
+              replace
+              onSubmit={(e) => {
+                if (!confirm("Скасувати цей запис?")) e.preventDefault();
+              }}
             >
-              Скасувати
-            </button>
-          </Form>
+              <input type="hidden" name="intent" value="cancel" />
+              <button
+                className="btn btn-ghost-danger block"
+                type="submit"
+                disabled={busy}
+              >
+                Скасувати
+              </button>
+            </Form>
+          ) : (
+            <a className="btn btn-soft" href={`/bookings/${b.id}?ics=1`}>
+              <Icon name="cal" small />У календар
+            </a>
+          )}
         </div>
       )}
 
@@ -204,8 +222,8 @@ export default function BookingPage({
         <div className="rule">
           <Icon name="user" />
           <span>
-            Інші бачать ваше імʼя, кімнату й імʼя в Telegram, якщо ви його
-            вказали.
+            Інші бачать ваше імʼя, кімнату й імʼя користувача в Telegram, якщо
+            ви його вказали.
           </span>
         </div>
       </div>

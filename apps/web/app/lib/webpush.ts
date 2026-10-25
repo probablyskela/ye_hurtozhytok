@@ -78,6 +78,14 @@ export function isSubscription(value: unknown): value is Subscription {
     return false;
   if (!/^[A-Za-z0-9_-]+$/.test(v.p256dh) || !/^[A-Za-z0-9_-]+$/.test(v.auth))
     return false;
+  // An uncompressed P-256 point and a 16-byte secret, or encryption would fail on every send.
+  try {
+    const key = fromBase64url(v.p256dh);
+    if (key.length !== 65 || key[0] !== 4) return false;
+    if (fromBase64url(v.auth).length !== 16) return false;
+  } catch {
+    return false;
+  }
   let url: URL;
   try {
     url = new URL(v.endpoint);

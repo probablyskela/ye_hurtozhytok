@@ -2,7 +2,7 @@
  * Booking rules. Pure functions only: everything here is shared by loaders,
  * actions and the UI, and covered by tests.
  */
-import { addDays, daysBetween, isDateKey } from "./time";
+import { addDays, daysBetween, isDateKey, kyivMinuteToUtc } from "./time";
 
 /** Laundry hours, minutes from Kyiv midnight: 06:00 to 24:00. */
 export const OPEN_MIN = 6 * 60;
@@ -22,6 +22,8 @@ export const MAX_ACTIVE = 3;
 export const PAST_GRACE_MIN = 10;
 /** Someone who has not come within this time loses the machine. */
 export const NO_SHOW_MIN = 15;
+/** The reminder goes out this long before the start. */
+export const REMIND_BEFORE_MIN = 15;
 
 export type Slot = { startMin: number; endMin: number };
 
@@ -106,6 +108,7 @@ export type BookingError =
   | "taken"
   | "limit"
   | "profile"
+  | "blocked"
   | "machine";
 
 export const BOOKING_ERRORS: Record<BookingError, string> = {
@@ -118,6 +121,7 @@ export const BOOKING_ERRORS: Record<BookingError, string> = {
   taken: "Цей час щойно зайняли. Оберіть інший початок.",
   limit: `У вас уже ${MAX_ACTIVE} записи. Скасуйте один або дочекайтеся, поки він закінчиться.`,
   profile: "Спершу вкажіть кімнату в профілі.",
+  blocked: "Записуватися зараз не можна: акаунт заблоковано.",
   machine: "Цієї пралки немає або вона зараз не працює.",
 };
 
@@ -186,6 +190,20 @@ export function freeWindows(
   if (CLOSE_MIN - cursor >= DURATIONS[0])
     windows.push({ startMin: cursor, endMin: CLOSE_MIN });
   return windows;
+}
+
+/**
+ * True when the reminder for a booking should go out at `nowMs`: the start is
+ * at most 15 minutes ahead. A booking made after that moment (for example
+ * «Почати зараз») gets no reminder: the person has just booked it.
+ */
+export function reminderDue(
+  b: { date: string; startMin: number; createdAt: number },
+  nowMs: number,
+): boolean {
+  const start = kyivMinuteToUtc(b.date, b.startMin);
+  const remindAt = start - REMIND_BEFORE_MIN * 60_000;
+  return start > nowMs && remindAt <= nowMs && b.createdAt < remindAt;
 }
 
 /** "через 4 год 20 хв", "через 5 хв", "зараз". */

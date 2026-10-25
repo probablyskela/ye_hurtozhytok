@@ -87,10 +87,7 @@ describe("VAPID", () => {
 });
 
 describe("isSubscription", () => {
-  const sub = {
-    p256dh: "BCVxsr7N_eNgVRqvHtD0zTZsEc6",
-    auth: "BTBZMqHH6r4Tts7J_aSIgg",
-  };
+  const sub = { p256dh: rfc.uaPublic, auth: rfc.auth };
   it("accepts the browsers' push services", () => {
     expect(
       isSubscription({
@@ -128,5 +125,15 @@ describe("isSubscription", () => {
         endpoint: "https://fcm.googleapis.com/x",
       }),
     ).toBe(false);
+  });
+  it("refuses keys that could never encrypt a message", () => {
+    const endpoint = "https://fcm.googleapis.com/x";
+    expect(
+      isSubscription({ ...sub, endpoint, p256dh: rfc.uaPublic.slice(0, 27) }),
+    ).toBe(false);
+    expect(isSubscription({ ...sub, endpoint, auth: "BTBZMqHH6r4T" })).toBe(
+      false,
+    );
+    expect(isSubscription({ ...sub, endpoint, auth: "A" })).toBe(false);
   });
 });

@@ -43,6 +43,7 @@ describe("checkClaims", () => {
       checkClaims({ ...good, iss: "https://evil.example" }, expected),
     ).toBe("issuer");
     expect(checkClaims({ ...good, exp: 1_000 }, expected)).toBe("expired");
+    expect(checkClaims({ ...good, sub: "" }, expected)).toBe("subject");
   });
 });
 

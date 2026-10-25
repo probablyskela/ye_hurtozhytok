@@ -101,6 +101,9 @@ export function PillGroup({
       aria-label={label}
       style={style}
       onClick={(e) => {
+        // A link opened in a new tab or window does not change this page.
+        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)
+          return;
         const item = (e.target as HTMLElement).closest<HTMLElement>(
           "[data-pill-item]",
         );
@@ -114,7 +117,9 @@ export function PillGroup({
         item.scrollIntoView?.({
           block: "nearest",
           inline: "nearest",
-          behavior: "smooth",
+          behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+            ? "auto"
+            : "smooth",
         });
       }}
     >

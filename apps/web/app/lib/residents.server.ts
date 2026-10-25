@@ -52,7 +52,7 @@ export async function listResidents(env: Env) {
     .all();
 }
 
-/** Blocking also ends the person's open sessions. */
+/** Blocking also ends the person's open sessions and cancels bookings that have not started. */
 export async function setBlocked(
   env: Env,
   actor: Actor,
@@ -76,9 +76,10 @@ export async function setBlocked(
       updatedAt: Date.now(),
     })
     .where(eq(residents.id, targetId));
+  let cancelled: number[] = [];
   if (blocked) {
     const now = kyivNow();
-    await db
+    const rows = await db
       .update(bookings)
       .set({
         status: "cancelled",
@@ -94,13 +95,16 @@ export async function setBlocked(
             and(eq(bookings.date, now.date), gt(bookings.startMin, now.minute)),
           ),
         ),
-      );
+      )
+      .returning({ id: bookings.id });
+    cancelled = rows.map((r) => r.id);
   }
   await activity(db, {
     actorId: actor.id,
     action: blocked ? "resident.blocked" : "resident.unblocked",
     entity: "resident",
     entityId: targetId,
+    details: cancelled.length ? { cancelledBookings: cancelled } : undefined,
   });
   return true;
 }

@@ -228,10 +228,15 @@ export async function finishGoogleLogin(
     console.error("google token exchange failed", tokenRes.status);
     return { ok: false, error: LOGIN_ERRORS.generic };
   }
-  const { id_token: idToken } = (await tokenRes.json()) as {
-    id_token?: string;
-  };
-  const claims = idToken ? await verifyIdToken(idToken) : null;
+  const { id_token: idToken } = ((await tokenRes.json().catch(() => null)) ??
+    {}) as { id_token?: unknown };
+  const claims =
+    typeof idToken === "string"
+      ? await verifyIdToken(idToken).catch((error) => {
+          console.error("id_token check failed", error);
+          return null;
+        })
+      : null;
   if (!claims) return { ok: false, error: LOGIN_ERRORS.generic };
 
   const problem = checkClaims(claims, {
@@ -290,7 +295,15 @@ async function googleKeys(force = false): Promise<Jwk[]> {
   if (!force && jwksCache && jwksCache.until > Date.now())
     return jwksCache.keys;
   const res = await fetch(GOOGLE_JWKS_URL);
-  const { keys } = (await res.json()) as { keys: Jwk[] };
+  const body = res.ok
+    ? ((await res.json().catch(() => null)) as { keys?: unknown } | null)
+    : null;
+  // Never cache a failed fetch: the next sign-in simply tries again.
+  if (!Array.isArray(body?.keys)) {
+    console.error("google keys fetch failed", res.status);
+    return jwksCache?.keys ?? [];
+  }
+  const keys = body.keys as Jwk[];
   const maxAge = Number(
     /max-age=(\d+)/.exec(res.headers.get("cache-control") ?? "")?.[1] ?? 3600,
   );
@@ -298,13 +311,20 @@ async function googleKeys(force = false): Promise<Jwk[]> {
   return keys;
 }
 
+/** JSON from one base64url part of a JWT, or null if it is not JSON. */
+function jwtPart<T>(part: string): T | null {
+  try {
+    return JSON.parse(new TextDecoder().decode(fromBase64url(part))) as T;
+  } catch {
+    return null;
+  }
+}
+
 async function verifyIdToken(token: string): Promise<GoogleClaims | null> {
   const [h, p, s] = token.split(".");
   if (!h || !p || !s) return null;
-  const header = JSON.parse(new TextDecoder().decode(fromBase64url(h))) as {
-    kid?: string;
-    alg?: string;
-  };
+  const header = jwtPart<{ kid?: string; alg?: string }>(h);
+  if (!header) return null;
   if (header.alg !== "RS256" || !header.kid) return null;
   let jwk = (await googleKeys()).find((k) => k.kid === header.kid);
   if (!jwk) jwk = (await googleKeys(true)).find((k) => k.kid === header.kid);
@@ -323,5 +343,5 @@ async function verifyIdToken(token: string): Promise<GoogleClaims | null> {
     new TextEncoder().encode(`${h}.${p}`),
   );
   if (!valid) return null;
-  return JSON.parse(new TextDecoder().decode(fromBase64url(p))) as GoogleClaims;
+  return jwtPart<GoogleClaims>(p);
 }

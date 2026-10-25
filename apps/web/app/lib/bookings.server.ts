@@ -1,4 +1,4 @@
-import { and, asc, eq, gt, gte, inArray, or } from "drizzle-orm";
+import { and, asc, eq, gt, inArray, isNull, or } from "drizzle-orm";
 
 import {
   BUFFER_MIN,
@@ -9,7 +9,7 @@ import {
 } from "./booking";
 import { activity, getDb } from "./db";
 import { bookings, machines, residents, type Machine } from "./db/schema";
-import { canCancel, canRelease, type Actor } from "./permissions";
+import { canCancel, canRelease, isCouncil, type Actor } from "./permissions";
 
 export type BookingRow = {
   id: number;
@@ -105,8 +105,9 @@ export type CreateResult =
   { ok: true; id: number } | { ok: false; error: BookingError };
 
 /**
- * Checks the buffer, the per-person limit and the machine in the same
- * statement as the insert, so two people can never take the same time.
+ * Checks the buffer, the per-person limit, the machine and that the person may
+ * book (room filled in, not blocked) in the same statement as the insert, so
+ * two people can never take the same time.
  */
 export async function createBooking(
   env: Env,
@@ -129,6 +130,10 @@ export async function createBooking(
     `INSERT INTO bookings (machine_id, resident_id, date, start_min, end_min, status, created_at)
      SELECT ?1, ?2, ?3, ?4, ?5, 'active', ?6
      WHERE EXISTS (SELECT 1 FROM machines WHERE id = ?1 AND status = 'working')
+       AND EXISTS (
+         SELECT 1 FROM residents
+         WHERE id = ?2 AND blocked = 0 AND room IS NOT NULL
+       )
        AND NOT EXISTS (
          SELECT 1 FROM bookings
          WHERE machine_id = ?1 AND date = ?3 AND status = 'active'
@@ -182,6 +187,13 @@ async function whyRejected(
   },
 ): Promise<BookingError> {
   const db = getDb(env);
+  const resident = await db
+    .select({ blocked: residents.blocked, room: residents.room })
+    .from(residents)
+    .where(eq(residents.id, input.residentId))
+    .get();
+  if (!resident || resident.blocked) return "blocked";
+  if (!resident.room) return "profile";
   const machine = await db
     .select()
     .from(machines)
@@ -213,6 +225,7 @@ export async function cancelBooking(
   actor: Actor,
   id: number,
   now: { date: string; minute: number },
+  opts: { evenIfStarted?: boolean } = {},
 ): Promise<boolean> {
   const db = getDb(env);
   const booking = await db
@@ -226,14 +239,28 @@ export async function cancelBooking(
     booking.date < now.date ||
     (booking.date === now.date && booking.endMin <= now.minute);
   if (ended) return false;
-  await db
+  // Once washing has started, the owner frees the machine instead (the council still may cancel).
+  const started =
+    booking.date < now.date ||
+    (booking.date === now.date && booking.startMin <= now.minute);
+  if (
+    started &&
+    !opts.evenIfStarted &&
+    booking.residentId === actor.id &&
+    !isCouncil(actor)
+  )
+    return false;
+  // Only the request that actually flips the status logs it.
+  const changed = await db
     .update(bookings)
     .set({
       status: "cancelled",
       cancelledAt: Date.now(),
       cancelledBy: actor.id,
     })
-    .where(eq(bookings.id, id));
+    .where(and(eq(bookings.id, id), eq(bookings.status, "active")))
+    .returning({ id: bookings.id });
+  if (changed.length === 0) return false;
   await activity(db, {
     actorId: actor.id,
     action: "booking.cancelled",
@@ -267,12 +294,23 @@ export async function releaseBooking(
     booking.startMin <= now.minute &&
     now.minute < booking.endMin;
   if (!running) return false;
-  const newEnd = ceilToStep(now.minute);
-  if (newEnd <= booking.startMin) return cancelBooking(env, actor, id, now);
-  await db
+  const newEnd = Math.min(ceilToStep(now.minute), booking.endMin);
+  if (newEnd <= booking.startMin)
+    return cancelBooking(env, actor, id, now, { evenIfStarted: true });
+  // Already ends at the next 5-minute mark: nothing to free.
+  if (newEnd === booking.endMin) return true;
+  const changed = await db
     .update(bookings)
-    .set({ endMin: Math.min(newEnd, booking.endMin) })
-    .where(eq(bookings.id, id));
+    .set({ endMin: newEnd })
+    .where(
+      and(
+        eq(bookings.id, id),
+        eq(bookings.status, "active"),
+        eq(bookings.endMin, booking.endMin),
+      ),
+    )
+    .returning({ id: bookings.id });
+  if (changed.length === 0) return false;
   await activity(db, {
     actorId: actor.id,
     action: "booking.released",
@@ -283,7 +321,7 @@ export async function releaseBooking(
   return true;
 }
 
-/** Bookings starting soon that have not been reminded yet. */
+/** Active bookings on the given dates that have not been reminded yet. */
 export async function dueReminders(env: Env, dates: string[]) {
   return getDb(env)
     .select({
@@ -292,8 +330,8 @@ export async function dueReminders(env: Env, dates: string[]) {
       date: bookings.date,
       startMin: bookings.startMin,
       endMin: bookings.endMin,
+      createdAt: bookings.createdAt,
       machineName: machines.name,
-      remindedAt: bookings.remindedAt,
     })
     .from(bookings)
     .innerJoin(machines, eq(machines.id, bookings.machineId))
@@ -301,7 +339,7 @@ export async function dueReminders(env: Env, dates: string[]) {
       and(
         inArray(bookings.date, dates),
         eq(bookings.status, "active"),
-        gte(bookings.startMin, 0),
+        isNull(bookings.remindedAt),
       ),
     )
     .all();

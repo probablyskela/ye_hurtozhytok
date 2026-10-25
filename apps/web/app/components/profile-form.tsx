@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Form, useNavigation } from "react-router";
 
 /** Room (required) and Telegram username (optional), with a live preview of how others see you. */
@@ -20,6 +20,14 @@ export function ProfileForm({
   const [roomValue, setRoom] = useState(room ?? "");
   const [tgValue, setTg] = useState(telegram ?? "");
   const busy = useNavigation().state === "submitting";
+  const roomRef = useRef<HTMLInputElement>(null);
+  const tgRef = useRef<HTMLInputElement>(null);
+  // After a rejected save, take the person to the first field to fix; its
+  // help text (now the error) is read out with it.
+  useEffect(() => {
+    if (errors?.room) roomRef.current?.focus();
+    else if (errors?.telegram) tgRef.current?.focus();
+  }, [errors]);
   const tgPreview = tgValue
     .replace(/^https?:\/\/(www\.)?(t|telegram)\.me\//i, "")
     .replace(/^@/, "")
@@ -36,6 +44,7 @@ export function ProfileForm({
         <div className="field-row">
           <label htmlFor="room">Кімната</label>
           <input
+            ref={roomRef}
             id="room"
             name="room"
             inputMode="numeric"
@@ -62,6 +71,7 @@ export function ProfileForm({
           <div className="affix">
             <span aria-hidden="true">@</span>
             <input
+              ref={tgRef}
               id="tg"
               name="telegram"
               autoComplete="off"

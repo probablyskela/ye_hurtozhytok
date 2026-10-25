@@ -1,9 +1,36 @@
 // єГуртожиток service worker: offline read-only pages and booking reminders.
-const CACHE = "eh-v2";
-// Only these pages are kept for offline reading; profile, bookings and the
-// council page are never cached, so nothing personal outlives a logout.
+// Bump the version when the caching rules change: activate drops older caches.
+const CACHE = "eh-v3";
+
+// Only the home page and machine pages are kept for offline reading; profile,
+// bookings and the council page are never cached, so nothing personal beyond
+// the home page outlives a logout. React Router fetches page data from
+// "<path>.data" ("/_root.data" for "/"), so data requests follow the same rule.
+const pagePath = (path) =>
+  path === "/_root.data"
+    ? "/"
+    : path.endsWith(".data")
+      ? path.slice(0, -5)
+      : path;
 const OFFLINE_OK = (path) => path === "/" || path.startsWith("/machines/");
-const OFFLINE_PAGES = ["/"];
+
+const OFFLINE_HTML = `<!doctype html>
+<html lang="uk">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Немає зʼєднання · єГуртожиток</title>
+<body style="margin:0;padding:24px 16px;font:16px/1.5 system-ui,sans-serif;background:#edf2f8;color:#101217">
+<h1 style="margin:0 0 8px;font-size:22px">Немає зʼєднання</h1>
+<p style="margin:0 0 16px">Без інтернету можна переглянути лише головну й сторінки пралок, які ви вже відкривали. Записатися чи скасувати запис можна, коли зʼєднання повернеться.</p>
+<a href="/" style="color:#2a37d8;font-weight:600">На головну</a>
+</body>
+</html>`;
+
+const keep = (req, res) => {
+  if (res.status !== 200 || res.type !== "basic") return;
+  const copy = res.clone();
+  caches.open(CACHE).then((c) => c.put(req, copy));
+};
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -48,8 +75,7 @@ self.addEventListener("fetch", (event) => {
         (hit) =>
           hit ||
           fetch(req).then((res) => {
-            const copy = res.clone();
-            caches.open(CACHE).then((c) => c.put(req, copy));
+            keep(req, res);
             return res;
           }),
       ),
@@ -57,32 +83,39 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Pages: network first, the last copy when offline (booking still needs the network).
+  const offlineOk = OFFLINE_OK(pagePath(url.pathname));
+
+  // Pages: network first, the last copy when offline. Booking always needs the network.
   if (req.mode === "navigate") {
     event.respondWith(
       fetch(req)
         .then((res) => {
-          if (res.ok && OFFLINE_OK(url.pathname)) {
-            const copy = res.clone();
-            caches.open(CACHE).then((c) => c.put(req, copy));
-          }
+          if (offlineOk) keep(req, res);
           return res;
         })
         .catch(() =>
-          caches
-            .match(req)
-            .then((hit) => hit || caches.match(OFFLINE_PAGES[0]))
-            .then(
-              (hit) =>
-                hit ||
-                new Response(
-                  "<meta charset=utf-8><p style='font:16px system-ui;padding:24px'>Немає зʼєднання. Спробуйте пізніше.</p>",
-                  {
-                    headers: { "Content-Type": "text/html; charset=utf-8" },
-                  },
-                ),
-            ),
+          (offlineOk ? caches.match(req) : Promise.resolve(undefined)).then(
+            (hit) =>
+              hit ||
+              new Response(OFFLINE_HTML, {
+                status: 503,
+                headers: { "Content-Type": "text/html; charset=utf-8" },
+              }),
+          ),
         ),
+    );
+    return;
+  }
+
+  // Page data for the same pages, so a page opened offline survives its 20-second refresh.
+  if (offlineOk && url.pathname.endsWith(".data")) {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          keep(req, res);
+          return res;
+        })
+        .catch(() => caches.match(req).then((hit) => hit || Response.error())),
     );
   }
 });
@@ -100,7 +133,7 @@ self.addEventListener("push", (event) => {
     self.registration.showNotification(data.title, {
       body: data.body,
       icon: "/icons/icon-192.png",
-      badge: "/icons/icon-192.png",
+      badge: "/icons/badge-96.png",
       lang: "uk",
       data: { url: data.url },
     }),

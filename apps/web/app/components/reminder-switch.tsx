@@ -16,6 +16,16 @@ function toB64url(buf: ArrayBuffer | null) {
     .replace(/=+$/, "");
 }
 
+/** The service worker registration, or an error if it never becomes ready. */
+function swReady(): Promise<ServiceWorkerRegistration> {
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("sw")), 8000),
+    ),
+  ]);
+}
+
 async function post(body: unknown) {
   const res = await fetch("/push", {
     method: "POST",
@@ -29,6 +39,7 @@ async function post(body: unknown) {
 export function ReminderSwitch({ vapidKey }: { vapidKey: string }) {
   const [state, setState] = useState<State>("loading");
   const [standalone, setStandalone] = useState(true);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     setStandalone(
@@ -48,28 +59,35 @@ export function ReminderSwitch({ vapidKey }: { vapidKey: string }) {
       setState("denied");
       return;
     }
-    navigator.serviceWorker.ready
+    swReady()
       .then((reg) => reg.pushManager.getSubscription())
       .then((sub) => setState(sub ? "on" : "off"))
       .catch(() => setState("off"));
   }, [vapidKey]);
 
   async function toggle() {
-    const reg = await navigator.serviceWorker.ready;
-    if (state === "on") {
-      setState("busy");
-      const sub = await reg.pushManager.getSubscription();
-      if (sub) {
-        await post({ op: "unsubscribe", endpoint: sub.endpoint }).catch(
-          () => {},
-        );
-        await sub.unsubscribe();
+    const wasOn = state === "on";
+    setState("busy");
+    setFailed(false);
+    if (wasOn) {
+      try {
+        const reg = await swReady();
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) {
+          await post({ op: "unsubscribe", endpoint: sub.endpoint }).catch(
+            () => {},
+          );
+          await sub.unsubscribe();
+        }
+        setState("off");
+      } catch {
+        setFailed(true);
+        setState("on");
       }
-      setState("off");
       return;
     }
-    setState("busy");
     try {
+      const reg = await swReady();
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
         setState(permission === "denied" ? "denied" : "off");
@@ -89,6 +107,7 @@ export function ReminderSwitch({ vapidKey }: { vapidKey: string }) {
       });
       setState("on");
     } catch {
+      setFailed(true);
       setState("off");
     }
   }
@@ -100,7 +119,14 @@ export function ReminderSwitch({ vapidKey }: { vapidKey: string }) {
         : "На iPhone сповіщення працюють, коли єГуртожиток додано на початковий екран: «Поділитися» → «На початковий екран»."
       : state === "denied"
         ? "Сповіщення заборонені в налаштуваннях браузера. Дозвольте їх для цього сайту."
-        : "Нагадаємо за 15 хвилин до початку на цьому пристрої.";
+        : failed
+          ? "Не вдалося змінити сповіщення. Спробуйте ще раз."
+          : "Нагадаємо за 15 хвилин до початку на цьому пристрої.";
+  const hasSwitch =
+    state === "on" ||
+    state === "off" ||
+    state === "busy" ||
+    state === "loading";
 
   return (
     <div className="glass notify">
@@ -112,19 +138,22 @@ export function ReminderSwitch({ vapidKey }: { vapidKey: string }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <b>Нагадати за 15 хвилин</b>
-          {(state === "on" || state === "off" || state === "busy") && (
+          {/* While checking, the switch keeps its place unseen, so nothing moves. */}
+          {hasSwitch && (
             <button
               className="switch"
               type="button"
               role="switch"
               aria-checked={state === "on"}
               aria-label="Нагадати за 15 хвилин"
-              disabled={state === "busy"}
+              aria-hidden={state === "loading" ? true : undefined}
+              style={state === "loading" ? { visibility: "hidden" } : undefined}
+              disabled={state === "busy" || state === "loading"}
               onClick={toggle}
             />
           )}
         </div>
-        <p>{state === "loading" ? "Перевіряємо…" : note}</p>
+        <p aria-live="polite">{note}</p>
       </div>
     </div>
   );

@@ -22,7 +22,7 @@ export type GoogleClaims = {
 };
 
 export type ClaimError =
-  "issuer" | "audience" | "expired" | "nonce" | "domain" | "email";
+  "issuer" | "audience" | "subject" | "expired" | "nonce" | "domain" | "email";
 
 /**
  * The `hd` parameter in the sign-in URL only preselects accounts on Google's
@@ -34,6 +34,7 @@ export function checkClaims(
 ): ClaimError | null {
   if (!ISSUERS.includes(claims.iss)) return "issuer";
   if (claims.aud !== expected.clientId) return "audience";
+  if (typeof claims.sub !== "string" || !claims.sub) return "subject";
   if (typeof claims.exp !== "number" || claims.exp < expected.nowSec - 60)
     return "expired";
   if (claims.nonce !== expected.nonce) return "nonce";

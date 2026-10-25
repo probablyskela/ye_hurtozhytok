@@ -14,6 +14,7 @@ import {
   freeWindows,
   machineNow,
   parseDuration,
+  reminderDue,
   validateRequest,
 } from "./booking";
 
@@ -172,6 +173,28 @@ describe("freeWindows", () => {
         (w) => `${fmtMin(w.startMin)}–${fmtMin(w.endMin)}`,
       ),
     ).toEqual(["14:35–17:55", "21:50–24:00"]);
+  });
+});
+
+describe("reminderDue", () => {
+  const m = 60_000;
+  // 18:00 on 10 November 2026 in Kyiv is 16:00 UTC.
+  const start = Date.parse("2026-11-10T16:00:00Z");
+  const b = {
+    date: "2026-11-10",
+    startMin: t("18:00"),
+    createdAt: start - 24 * 60 * m,
+  };
+  it("fires within 15 minutes before the start, never after it", () => {
+    expect(reminderDue(b, start - 16 * m)).toBe(false);
+    expect(reminderDue(b, start - 15 * m)).toBe(true);
+    expect(reminderDue(b, start - 1 * m)).toBe(true);
+    expect(reminderDue(b, start)).toBe(false);
+  });
+  it("stays quiet for a booking made inside those 15 minutes", () => {
+    expect(reminderDue({ ...b, createdAt: start - 5 * m }, start - m)).toBe(
+      false,
+    );
   });
 });
 

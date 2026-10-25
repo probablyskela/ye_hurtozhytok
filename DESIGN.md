@@ -92,17 +92,6 @@ components:
     rounded: "{rounded.pill}"
     padding: "0 22px"
     height: "52px"
-  chip:
-    backgroundColor: "{colors.white}"
-    textColor: "{colors.ink}"
-    typography: "{typography.label}"
-    rounded: "{rounded.pill}"
-    padding: "0 16px"
-    height: "44px"
-  chip-selected:
-    backgroundColor: "{colors.mine}"
-    textColor: "{colors.white}"
-    rounded: "{rounded.pill}"
   duration-option:
     backgroundColor: "{colors.white}"
     textColor: "{colors.ink}"
@@ -182,7 +171,7 @@ A cool pastel field under white glass, graphite ink, and exactly three signal co
 
 - **Ultramarine "Yours"** (mine): reserved for what belongs to the signed-in resident — the booking card, your segment in a day strip, your block in the machine timeline, the selected duration and the selected start. Also the focus outline, caret and text selection.
 - **Deep Ultramarine** (mine-deep): the dark end of the ticket gradient and the text colour of the white button on the ticket.
-- **Pale Ultramarine** (mine-soft): the icon well for "your other booking" rows.
+- **Pale Ultramarine** (mine-soft): reserved token, not used in the app yet.
 
 ### Secondary
 
@@ -218,7 +207,7 @@ Hairlines are ink at 8% alpha; glass is white at 56% (tiles) and 78% (controls).
 **Display Font:** Fixel Display Black 900 (with Fixel Text, system-ui)
 **Body Font:** Fixel Text 400/500/600/700 (with -apple-system, Segoe UI, system-ui)
 
-Both families are self-hosted (`design/mockup/fonts`).
+Both families are self-hosted (`apps/web/app/fonts`).
 
 **Character:** A Ukrainian-made grotesque used plainly — tight negative tracking on headings, sentence case everywhere — with the Black display cut kept as a stamp for numbers you need to read across a room.
 
@@ -236,26 +225,28 @@ Both families are self-hosted (`design/mockup/fonts`).
 
 **The Display Is For Numbers Rule.** Fixel Display Black sets times and duration numerals only — never headings, names or sentences.
 
-**The Tabular Times Rule.** Times, dates in pickers, strip scales and chip times use tabular figures (`font-feature-settings: "tnum"`) so they do not jitter.
+**The Tabular Times Rule.** Times, dates in pickers, strip scales and the scrubber readout use tabular figures (`font-feature-settings: "tnum"`) so they do not jitter.
 
 **The Sentence Case Rule.** No uppercase labels and no tracked-out small caps; hierarchy comes from size and weight.
 
 ## Layout
 
-Single column on a phone (designed at 390px, must hold at 360px). Screen content sits in 16px side margins, with 54px top padding under the status area and 120px bottom padding to clear the floating tab bar or action sheet. Sections are separated by 26px above a title row (title left, a 44px text link right). Inside lists and rows the gap is 8–12px; tile padding is 16px (14–18px by density).
+Single column on a phone (designed at 390px, must hold at 360px and still fit at 320px). Screen content sits in 16px side margins, with at least 16px top padding (the safe area on notched phones) and 120px bottom padding to clear the floating tab bar or action sheet. Sections are separated by 26px above a title row (title left, a 44px text link right). Inside lists and rows the gap is 8–12px; tile padding is 16px (14–18px by density).
 
-Horizontal choice rows (chips, days) scroll sideways with hidden scrollbars rather than wrapping. Duration options sit in a five-column equal grid. The tab bar and the booking action sheet float 12px from the sides and 14px from the bottom; on small screens they become sticky.
+Horizontal choice rows (days) scroll sideways with hidden scrollbars rather than wrapping, bleeding to the screen edge with room for their shadows. Duration options sit in a five-column equal grid. The tab bar and the booking action sheet are fixed and centred, at most 456px wide, 12px from the sides on phones and 14px above the bottom safe area. Below 360px the duration switch tightens its item padding and the scrubber time steps down to 24px.
 
-The background field drifts slowly (26s, alternate). All motion collapses under `prefers-reduced-motion`; all glass becomes opaque near-white (#fbfcfd) under `prefers-reduced-transparency`.
+Wider screens work but the phone stays the main case: from 720px the column grows to 600px; from 1024px the home page uses two columns (up to 1040px) with the machines panel sticky.
+
+In the app the background is currently the flat field base (#edf2f8); the drifting mint, sky and lilac washes exist only in the mockup (the `Field` element is an empty hook). All motion collapses under `prefers-reduced-motion`; all glass becomes opaque near-white (#fbfcfd) under `prefers-reduced-transparency`.
 
 ## Elevation & Depth
 
-Depth is glass, not stacking. Tiles and bars are translucent white with backdrop blur (18–22px, saturate 170–180%) and a layered shadow that combines an inner rim light along the top edge, an inner glow near the bottom, and one long, soft, cool-tinted drop. Small controls (chips, day and duration options, avatars, icon buttons) use a lighter gloss shadow. The booking card carries its own ultramarine-tinted drop. There are no hard offset shadows and no borders around surfaces.
+Depth is glass, not stacking. Tiles and bars are translucent white with backdrop blur (18–22px, saturate 170–180%) and a layered shadow that combines an inner rim light along the top edge, an inner glow near the bottom, and one long, soft, cool-tinted drop. Small controls (day and duration options, avatars, icon buttons) use a lighter gloss shadow. The booking card carries its own ultramarine-tinted drop. There are no hard offset shadows and no borders around surfaces.
 
 ### Shadow Vocabulary
 
 - **Glass** (`inset 0 1px 1px rgb(255 255 255 / .95), inset 0 -1px 1px rgb(255 255 255 / .35), inset 0 -22px 34px -26px rgb(255 255 255 / .8), 0 1px 2px rgb(16 18 23 / .05), 0 20px 40px -24px rgb(31 45 90 / .28)`): tiles, tab bar, action sheet.
-- **Gloss** (`inset 0 1px 0 #fff, 0 1px 2px rgb(16 18 23 / .08), 0 6px 16px -6px rgb(16 18 23 / .2)`): chips, options, avatars, icon buttons, the segmented-control thumb, other people's timeline blocks.
+- **Gloss** (`inset 0 1px 0 #fff, 0 1px 2px rgb(16 18 23 / .08), 0 6px 16px -6px rgb(16 18 23 / .2)`): options, avatars, icon buttons, the sliding pill, other people's timeline blocks.
 - **Ticket** (`inset 0 1px 1px rgb(255 255 255 / .35), inset 0 -30px 50px -40px rgb(160 180 255 / .7), 0 26px 44px -22px rgb(27 35 163 / .6)`): the booking card.
 - **Capsule** (`inset 0 1px 0 rgb(255 255 255 / .16), 0 10px 22px -10px rgb(16 18 23 / .6)`): black primary buttons and the central tab.
 
@@ -265,7 +256,7 @@ Depth is glass, not stacking. Tiles and bars are translucent white with backdrop
 
 ## Shapes
 
-Soft and continuous: no square corners anywhere in the product. Glass tiles 26px, the booking card and action sheet 28px, the tab bar 30px, rows and day/duration options 18–20px, inputs 16px, timeline blocks 16px, segments inside a strip 6px. Every button, chip, state pill, segmented control and strip track is a full capsule (999px). The mark is the facade: a 30px graphite squircle (23% radius) with a 3×3 grid of 4.5-radius windows — three white, five at 16% white, one ultramarine for «твоє вікно». It stays legible down to 32px; at 16px use it only with the wordmark beside it.
+Soft and continuous: no square corners anywhere in the product. Glass tiles 26px, the booking card and action sheet 28px, the tab bar 30px, rows and day/duration options 18–20px, inputs 16px, timeline blocks 16px, segments inside a strip 6px. Every button, state pill, segmented control and strip track is a full capsule (999px). The mark is the facade: a 30px graphite squircle (23% radius) with a 3×3 grid of 4.5-radius windows — three white, five at 16% white, one ultramarine for «твоє вікно». It stays legible down to 32px; at 16px use it only with the wordmark beside it.
 
 Circles carry the porthole motif: the concentric rings with a water line drawn into the top-right of the booking card (white strokes at 30% opacity), and the ringed state dot before each machine name.
 
@@ -284,16 +275,12 @@ Tactile capsules that compress slightly when pressed.
 - **On the ticket:** a white 94% capsule, 44px, deep-ultramarine text.
 - **Focus:** 2px ultramarine outline with 2px offset across all controls.
 
-### Chips
-
-- **Style:** strong glass capsule, 44px, 16px padding, 15px/600 time label with optional muted small text.
-- **State:** selected (`aria-pressed`) turns solid ultramarine with white text and an ultramarine glow — a selected start is "yours". Press scales to 0.96.
-
 ### Duration and Day Options
 
 - **Duration:** five equal tiles, 72px tall, 20px radius; Fixel Display numeral over a 12.5px muted unit. Selected turns ultramarine.
 - **Day:** 66×64px tiles, 18px radius; weekday in small muted text over the date. Selected turns graphite ink, not ultramarine — the day is a filter, not your booking.
-- **Segmented control:** capsule track at ink 7% with a white gliding thumb (0.42s); selected label in ink 600.
+- **Segmented control:** capsule track at ink 7% with the white sliding pill; selected label in ink 600.
+- **Machine picker:** three equal options in an ink-6% track (22px radius); short name over the first free start in teal; the white sliding pill marks the chosen machine.
 
 ### Cards / Containers
 
@@ -315,7 +302,7 @@ Tactile capsules that compress slightly when pressed.
 
 ### Day Strip (signature)
 
-Each machine's day (08–22) as a capsule track: teal-tinted free fill; opaque grey booked segments (6px radius); hatched buffer flanks; your booking as an ultramarine segment; time already past veiled in pale grey; a 2px coral now-line with a dot. Height 26px full, 20px in compact rows; tabular 11.5px scale beneath. Choosing a start makes your segment glide into place (0.5s, scale-in from the left).
+Each machine's day (06–24) as a capsule track: teal-tinted free fill; opaque grey booked segments (6px radius); hatched buffer flanks; your booking as an ultramarine segment; time already past veiled in pale grey; a 2px coral now-line with a dot. Height 26px full, 20px in compact rows; tabular 11.5px scale beneath.
 
 ### Machine State
 

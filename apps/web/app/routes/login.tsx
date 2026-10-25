@@ -41,7 +41,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 export async function action({ request, context }: Route.ActionArgs) {
   const env = context.cloudflare.env;
   if (!devLoginEnabled(env, request))
-    throw new Response("Not found", { status: 404 });
+    throw new Response("Такої сторінки немає.", { status: 404 });
   const form = await request.formData();
   const email = String(form.get("email") ?? "")
     .trim()
@@ -71,7 +71,11 @@ export default function Login({
             початку.
           </p>
         </div>
-        <div className="glass preview" aria-label="Сьогодні на пралках">
+        <div
+          className="glass preview"
+          role="group"
+          aria-label="Сьогодні на пралках"
+        >
           {machines.map((m) => (
             <div className="preview-row" key={m.id}>
               <span>{m.shortName}</span>
@@ -131,7 +135,8 @@ export default function Login({
           {dev && (
             <Form method="post" className="glass form">
               <p className="muted" style={{ margin: 0, fontSize: 13.5 }}>
-                Локальний вхід для розробки. У продакшені його немає.
+                Вхід лише для розробки на власному компʼютері. На сайті його
+                немає.
               </p>
               {actionData?.error && (
                 <p className="error-note" role="alert">

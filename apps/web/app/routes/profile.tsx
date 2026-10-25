@@ -108,6 +108,8 @@ export default function Profile({
                   op: "unsubscribe",
                   endpoint: sub.endpoint,
                 }),
+                // A slow network must not keep the person signed in.
+                signal: AbortSignal.timeout?.(4000),
               });
               await sub.unsubscribe();
             }
@@ -130,8 +132,8 @@ export default function Profile({
         </button>
       </Form>
       <Credit>
-        Кімнату й імʼя в Telegram бачать лише ті, хто увійшов через пошту
-        Політехніки.
+        Кімнату й імʼя користувача в Telegram бачать лише ті, хто увійшов через
+        пошту Політехніки.
       </Credit>
     </>
   );

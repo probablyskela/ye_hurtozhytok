@@ -23,6 +23,22 @@ const STEPS = (CLOSE_MIN - OPEN_MIN) / STEP_MIN;
 
 const useIso = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
+const STATUS_LABEL = {
+  free: "Вільно",
+  busy: "Зайнято",
+  past: "Минуло",
+  none: "Немає місця",
+} as const;
+
+const VISUALLY_HIDDEN: React.CSSProperties = {
+  position: "absolute",
+  width: 1,
+  height: 1,
+  overflow: "hidden",
+  clip: "rect(0 0 0 0)",
+  whiteSpace: "nowrap",
+};
+
 export type ScrubberProps = {
   bookings: readonly (Slot & { id: number; mine?: boolean })[];
   len: number;
@@ -56,6 +72,11 @@ export function TimeScrubber({
   const pad = Math.max(0, (width - frameW) / 2);
   const lastStep = useRef<number | null>(null);
   const programmatic = useRef(false);
+  const programmaticTimer = useRef(0);
+  const settleTimer = useRef(0);
+  // A finger or the mouse is on the day: never glide away from under it.
+  const holding = useRef(false);
+  const movedWhileHolding = useRef(false);
 
   const startAt = useCallback(
     (left: number) => {
@@ -72,11 +93,16 @@ export function TimeScrubber({
     const el = ref.current;
     if (!el) return;
     programmatic.current = true;
+    window.clearTimeout(settleTimer.current);
     el.scrollTo({
       left: (start - OPEN_MIN) * PX_PER_MIN,
       behavior: smooth ? "smooth" : "auto",
     });
-    window.setTimeout(() => (programmatic.current = false), smooth ? 450 : 30);
+    window.clearTimeout(programmaticTimer.current);
+    programmaticTimer.current = window.setTimeout(
+      () => (programmatic.current = false),
+      smooth ? 450 : 30,
+    );
   }, []);
 
   useIso(() => {
@@ -85,10 +111,16 @@ export function TimeScrubber({
     const ro = new ResizeObserver(() => setWidth(el.clientWidth));
     ro.observe(el);
     setWidth(el.clientWidth);
-    return () => ro.disconnect();
+    return () => {
+      ro.disconnect();
+      window.clearTimeout(programmaticTimer.current);
+      window.clearTimeout(settleTimer.current);
+    };
   }, []);
 
-  // Follow the chosen start when it changes from outside (another day, length or machine).
+  // Follow the chosen start when the day is laid out again (first mount,
+  // new free starts after a refresh, a new width). `value` is left out on
+  // purpose: it changes while the person scrolls and must not pull back.
   useIso(() => {
     const target = value ?? starts[0] ?? null;
     if (target === null) return;
@@ -98,8 +130,8 @@ export function TimeScrubber({
 
   const nearestValid = useCallback(
     (start: number) => {
-      if (valid.has(start) || starts.length === 0)
-        return valid.has(start) ? start : null;
+      if (valid.has(start)) return start;
+      if (starts.length === 0) return null;
       return starts.reduce(
         (best, s) => (Math.abs(s - start) < Math.abs(best - start) ? s : best),
         starts[0],
@@ -126,10 +158,16 @@ export function TimeScrubber({
     onChange(target);
   }, [nearestValid, onChange, scrollToStart, startAt]);
 
+  const settleRef = useRef(settle);
+  settleRef.current = settle;
+  const queueSettle = useCallback(() => {
+    window.clearTimeout(settleTimer.current);
+    settleTimer.current = window.setTimeout(() => settleRef.current(), 140);
+  }, []);
+
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    let timer = 0;
     const onScroll = () => {
       const start = startAt(el.scrollLeft);
       setLive(start);
@@ -147,27 +185,73 @@ export function TimeScrubber({
       lastStep.current = step;
       if (programmatic.current) return;
       setSettling(true);
-      window.clearTimeout(timer);
-      timer = window.setTimeout(settle, 140);
+      if (holding.current) {
+        movedWhileHolding.current = true;
+        window.clearTimeout(settleTimer.current);
+        return;
+      }
+      queueSettle();
+    };
+    const onTouchStart = () => {
+      holding.current = true;
+      movedWhileHolding.current = false;
+      window.clearTimeout(settleTimer.current);
+    };
+    // Momentum keeps scrolling after the finger lifts and queues its own settle;
+    // a finger that stopped before lifting needs one here. A plain tap does not.
+    const onTouchEnd = () => {
+      holding.current = false;
+      if (movedWhileHolding.current) queueSettle();
     };
     el.addEventListener("scroll", onScroll, { passive: true });
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+    el.addEventListener("touchcancel", onTouchEnd, { passive: true });
     return () => {
       el.removeEventListener("scroll", onScroll);
-      window.clearTimeout(timer);
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchend", onTouchEnd);
+      el.removeEventListener("touchcancel", onTouchEnd);
+      window.clearTimeout(settleTimer.current);
     };
-  }, [settle, startAt]);
+  }, [queueSettle, startAt]);
 
-  /** Previous or next free start, for the arrow buttons and keys. */
+  const choose = useCallback(
+    (start: number) => {
+      scrollToStart(start, true);
+      setLive(start);
+      onChange(start);
+    },
+    [onChange, scrollToStart],
+  );
+
+  /** Beginnings of free stretches: starts not directly after another start. */
+  const windowStarts = useMemo(
+    () => starts.filter((s, i) => i === 0 || s - starts[i - 1] !== STEP_MIN),
+    [starts],
+  );
+
+  /**
+   * The arrow buttons move by free window, not by 5 minutes: forward to the
+   * beginning of the next free stretch, back to the beginning of this one or
+   * the one before.
+   */
+  const jumpTarget = useCallback(
+    (dir: 1 | -1, from: number) =>
+      dir > 0
+        ? windowStarts.find((s) => s > from)
+        : windowStarts.filter((s) => s < from).at(-1),
+    [windowStarts],
+  );
+
   const jump = useCallback(
     (dir: 1 | -1) => {
-      const side = starts.filter((s) => (dir > 0 ? s > live : s < live));
-      const next = dir > 0 ? side[0] : side.at(-1);
-      if (next === undefined) return;
-      scrollToStart(next, true);
-      setLive(next);
-      onChange(next);
+      // While the frame still glides, count from where it is heading.
+      const from = programmatic.current && value !== null ? value : live;
+      const next = jumpTarget(dir, from);
+      if (next !== undefined) choose(next);
     },
-    [live, onChange, scrollToStart, starts],
+    [choose, jumpTarget, live, value],
   );
 
   /** A click or tap on the day centres the booking there (or on the nearest free start). */
@@ -184,11 +268,9 @@ export function TimeScrubber({
       );
       if (target === null) return;
       if (target !== wanted) setNudge((n) => n + 1);
-      scrollToStart(target, true);
-      setLive(target);
-      onChange(target);
+      choose(target);
     },
-    [len, nearestValid, onChange, pad, scrollToStart],
+    [choose, len, nearestValid, pad],
   );
 
   // A mouse wheel moves the day one 5-minute step per notch; trackpads keep their own sideways scroll.
@@ -201,7 +283,9 @@ export function TimeScrubber({
     const onWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
       e.preventDefault();
-      acc += e.deltaY;
+      // Firefox may report lines (3 per notch) or pages instead of pixels.
+      acc +=
+        e.deltaY * (e.deltaMode === 1 ? 100 / 3 : e.deltaMode === 2 ? 100 : 1);
       const steps = Math.trunc(acc / 100);
       if (!steps) return;
       acc -= steps * 100;
@@ -214,7 +298,10 @@ export function TimeScrubber({
       idle = window.setTimeout(() => (target = null), 400);
     };
     el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      window.clearTimeout(idle);
+    };
   }, []);
 
   // Mouse: grab and drag the day like on a phone.
@@ -224,6 +311,9 @@ export function TimeScrubber({
     if (e.pointerType !== "mouse" || e.button !== 0) return;
     const el = e.currentTarget;
     drag.current = { x: e.clientX, left: el.scrollLeft, moved: false };
+    holding.current = true;
+    movedWhileHolding.current = false;
+    window.clearTimeout(settleTimer.current);
     el.style.scrollSnapType = "none";
     el.setPointerCapture(e.pointerId);
   };
@@ -238,13 +328,17 @@ export function TimeScrubber({
     const d = drag.current;
     if (!d) return;
     drag.current = null;
+    holding.current = false;
     const el = e.currentTarget;
-    el.releasePointerCapture(e.pointerId);
+    if (el.hasPointerCapture(e.pointerId))
+      el.releasePointerCapture(e.pointerId);
     suppressClick.current = d.moved;
-    // Snap to the nearest 5-minute step where the drag ended.
-    const left = Math.round(el.scrollLeft / STEP_PX) * STEP_PX;
     el.style.scrollSnapType = "";
-    if (d.moved) el.scrollTo({ left, behavior: "smooth" });
+    if (!d.moved) return;
+    // Snap to the nearest 5-minute step where the drag ended, then settle.
+    const left = Math.round(el.scrollLeft / STEP_PX) * STEP_PX;
+    el.scrollTo({ left, behavior: "smooth" });
+    queueSettle();
   };
 
   const free = valid.has(live);
@@ -252,6 +346,7 @@ export function TimeScrubber({
     nowMin !== null && live < Math.ceil(nowMin / STEP_MIN) * STEP_MIN;
   const status =
     starts.length === 0 ? "none" : free ? "free" : past ? "past" : "busy";
+  const statusLabel = STATUS_LABEL[status];
   const x = (m: number) => (m - OPEN_MIN) * PX_PER_MIN;
 
   const hours: number[] = [];
@@ -259,18 +354,18 @@ export function TimeScrubber({
 
   return (
     <div className={`scrubber is-${status}${settling ? " is-moving" : ""}`}>
-      <div className="scrub-readout" aria-live="polite">
+      {/* The readout changes on every step while the day moves; screen readers
+          hear only the settled choice. */}
+      <span aria-live="polite" style={VISUALLY_HIDDEN}>
+        {value !== null && `Обрано ${fmtMin(value)}–${fmtMin(value + len)}`}
+      </span>
+      <div className="scrub-readout" aria-hidden="true">
         <span className="scrub-time">
           {fmtMin(live)}
           <span className="dash">–</span>
           {fmtMin(live + len)}
         </span>
-        <span className="scrub-status">
-          {status === "free" && "Вільно"}
-          {status === "busy" && "Зайнято"}
-          {status === "past" && "Минуло"}
-          {status === "none" && "Немає місця"}
-        </span>
+        <span className="scrub-status">{statusLabel}</span>
       </div>
 
       <div className="scrub-window">
@@ -284,13 +379,27 @@ export function TimeScrubber({
           aria-valuemin={OPEN_MIN}
           aria-valuemax={CLOSE_MIN - len}
           aria-valuenow={live}
-          aria-valuetext={`${fmtMin(live)}–${fmtMin(live + len)}, ${free ? "вільно" : "зайнято"}`}
+          aria-valuetext={`${fmtMin(live)}–${fmtMin(live + len)}, ${statusLabel.toLowerCase()}`}
           onKeyDown={(e) => {
+            if (e.key === "Home" || e.key === "End") {
+              e.preventDefault();
+              const edge = e.key === "Home" ? starts[0] : starts.at(-1);
+              if (edge !== undefined) choose(edge);
+              return;
+            }
             const dir =
-              e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+              e.key === "ArrowRight" || e.key === "ArrowUp"
+                ? 1
+                : e.key === "ArrowLeft" || e.key === "ArrowDown"
+                  ? -1
+                  : 0;
             if (!dir) return;
             e.preventDefault();
-            jump(dir);
+            // Keys step to the neighbouring free start (5 minutes); buttons skip whole windows.
+            const from = programmatic.current && value !== null ? value : live;
+            const side = starts.filter((x) => (dir > 0 ? x > from : x < from));
+            const next = dir > 0 ? side[0] : side.at(-1);
+            if (next !== undefined) choose(next);
           }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -381,9 +490,9 @@ export function TimeScrubber({
         <button
           type="button"
           className="icon-btn"
-          aria-label="Попередній вільний час"
+          aria-label="Попереднє вільне вікно"
           onClick={() => jump(-1)}
-          disabled={!starts.some((x) => x < live)}
+          disabled={jumpTarget(-1, live) === undefined}
         >
           <svg className="ico" aria-hidden="true">
             <use href="#i-back" />
@@ -395,9 +504,9 @@ export function TimeScrubber({
         <button
           type="button"
           className="icon-btn"
-          aria-label="Наступний вільний час"
+          aria-label="Наступне вільне вікно"
           onClick={() => jump(1)}
-          disabled={!starts.some((x) => x > live)}
+          disabled={jumpTarget(1, live) === undefined}
         >
           <svg className="ico" aria-hidden="true">
             <use href="#i-chev" />

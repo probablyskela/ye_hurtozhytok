@@ -1,7 +1,7 @@
-import { PillGroup } from "~/components/pill-group";
 import { useEffect, useState } from "react";
 import { Form, Link, data, redirect, useNavigation } from "react-router";
 
+import { PillGroup } from "~/components/pill-group";
 import { TimeScrubber } from "~/components/time-scrubber";
 import { Icon, TopBar } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
@@ -71,6 +71,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     .filter((x) => x.starts.length)
     .sort((a, b) => a.starts[0] - b.starts[0])[0];
   const machine = requested ?? earliest ?? list[0];
+  if (!machine) throw new Response("Пралок ще не додано.", { status: 404 });
   const s = Number(url.searchParams.get("s"));
   // Today: the nearest free start. Later days: from 10:00, so nobody books 06:00 by accident.
   const preferred =
@@ -135,11 +136,19 @@ export default function Book({ loaderData, actionData }: Route.ComponentProps) {
   const hydrated = useHydrated();
   const busy = useNavigation().state === "submitting";
   const machine = machines.find((m) => m.id === machineId)!;
-  const [start, setStart] = useState<number | null>(loaderData.start);
-  useEffect(
-    () => setStart(loaderData.start),
-    [loaderData.start, machineId, len, date],
-  );
+  // The person's pick belongs to one machine, day and length. A new choice
+  // there starts from the server's suggestion in the same render, so the
+  // scale never mounts on the previous machine's time.
+  const choice = `${machineId}-${date}-${len}-${loaderData.start}`;
+  const [picked, setPicked] = useState<{
+    choice: string;
+    start: number | null;
+  }>({
+    choice,
+    start: loaderData.start,
+  });
+  const start = picked.choice === choice ? picked.start : loaderData.start;
+  const setStart = (s: number | null) => setPicked({ choice, start: s });
 
   const qs = (p: Record<string, string | number>) =>
     "?" +

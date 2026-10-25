@@ -1,4 +1,9 @@
-import { Form, data, useSearchParams } from "react-router";
+import {
+  Form,
+  data,
+  useSearchParams,
+  type ShouldRevalidateFunctionArgs,
+} from "react-router";
 
 import { TopBar } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
@@ -37,12 +42,24 @@ export async function action({ request, context }: Route.ActionArgs) {
   });
 }
 
+/** Typing in the search only filters the list already on the page. */
+export function shouldRevalidate({
+  currentUrl,
+  nextUrl,
+  formMethod,
+  defaultShouldRevalidate,
+}: ShouldRevalidateFunctionArgs) {
+  if (!formMethod && currentUrl.pathname === nextUrl.pathname) return false;
+  return defaultShouldRevalidate;
+}
+
 export default function Council({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
   const [params, setParams] = useSearchParams();
-  const q = (params.get("q") ?? "").trim().toLowerCase();
+  const raw = params.get("q") ?? "";
+  const q = raw.trim().toLowerCase();
   const people = loaderData.people.filter(
     (p) =>
       !q ||
@@ -73,7 +90,7 @@ export default function Council({
         <input
           id="q"
           name="q"
-          defaultValue={q}
+          defaultValue={raw}
           placeholder="Імʼя, кімната або пошта"
           autoComplete="off"
         />
@@ -95,7 +112,20 @@ export default function Council({
               </span>
             </span>
             {p.canBlock && (
-              <Form method="post" replace preventScrollReset>
+              <Form
+                method="post"
+                replace
+                preventScrollReset
+                onSubmit={(e) => {
+                  if (
+                    !p.blocked &&
+                    !confirm(
+                      `Заблокувати: ${p.name}? Записи цієї людини, які ще не почалися, буде скасовано.`,
+                    )
+                  )
+                    e.preventDefault();
+                }}
+              >
                 <input type="hidden" name="id" value={p.id} />
                 <input
                   type="hidden"

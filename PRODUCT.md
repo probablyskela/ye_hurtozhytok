@@ -29,21 +29,25 @@ The app is built by the team of Софія Полупан, a candidate for head 
 ## Operating Context
 
 - Three Samsung machines: «4 поверх», «6 поверх, №1», «6 поверх, №2» (numbered stickers on the machines). Anyone may use any machine.
-- Booking: 5-minute start grid, 30 min to 2.5 h, 5-minute buffer between bookings, up to 3 unfinished bookings per person, up to 7 days ahead. The resident picks one of five lengths (30 min, 1, 1.5, 2, 2.5 h); the interface does not talk about machine programs.
+- Booking: laundry hours 06:00–24:00, 5-minute start grid, 30 min to 2.5 h, 5-minute buffer between bookings, up to 3 unfinished bookings per person, any of 7 days (today and the next six). The resident picks one of five lengths (30 min, 1, 1.5, 2, 2.5 h); the interface does not talk about machine programs.
 - Sign-in with the university Google account (@lpnu.ua); the user rejected Telegram sign-in. Telegram nicks are how residents contact each other today, so a nick stays an optional profile field.
 - QR stickers on machines lead to that machine's page.
-- Reminders via Web Push in the installed PWA, with email to the @lpnu.ua address as fallback.
+- Reminders via Web Push only for now (on iPhone only in the installed PWA). An email fallback to the @lpnu.ua address is planned after launch and needs an own domain.
 
 ## Capabilities and Constraints
 
 - Ukrainian only, plain language, no English loanwords or slang («запис», not «бронь/слот»).
 - Phone first; installed-PWA use on iPhone and Android is the main case. Forms work without JavaScript; offline is read-only.
-- Open: allowed laundry hours; how prominent the campaign credit is in the interface.
+- The campaign credit is one faint line at the end of the main pages and on the stickers.
 
 ## Brand Commitments
 
 - Name: «єГуртожиток». No existing logo, colors or channel; identity is created from scratch.
 - Visual references named by the user: their own redesign of Кривда (telegram_monitor) and the design language of Ukrainian state apps such as Дія. These are references for clarity and craft, not identities to copy: no state symbols (тризуб, national emblem), no Дія name or marks, nothing that suggests the app is a government or university service — especially sensitive in an election context.
+
+## Status
+
+Live at https://ehurtozhytok.pages.dev; launch plan and remaining steps in `docs/launch-plan.md`.
 
 ## Evidence on Hand
 

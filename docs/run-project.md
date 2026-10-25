@@ -42,21 +42,41 @@ npm run build
 
 ## Публікація на Cloudflare
 
-Один раз:
+Застосунок працює на https://ehurtozhytok.pages.dev: Pages-проєкт
+`ehurtozhytok` (`apps/gateway`) пересилає всі запити Worker'у `ehurtozhytok`
+(`apps/web`). Продакшен-база D1 уже створена, її `database_id` і публічний
+ключ VAPID записані в `apps/web/wrangler.jsonc`.
+
+### Автоматично з GitHub
+
+Кожен push і PR у [serpanchyk/ye_hurtozhytok](https://github.com/serpanchyk/ye_hurtozhytok)
+проходить перевірки (`.github/workflows/ci.yml`). Push у `main` після перевірок
+застосовує міграції D1, публікує Worker, а Pages-шлюз — лише якщо змінився
+`apps/gateway`. Для цього в репозиторії потрібен секрет
+`CLOUDFLARE_API_TOKEN` (Settings → Secrets and variables → Actions) з правами
+Workers Scripts, D1 і Cloudflare Pages на редагування. Без секрету деплой
+пропускається з попередженням, перевірки все одно йдуть.
+
+### Вручну
 
 ```bash
 cd apps/web
 npx wrangler login
-npx wrangler d1 create ehurtozhytok      # id з відповіді → wrangler.jsonc, database_id
-npx wrangler d1 migrations apply ehurtozhytok --remote
+npx wrangler secret list                  # що вже задано
 npx wrangler secret put SESSION_SECRET    # довгий випадковий рядок
-npm run vapid:keys                        # публічний → vars.VAPID_PUBLIC_KEY у wrangler.jsonc
-npx wrangler secret put VAPID_PRIVATE_KEY # приватний ключ
+npx wrangler secret put VAPID_PRIVATE_KEY # пара до vars.VAPID_PUBLIC_KEY
+npm run db:migrate:remote                 # міграції — перед деплоєм
 npm run deploy
-cd ../gateway && npm run deploy           # адреса https://ehurtozhytok.pages.dev
+cd ../gateway && npm run deploy           # лише коли змінився шлюз
 ```
 
-Після кожної зміни: `npm run deploy` у `apps/web` (міграції — перед цим).
+Нова пара ключів VAPID (`npm run vapid:keys`) робить недійсними всі наявні
+підписки на сповіщення: публічний ключ іде у `vars.VAPID_PUBLIC_KEY`, приватний
+— у секрет. Члена студради в продакшені призначає
+`npm run council:add -- --email імʼя@lpnu.ua --remote` (з кореня).
+
+Якщо потрібна нова база: `npx wrangler d1 create ehurtozhytok`, `id` з
+відповіді — у `database_id` у `wrangler.jsonc`.
 
 ## Вхід через Google (@lpnu.ua)
 
@@ -75,6 +95,8 @@ cd ../gateway && npm run deploy           # адреса https://ehurtozhytok.pa
    npx wrangler secret put GOOGLE_CLIENT_ID
    npx wrangler secret put GOOGLE_CLIENT_SECRET
    ```
+
+   Форма входу без Google зникає сама: вона працює лише на localhost.
 
 5. Перевір вхід з телефона. Якщо Google пише, що застосунок заблоковано
    адміністратором, університет забороняє сторонні застосунки — тоді

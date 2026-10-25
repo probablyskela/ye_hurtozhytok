@@ -35,6 +35,15 @@ describe("Kyiv time", () => {
     expect(kyivMinute(evening)).toBe(18 * 60);
   });
 
+  it("survives the switch to summer time (28 March 2027)", () => {
+    const opening = kyivMinuteToUtc("2027-03-28", 6 * 60);
+    expect(new Date(opening).toISOString()).toBe("2027-03-28T03:00:00.000Z");
+    expect(kyivMinute(opening)).toBe(6 * 60);
+    expect(kyivMinuteToUtc("2027-03-28", 1440)).toBe(
+      Date.parse("2027-03-28T21:00:00Z"),
+    );
+  });
+
   it("reads the Kyiv date near midnight UTC", () => {
     expect(kyivDateKey(Date.parse("2026-11-10T22:30:00Z"))).toBe("2026-11-11");
   });

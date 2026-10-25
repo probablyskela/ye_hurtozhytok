@@ -1,6 +1,6 @@
-import { PillGroup } from "~/components/pill-group";
-import { Form, Link } from "react-router";
+import { Form, Link, useNavigation } from "react-router";
 
+import { PillGroup } from "~/components/pill-group";
 import { Credit, DayStrip, Port, StripScale, Ticket } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
 import {
@@ -132,6 +132,9 @@ function stateText(state: ReturnType<typeof machineNow>, working: boolean) {
 
 export default function Home({ loaderData }: Route.ComponentProps) {
   usePolling(20_000);
+  const navigation = useNavigation();
+  const booking =
+    navigation.state !== "idle" && navigation.formAction?.startsWith("/book");
   const {
     name,
     blocked,
@@ -280,7 +283,13 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                 {fmtMin(nearest.s + len)}
               </div>
               <div className="nearest-where">{nearest.name}</div>
-              <Form method="post" action="/book" className="nearest-actions">
+              {/* If the time is taken meanwhile, the error opens on the booking
+                  page with this same length, day and machine. */}
+              <Form
+                method="post"
+                action={`/book?len=${len}&d=${nearest.date}&m=${nearest.id}`}
+                className="nearest-actions"
+              >
                 <input type="hidden" name="machine" value={nearest.id} />
                 <input type="hidden" name="date" value={nearest.date} />
                 <input type="hidden" name="start" value={nearest.s} />
@@ -288,9 +297,9 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                 <button
                   className="btn btn-primary"
                   type="submit"
-                  disabled={!canBookNow}
+                  disabled={!canBookNow || !!booking}
                 >
-                  Записатися
+                  {booking ? "Записуємо…" : "Записатися"}
                 </button>
                 <Link
                   className="btn btn-soft"
