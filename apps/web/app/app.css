@@ -2612,3 +2612,37 @@ html:not(.booted) .ticket::after,
     transform: translateY(8px) scale(0.985);
   }
 }
+
+/* ---------- nothing ever shifts the page ---------- */
+/* Time readout: one line, fixed height; the status pill keeps one width. */
+.scrub-readout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  height: 40px;
+  flex-wrap: nowrap;
+}
+.scrub-time {
+  font-size: clamp(26px, 8.4vw, 34px);
+  white-space: nowrap;
+}
+.scrub-status {
+  justify-content: center;
+  min-width: 96px;
+  white-space: nowrap;
+}
+/* The time card keeps its height whether it shows the scale, the plain list
+   before JavaScript loads, or a "no room" note. */
+.pick-card {
+  min-height: 262px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.pick-card > .scrubber {
+  width: 100%;
+}
+/* The nearest card always has its last line, so switching length keeps its size. */
+.nearest-others {
+  min-height: 20px;
+}

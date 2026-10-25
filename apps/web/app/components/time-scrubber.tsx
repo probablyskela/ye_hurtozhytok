@@ -267,9 +267,9 @@ export function TimeScrubber({
         </span>
         <span className="scrub-status">
           {status === "free" && "Вільно"}
-          {status === "busy" && "Зайнято — посуньте"}
-          {status === "past" && "Уже минуло"}
-          {status === "none" && "Немає вільного часу"}
+          {status === "busy" && "Зайнято"}
+          {status === "past" && "Минуло"}
+          {status === "none" && "Немає місця"}
         </span>
       </div>
 

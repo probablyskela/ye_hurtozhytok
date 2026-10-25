@@ -300,6 +300,11 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                   Інший час
                 </Link>
               </Form>
+              {others.length === 0 && (
+                <p className="nearest-others">
+                  Інші пралки на {durationLabel(len)} {nearest.when} зайняті.
+                </p>
+              )}
               {others.length > 0 && (
                 <p className="nearest-others">
                   Також:{" "}

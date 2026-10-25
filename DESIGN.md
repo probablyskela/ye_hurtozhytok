@@ -166,6 +166,7 @@ Scope note: the presentation canvas in `design/mockup/index.html` (phone bezels,
 - Black capsule primary buttons; everything is a pill or a generously rounded tile.
 - Fixel Display Black only for times and duration numerals; Fixel Text for everything else.
 - The day strip: each machine's day as a capsule ribbon with booked segments, hatched buffers and a coral now-marker.
+- No layout shift: anything that changes while someone interacts (scrubber status, the time card across scale / list / no-room states, the nearest card across lengths) keeps a fixed height; status labels are one word («Вільно», «Зайнято», «Минуло»).
 - Sliding pill: every horizontal switcher (durations, days, machines, segmented controls) has one selection pill that slides to the tapped item at once (0.45s, the system ease) and text colour follows it; without JavaScript items keep their own highlight. A dark selected day has no white top highlight.
 - Nearest free time: one glass card with the soonest start across machines in Display numerals, the machine, a black «Записатися» that books in one tap and a soft «Інший час»; the other machines' first starts sit below as quiet links.
 - The time scrubber: the day slides under a fixed ultramarine frame the size of the booking (8px per 5 minutes, 96px per hour, native momentum scroll with snap points); the frame turns red on busy time and glides to the nearest free start when released.
