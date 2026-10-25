@@ -6,12 +6,17 @@ Node 20.19 або новіший, npm.
 
 ## Локально
 
+Усі команди — з кореня репозиторію (`ye-hurtozhytok/`), не з `apps/web`.
+
 ```bash
 npm install
-cp apps/web/.dev.vars.example apps/web/.dev.vars   # і впиши SESSION_SECRET
-npm run db:migrate:local
-npm run dev
+cp -n apps/web/.dev.vars.example apps/web/.dev.vars   # якщо файлу ще немає; впиши SESSION_SECRET
+npm run db:migrate:local                               # на питання відповісти Y
+npm run dev                                            # адресу показує в терміналі
 ```
+
+Якщо змінився `database_id` у `wrangler.jsonc`, локальна база створюється
+заново й міграції треба застосувати ще раз (вона буде порожня, лише пралки).
 
 Поки `GOOGLE_CLIENT_ID` порожній, а `DEV_LOGIN=1`, на `/login` (адресу показує `npm run dev`)
 є форма входу без Google: будь-яке імʼя й адреса `@lpnu.ua`. Ця форма працює
