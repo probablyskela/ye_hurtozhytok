@@ -2240,7 +2240,19 @@ html:not(.booted) .ticket::after,
 .nearest {
   margin-top: 12px;
   padding: 18px 18px 16px;
-  animation: nearest-in 0.45s var(--ease-out) both;
+}
+/* Values change in place: a short dim while the new length loads, no remount. */
+.nearest .nearest-time,
+.nearest .nearest-where,
+.nearest .nearest-when,
+.nearest .nearest-others {
+  transition: opacity 0.18s var(--ease);
+}
+.nearest.is-pending .nearest-time,
+.nearest.is-pending .nearest-where,
+.nearest.is-pending .nearest-when,
+.nearest.is-pending .nearest-others {
+  opacity: 0.45;
 }
 .nearest-top {
   display: flex;
@@ -2298,12 +2310,6 @@ html:not(.booted) .ticket::after,
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-color: rgb(16 18 23 / 0.25);
-}
-@keyframes nearest-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.985);
-  }
 }
 
 /* ---------- reduced motion: everything stops ---------- */

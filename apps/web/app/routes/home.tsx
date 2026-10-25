@@ -139,6 +139,12 @@ function stateText(state: ReturnType<typeof machineNow>, working: boolean) {
 export default function Home({ loaderData }: Route.ComponentProps) {
   usePolling(20_000);
   const navigation = useNavigation();
+  // While a new length is loading, the card stays put and only dims its values.
+  const lengthPending =
+    navigation.state === "loading" &&
+    navigation.location.pathname === "/" &&
+    navigation.location.search !==
+      (typeof window === "undefined" ? "" : window.location.search);
   const booking =
     navigation.state !== "idle" && navigation.formAction?.startsWith("/book");
   const {
@@ -275,8 +281,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           </PillGroup>
           {nearest ? (
             <div
-              className="glass nearest"
-              key={`${len}-${nearest.id}-${nearest.s}`}
+              className={`glass nearest${lengthPending ? " is-pending" : ""}`}
             >
               <div className="nearest-top">
                 <span className="state free">Вільно</span>
