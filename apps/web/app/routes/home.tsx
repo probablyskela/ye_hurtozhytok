@@ -15,7 +15,7 @@ import {
 } from "~/lib/booking";
 import { upcomingFor } from "~/lib/bookings.server";
 import { machinesOn } from "~/lib/day.server";
-import { initials } from "~/lib/profile";
+import { initials, vocative } from "~/lib/profile";
 import {
   addDays,
   dayHeading,
@@ -25,6 +25,11 @@ import {
 } from "~/lib/time";
 import { usePolling } from "~/lib/use-polling";
 import type { Route } from "./+types/home";
+
+function greeting(name: string) {
+  const first = vocative(name.split(" ")[0]);
+  return first ? `Привіт, ${first}` : "Привіт!";
+}
 
 export const handle = { tab: "home", wide: true };
 export const meta: Route.MetaFunction = () => [{ title: "єГуртожиток" }];
@@ -167,7 +172,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         </Link>
       </div>
       <h2 className="title" style={{ marginBottom: 16 }}>
-        Привіт, {name.split(" ")[0]}
+        {greeting(name)}
       </h2>
       {blocked && (
         <p className="error-note" role="alert">

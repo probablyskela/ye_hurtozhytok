@@ -20,3 +20,24 @@ describe("profile fields", () => {
     expect(initials("Anton")).toBe("A");
   });
 });
+
+describe("vocative", () => {
+  it("declines common Ukrainian first names", async () => {
+    const { vocative } = await import("./profile");
+    expect(vocative("Олена")).toBe("Олено");
+    expect(vocative("Ірина")).toBe("Ірино");
+    expect(vocative("Софія")).toBe("Софіє");
+    expect(vocative("Остап")).toBe("Остапе");
+    expect(vocative("Андрій")).toBe("Андрію");
+    expect(vocative("Дмитро")).toBe("Дмитре");
+    expect(vocative("Марко")).toBe("Марку");
+    expect(vocative("Василь")).toBe("Василю");
+    expect(vocative("Микола")).toBe("Миколо");
+  });
+  it("keeps Latin names and gives up when unsure", async () => {
+    const { vocative } = await import("./profile");
+    expect(vocative("Anton")).toBe("Anton");
+    expect(vocative("Олег")).toBeNull();
+    expect(vocative("Оля")).toBeNull();
+  });
+});

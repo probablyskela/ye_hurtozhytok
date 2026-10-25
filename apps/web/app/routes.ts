@@ -12,6 +12,7 @@ export default [
   route("logout", "routes/logout.ts"),
   route("welcome", "routes/welcome.tsx"),
   route("push", "routes/push.ts"),
+  route("bookings/:id/calendar.ics", "routes/booking-ics.ts"),
   layout("routes/app-layout.tsx", [
     index("routes/home.tsx"),
     route("book", "routes/book.tsx"),

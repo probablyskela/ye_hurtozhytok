@@ -29,3 +29,24 @@ export function initials(name: string): string {
     .map((w) => w[0]!.toUpperCase())
     .join("");
 }
+
+/**
+ * Ukrainian vocative for a first name, for greetings: «Олено», «Остапе».
+ * Covers the common patterns only; returns null when unsure, so the caller
+ * can greet without a name rather than in the wrong case. Latin names stay as they are.
+ */
+export function vocative(name: string): string | null {
+  const n = name.trim();
+  if (!n) return null;
+  if (!/[а-яіїєґ]/i.test(n)) return n;
+  const lower = n.toLowerCase();
+  const cut = (k: number, add: string) => n.slice(0, n.length - k) + add;
+  if (lower.endsWith("ія")) return cut(1, "є"); // Софія → Софіє
+  if (lower.endsWith("ій")) return cut(1, "ю"); // Андрій → Андрію
+  if (lower.endsWith("ь")) return cut(1, "ю"); // Василь → Василю
+  if (lower.endsWith("ко")) return cut(1, "у"); // Марко → Марку
+  if (/[бвгґджзклмнпрстфхцчшщ]а$/.test(lower)) return cut(1, "о"); // Олена → Олено
+  if (/[бвдзлмнпрстф]о$/.test(lower)) return cut(1, "е"); // Дмитро → Дмитре
+  if (/[бвдзлмнпрстф]$/.test(lower)) return n + "е"; // Остап → Остапе
+  return null;
+}

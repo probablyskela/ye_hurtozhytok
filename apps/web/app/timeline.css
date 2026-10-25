@@ -83,10 +83,10 @@
   transform: scale(0.985);
 }
 /* The day name on other days is neutral, not a free/busy state. */
-.day-head .state.day {
+.day-head .state.neutral {
   color: var(--ink-2);
   background: rgb(16 18 23 / 0.07);
 }
-.day-head .state.day::before {
+.day-head .state.neutral::before {
   display: none;
 }

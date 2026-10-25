@@ -151,7 +151,7 @@ export default function MachineDay({
         <div>
           <h2>{machine.name}</h2>
           <span
-            className={`state ${pill.free === null ? "day" : pill.free ? "free" : "busy"}`}
+            className={`state ${pill.free === null ? "neutral" : pill.free ? "free" : "busy"}`}
           >
             {pill.text}
           </span>

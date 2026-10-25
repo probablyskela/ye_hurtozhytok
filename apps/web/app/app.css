@@ -2331,3 +2331,8 @@ html:not(.booted) .ticket::after,
     radial-gradient(70% 50% at 35% 100%, var(--field-b), transparent 72%),
     #edf2f8;
 }
+
+/* While washing there is one action: free the machine early, full width. */
+.actions.running {
+  grid-template-columns: minmax(0, 1fr);
+}

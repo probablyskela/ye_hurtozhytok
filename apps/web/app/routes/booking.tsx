@@ -9,7 +9,6 @@ import {
   cancelBooking,
   releaseBooking,
 } from "~/lib/bookings.server";
-import { bookingIcs } from "~/lib/ics";
 import { isCouncil } from "~/lib/permissions";
 import { notifyCancelledByCouncil } from "~/lib/scheduled.server";
 import { dayHeading, kyivMinuteToUtc, kyivNow } from "~/lib/time";
@@ -27,25 +26,6 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
   if (!b || (b.residentId !== resident.id && !isCouncil(resident)))
     throw new Response("Такого запису немає.", { status: 404 });
   const url = new URL(request.url);
-  if (url.searchParams.get("ics") === "1") {
-    return new Response(
-      bookingIcs({
-        id: b.id,
-        date: b.date,
-        startMin: b.startMin,
-        endMin: b.endMin,
-        machine: b.machineName,
-        url: url.origin + url.pathname,
-        nowMs: Date.now(),
-      }),
-      {
-        headers: {
-          "Content-Type": "text/calendar; charset=utf-8",
-          "Content-Disposition": `attachment; filename="prannya-${b.id}.ics"`,
-        },
-      },
-    );
-  }
   const nowMs = Date.now();
   const now = kyivNow(nowMs);
   const ended =
@@ -156,7 +136,7 @@ export default function BookingPage({
       />
 
       {b.status === "active" && !ended && (
-        <div className="actions">
+        <div className={`actions${running && b.mine ? " running" : ""}`}>
           {running && b.mine ? (
             <Form method="post" replace>
               <input type="hidden" name="intent" value="release" />
@@ -170,12 +150,12 @@ export default function BookingPage({
               </button>
             </Form>
           ) : (
-            <a className="btn btn-soft" href={`/bookings/${b.id}?ics=1`}>
+            <a className="btn btn-soft" href={`/bookings/${b.id}/calendar.ics`}>
               <Icon name="cal" small />У календар
             </a>
           )}
           {/* While washing, the owner frees the machine instead of cancelling. */}
-          {!(running && b.mine) ? (
+          {!(running && b.mine) && (
             <Form
               method="post"
               replace
@@ -192,15 +172,11 @@ export default function BookingPage({
                 Скасувати
               </button>
             </Form>
-          ) : (
-            <a className="btn btn-soft" href={`/bookings/${b.id}?ics=1`}>
-              <Icon name="cal" small />У календар
-            </a>
           )}
         </div>
       )}
 
-      {b.mine && b.status === "active" && !ended && (
+      {b.mine && b.status === "active" && !ended && !running && (
         <ReminderSwitch vapidKey={vapidKey} />
       )}
 

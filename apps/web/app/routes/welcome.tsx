@@ -3,6 +3,7 @@ import { redirect } from "react-router";
 import { ProfileForm } from "~/components/profile-form";
 import { TopBar } from "~/components/ui";
 import { requireResident } from "~/lib/auth.server";
+import { vocative } from "~/lib/profile";
 import { saveProfile } from "~/lib/residents.server";
 import type { Route } from "./+types/welcome";
 
@@ -29,11 +30,11 @@ export default function Welcome({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const first = loaderData.name.split(" ")[0];
+  const first = vocative(loaderData.name.split(" ")[0]);
   return (
     <main className="page bare">
       <TopBar />
-      <h2 className="title">Вітаємо, {first}</h2>
+      <h2 className="title">{first ? `Вітаємо, ${first}` : "Вітаємо!"}</h2>
       <p className="lede">
         Залишився один крок: вкажіть кімнату, щоб інші знали, чий запис.
       </p>
