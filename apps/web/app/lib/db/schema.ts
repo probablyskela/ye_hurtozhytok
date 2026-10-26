@@ -27,7 +27,7 @@ export const residents = sqliteTable(
     lastName: text("last_name"),
     // From the Polytechnic directory; shown only to the council.
     patronymic: text("patronymic"),
-    // Three digits; null until the person fills in the profile.
+    // As people say it («612», «1б», «робочка»); null until the profile is filled in.
     room: text("room"),
     // Telegram username without "@", optional, so others can reach the person.
     telegram: text("telegram"),

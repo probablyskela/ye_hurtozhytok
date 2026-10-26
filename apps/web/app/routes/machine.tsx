@@ -17,6 +17,7 @@ import {
 } from "~/lib/booking";
 import { cancelBooking } from "~/lib/bookings.server";
 import { machinesOn } from "~/lib/day.server";
+import { roomLabel } from "~/lib/profile";
 import { isCouncil } from "~/lib/permissions";
 import { notifyCancelledByCouncil } from "~/lib/scheduled.server";
 import {
@@ -252,7 +253,7 @@ export default function MachineDay({
                 <span className="tl-body">
                   <b>{b.name}</b>
                   <span>
-                    кімната {b.room ?? "—"}
+                    {roomLabel(b.room)}
                     {b.telegram && (
                       <>
                         {" · "}

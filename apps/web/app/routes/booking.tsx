@@ -9,6 +9,7 @@ import {
   cancelBooking,
   releaseBooking,
 } from "~/lib/bookings.server";
+import { roomLabel } from "~/lib/profile";
 import { isCouncil } from "~/lib/permissions";
 import { notifyCancelledByCouncil } from "~/lib/scheduled.server";
 import { dayHeading, kyivMinuteToUtc, kyivNow } from "~/lib/time";
@@ -44,9 +45,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
       status: b.status,
       mine: b.residentId === resident.id,
       who:
-        b.residentId === resident.id
-          ? null
-          : `${b.name}, кімната ${b.room ?? "—"}`,
+        b.residentId === resident.id ? null : `${b.name}, ${roomLabel(b.room)}`,
     },
     ended,
     running,

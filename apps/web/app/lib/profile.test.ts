@@ -1,12 +1,25 @@
 import { describe, expect, it } from "vitest";
 
-import { initials, normalizeRoom, normalizeTelegram } from "./profile";
+import {
+  initials,
+  normalizeRoom,
+  normalizeTelegram,
+  roomLabel,
+} from "./profile";
 
 describe("profile fields", () => {
-  it("accepts three-digit rooms only", () => {
+  it("accepts any room name people use", () => {
     expect(normalizeRoom(" 612 ")).toBe("612");
-    expect(normalizeRoom("61")).toBeNull();
-    expect(normalizeRoom("6a2")).toBeNull();
+    expect(normalizeRoom("1б")).toBe("1б");
+    expect(normalizeRoom("робочка")).toBe("робочка");
+    expect(normalizeRoom("кімната   для  навчання")).toBe(
+      "кімната для навчання",
+    );
+  });
+  it("refuses empty, too long and odd input", () => {
+    expect(normalizeRoom("   ")).toBeNull();
+    expect(normalizeRoom("x".repeat(21))).toBeNull();
+    expect(normalizeRoom("6<b>")).toBeNull();
   });
   it("cleans Telegram usernames", () => {
     expect(normalizeTelegram("@olena_hr")).toBe("olena_hr");
@@ -39,5 +52,14 @@ describe("vocative", () => {
     expect(vocative("Anton")).toBe("Anton");
     expect(vocative("Олег")).toBeNull();
     expect(vocative("Оля")).toBeNull();
+  });
+});
+
+describe("roomLabel", () => {
+  it("says «кімната» before numbers only", () => {
+    expect(roomLabel("612")).toBe("кімната 612");
+    expect(roomLabel("1б")).toBe("кімната 1б");
+    expect(roomLabel("робочка")).toBe("робочка");
+    expect(roomLabel(null)).toBe("кімната —");
   });
 });

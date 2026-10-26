@@ -1,8 +1,24 @@
 /** Room and Telegram fields of the profile. */
 
+export const ROOM_MAX = 20;
+
+/**
+ * Room as people say it: «612», «1б», «робочка». Spaces are tidied; empty,
+ * too long or containing control characters is refused.
+ */
 export function normalizeRoom(value: unknown): string | null {
-  const room = String(value ?? "").trim();
-  return /^\d{3}$/.test(room) ? room : null;
+  const room = String(value ?? "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!room || room.length > ROOM_MAX) return null;
+  if (/[\u0000-\u001f\u007f<>]/.test(room)) return null;
+  return room;
+}
+
+/** «кімната 612», «кімната 1б», but just «робочка» for a named room. */
+export function roomLabel(room: string | null | undefined): string {
+  if (!room) return "кімната —";
+  return /^\d+[а-яіїєґa-z]?$/i.test(room) ? `кімната ${room}` : room;
 }
 
 /** Accepts "name", "@name" or a t.me link; returns the bare username, "" for empty, null if invalid. */
@@ -16,7 +32,7 @@ export function normalizeTelegram(value: unknown): string | null {
 }
 
 export const PROFILE_ERRORS = {
-  room: "Вкажіть кімнату трьома цифрами, як на дверях.",
+  room: `Вкажіть кімнату: номер чи назву, до ${ROOM_MAX} символів.`,
   telegram:
     "Імʼя користувача в Telegram — від 5 до 32 латинських літер, цифр або «_».",
 };

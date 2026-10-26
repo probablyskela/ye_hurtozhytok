@@ -8,6 +8,7 @@ import {
 import { TopBar } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
 import { fullName } from "~/lib/names";
+import { roomLabel } from "~/lib/profile";
 import { canBlock, isCouncil } from "~/lib/permissions";
 import { listResidents, setBlocked } from "~/lib/residents.server";
 import type { Route } from "./+types/council";
@@ -119,7 +120,7 @@ export default function Council({
                 )}
               </b>
               <span className="sub">
-                кімната {p.room ?? "—"} · {p.email}
+                {roomLabel(p.room)} · {p.email}
                 {p.telegram ? ` · @${p.telegram}` : ""}
               </span>
             </span>
