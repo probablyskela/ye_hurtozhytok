@@ -363,7 +363,6 @@ h2.title {
 .tl-block .t,
 .strip-scale,
 .day b,
-.dur b,
 .tl-hour span {
   font-feature-settings: "tnum";
 }
@@ -818,42 +817,6 @@ h2.title {
 }
 
 /* booking flow */
-.durations {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 6px;
-}
-.dur {
-  min-height: 72px;
-  border: 0;
-  border-radius: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  background: var(--glass-strong);
-  box-shadow: var(--shadow-gloss);
-}
-.dur b {
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 24px;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-}
-.dur span {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--muted);
-}
-.dur:hover {
-  background: #fff;
-}
-.dur:active {
-  transform: scale(0.96);
-}
-
 .days {
   display: flex;
   gap: 6px;
@@ -1412,28 +1375,15 @@ a {
   right: 8px;
   top: 8px;
 }
-a.day:hover,
-a.dur:hover {
+a.day:hover {
   background: #fff;
 }
-.day[aria-current="true"],
-.dur[aria-current="true"] {
+.day[aria-current="true"] {
   pointer-events: none;
 }
-.day,
-.dur {
+.day {
   text-decoration: none;
   color: inherit;
-}
-.dur[aria-current="true"] {
-  background: var(--mine);
-  color: #fff;
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.25),
-    0 10px 20px -10px rgb(42 55 216 / 0.75);
-}
-.dur[aria-current="true"] span {
-  color: rgb(255 255 255 / 0.8);
 }
 .day[aria-current="true"] {
   background: var(--ink);
@@ -1578,6 +1528,10 @@ a.dur:hover {
 .pick-card > .scrubber {
   width: 100%;
 }
+.pick-fallback {
+  display: grid;
+  gap: 14px;
+}
 .select {
   min-height: 52px;
   width: 100%;
@@ -1719,8 +1673,8 @@ a.dur:hover {
       transparent 1px 24px
     );
   background-size:
-    calc(100% - var(--frame, 0px)) 12px,
-    calc(100% - var(--frame, 0px)) 6px;
+    100% 12px,
+    100% 6px;
   background-position:
     0 calc(100% - 14px),
     0 calc(100% - 14px);
@@ -1745,7 +1699,7 @@ a.dur:hover {
 .scrub-band {
   position: absolute;
   left: 0;
-  right: var(--frame, 0px);
+  right: 0;
   top: 28px;
   height: 40px;
   border-radius: 12px;
@@ -1769,10 +1723,9 @@ a.dur:hover {
 }
 .scrub-frame {
   position: absolute;
-  left: 50%;
   top: 20px;
   height: 56px;
-  transform: translateX(-50%);
+  transform-origin: 0 50%;
   border-radius: 14px;
   pointer-events: none;
   border: 2.5px solid var(--mine);
@@ -1784,11 +1737,102 @@ a.dur:hover {
     border-color 0.25s var(--ease),
     background 0.25s var(--ease),
     box-shadow 0.3s var(--ease),
-    transform 0.3s var(--ease);
+    transform 0.3s var(--ease),
+    width 0.14s var(--ease-out);
   animation: frame-pop 0.55s var(--ease-out);
+}
+/* The length rides on top of the frame and grows with it. */
+.scrub-len {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 3px);
+  text-align: center;
+  font-size: 11.5px;
+  font-weight: 750;
+  line-height: 1;
+  color: var(--mine);
+  white-space: nowrap;
+  font-feature-settings: "tnum";
+  transition: color 0.25s var(--ease);
+}
+/* The right edge: a big, thumb-sized target around a small visible grip. */
+.scrub-handle {
+  position: absolute;
+  top: -10px;
+  bottom: -10px;
+  right: -24px;
+  width: 44px;
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: ew-resize;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.scrub-handle::before {
+  content: "";
+  width: 12px;
+  height: 34px;
+  border-radius: 99px;
+  background:
+    linear-gradient(#fff, #fff) center / 2px 12px no-repeat,
+    var(--mine);
+  box-shadow:
+    0 0 0 2.5px #fff,
+    0 6px 14px -4px rgb(42 55 216 / 0.6);
+  transition:
+    transform 0.2s var(--ease-out),
+    background-color 0.25s var(--ease);
+  animation: handle-hint 1.4s 0.7s var(--ease) 2;
+}
+.scrub-handle:hover::before,
+.scrubber.is-resizing .scrub-handle::before {
+  transform: scaleY(1.12) scaleX(1.15);
+}
+.scrub-handle:focus-visible::before {
+  box-shadow:
+    0 0 0 2.5px #fff,
+    0 0 0 5px var(--ink);
+}
+.scrub-handle[aria-disabled="true"] {
+  display: none;
+}
+.scrubber.is-resizing .scrub-frame {
+  background: rgb(42 55 216 / 0.2);
+}
+.scrubber.is-limit .scrub-handle::before {
+  background-color: var(--danger);
+  animation: handle-bump 0.32s var(--ease-out);
+}
+.scrub-hint.is-note {
+  color: var(--ink-2);
+}
+.scrub-hint.is-limit {
+  color: var(--danger);
+  font-weight: 650;
+}
+@keyframes handle-hint {
+  0%,
+  100% {
+    translate: 0;
+  }
+  30% {
+    translate: 6px;
+  }
+  60% {
+    translate: -2px;
+  }
+}
+@keyframes handle-bump {
+  40% {
+    translate: 4px;
+  }
 }
 .scrub-grip {
   position: absolute;
+  left: -3px;
   top: 50%;
   width: 4px;
   height: 20px;
@@ -1797,14 +1841,8 @@ a.dur:hover {
   background: var(--mine);
   transition: background 0.25s var(--ease);
 }
-.scrub-grip:first-child {
-  left: -3px;
-}
-.scrub-grip:last-child {
-  right: -3px;
-}
 .scrubber.is-moving .scrub-frame {
-  transform: translateX(-50%) scale(1.035);
+  transform: scale(1.035);
   box-shadow:
     0 18px 32px -14px rgb(42 55 216 / 0.7),
     inset 0 0 0 1px rgb(255 255 255 / 0.55);
@@ -1819,6 +1857,10 @@ a.dur:hover {
 .scrubber.is-past .scrub-grip {
   background: var(--danger);
 }
+.scrubber.is-busy .scrub-len,
+.scrubber.is-past .scrub-len {
+  color: var(--danger);
+}
 .scrub-fade {
   display: none;
 }
@@ -1830,15 +1872,15 @@ a.dur:hover {
 }
 @keyframes frame-pop {
   0% {
-    transform: translateX(-50%) scale(0.9);
+    transform: scale(0.9);
     opacity: 0.4;
   }
   60% {
-    transform: translateX(-50%) scale(1.04);
+    transform: scale(1.04);
     opacity: 1;
   }
   100% {
-    transform: translateX(-50%) scale(1);
+    transform: scale(1);
   }
 }
 
@@ -2035,7 +2077,6 @@ html:not(.booted) .ticket::after,
     transform: translateY(8px);
   }
 }
-.dur,
 .day {
   transition:
     background 0.35s var(--ease),
@@ -2043,7 +2084,6 @@ html:not(.booted) .ticket::after,
     box-shadow 0.35s var(--ease),
     transform 0.2s var(--ease);
 }
-.dur[aria-current="true"],
 .day[aria-current="true"] {
   animation: select-pop 0.4s var(--ease-out);
 }
@@ -2101,9 +2141,17 @@ html:not(.booted) .ticket::after,
   gap: 10px;
   margin-top: 10px;
 }
+/* Two lines tall whatever it says, so a short limit note never shifts the page. */
 .scrub-controls .scrub-hint {
   margin: 0;
   flex: 1;
+  min-height: calc(2 * 1.35em);
+  line-height: 1.35;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-wrap: balance;
+  transition: color 0.2s var(--ease);
 }
 .scrub-controls .icon-btn:disabled {
   opacity: 0.35;
@@ -2180,31 +2228,6 @@ html:not(.booted) .ticket::after,
 }
 .machine-pick.has-pill > a[data-pill-on] b {
   color: var(--ink);
-}
-
-.durations.has-pill > .pill {
-  border-radius: 20px;
-  background: var(--mine);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.25),
-    0 10px 20px -10px rgb(42 55 216 / 0.75);
-}
-.durations.has-pill > .dur[aria-current="true"]:not([data-pill-on]) {
-  color: var(--ink);
-}
-.durations.has-pill > .dur[aria-current="true"]:not([data-pill-on]) span {
-  color: var(--muted);
-}
-.durations.has-pill > .dur[data-pill-on] {
-  color: #fff;
-  background: transparent;
-  box-shadow: none;
-}
-.durations.has-pill > .dur[data-pill-on] span {
-  color: rgb(255 255 255 / 0.8);
-}
-.durations.has-pill > .dur:not([data-pill-on]) {
-  background: var(--glass-strong);
 }
 
 .days.has-pill > .pill {

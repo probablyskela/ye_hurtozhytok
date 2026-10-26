@@ -11,9 +11,12 @@ export const CLOSE_MIN = 24 * 60;
 export const STEP_MIN = 5;
 /** Free gap kept between two bookings on one machine. */
 export const BUFFER_MIN = 5;
-export const DURATIONS = [30, 60, 90, 120, 150] as const;
-export type Duration = (typeof DURATIONS)[number];
-export const DEFAULT_DURATION: Duration = 120;
+/** A booking lasts 30 minutes to 2.5 hours, in 5-minute steps. */
+export const MIN_DURATION = 30;
+export const MAX_DURATION = 150;
+/** One-tap lengths on the home screen; the booking page takes any length. */
+export const QUICK_DURATIONS = [30, 60, 90, 120, 150] as const;
+export const DEFAULT_DURATION = 120;
 /** Today plus six more days. */
 export const HORIZON_DAYS = 7;
 /** Bookings that have not ended yet, per person. */
@@ -34,34 +37,41 @@ export function fmtMin(minute: number): string {
   return `${pad(Math.floor(minute / 60))}:${pad(minute % 60)}`;
 }
 
-/** 30 → "30 хв", 90 → "1,5 год". */
+/** 30 → "30 хв", 90 → "1,5 год", 105 → "1 год 45 хв". */
 export function durationLabel(minutes: number): string {
   if (minutes < 60) return `${minutes} хв`;
-  if (minutes % 30 !== 0) {
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    return m ? `${h} год ${m} хв` : `${h} год`;
-  }
-  return `${String(minutes / 60).replace(".", ",")} год`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (m === 30) return `${h},5 год`;
+  return m ? `${h} год ${m} хв` : `${h} год`;
 }
 
-/** The longest booking length that fits a free window of `minutes`. */
+/** The longest booking that fits a free window of `minutes`. */
 export function longestFit(minutes: number): number | null {
-  return [...DURATIONS].reverse().find((d) => d <= minutes) ?? null;
+  if (minutes < MIN_DURATION) return null;
+  return Math.min(MAX_DURATION, Math.floor(minutes / STEP_MIN) * STEP_MIN);
 }
 
-/** 120 → "2 години", 90 → "1,5 години", 60 → "1 година", 30 → "30 хвилин". */
+/** 120 → "2 години", 90 → "1,5 години", 105 → "1 година 45 хвилин". */
 export function durationWords(minutes: number): string {
   if (minutes < 60) return `${minutes} хвилин`;
-  if (minutes === 60) return "1 година";
-  return `${String(minutes / 60).replace(".", ",")} години`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  const hours = h === 1 ? "1 година" : `${h} години`;
+  if (m === 30) return `${h},5 години`;
+  return m ? `${hours} ${m} хвилин` : hours;
 }
 
-export function isDuration(value: number): value is Duration {
-  return (DURATIONS as readonly number[]).includes(value);
+export function isDuration(value: number): boolean {
+  return (
+    Number.isInteger(value) &&
+    value % STEP_MIN === 0 &&
+    value >= MIN_DURATION &&
+    value <= MAX_DURATION
+  );
 }
 
-export function parseDuration(value: unknown): Duration {
+export function parseDuration(value: unknown): number {
   const n = Number(value);
   return isDuration(n) ? n : DEFAULT_DURATION;
 }
@@ -69,6 +79,30 @@ export function parseDuration(value: unknown): Duration {
 /** The first grid start not earlier than `minute`. */
 export function ceilToStep(minute: number): number {
   return Math.ceil(minute / STEP_MIN) * STEP_MIN;
+}
+
+/**
+ * How long a booking starting at the free `start` may last: up to the
+ * maximum, closing time, or 5 minutes before the next booking.
+ */
+export function maxLengthAt(bookings: readonly Slot[], start: number): number {
+  let limit = Math.min(MAX_DURATION, CLOSE_MIN - start);
+  for (const b of bookings)
+    if (b.startMin >= start)
+      limit = Math.min(limit, b.startMin - BUFFER_MIN - start);
+  return Math.floor(limit / STEP_MIN) * STEP_MIN;
+}
+
+/** The longest booking that fits anywhere in the free windows, or null. */
+export function longestFree(
+  bookings: readonly Slot[],
+  nowMin: number | null,
+): number | null {
+  const best = Math.max(
+    0,
+    ...freeWindows(bookings, nowMin).map((w) => w.endMin - w.startMin),
+  );
+  return longestFit(best);
 }
 
 /** True when [start, end) comes closer than the buffer to any booking. */
@@ -112,7 +146,7 @@ export type BookingError =
   | "machine";
 
 export const BOOKING_ERRORS: Record<BookingError, string> = {
-  duration: "Оберіть тривалість: 30 хв, 1, 1,5, 2 або 2,5 години.",
+  duration: "Тривалість: від 30 хвилин до 2,5 години, кратно 5 хвилинам.",
   date: "Оберіть день зі списку.",
   grid: "Початок має бути кратним 5 хвилинам.",
   hours: "Пралки працюють з 06:00 до 24:00. Оберіть інший час.",
@@ -183,11 +217,11 @@ export function freeWindows(
   let cursor = Math.max(OPEN_MIN, nowMin === null ? 0 : ceilToStep(nowMin));
   for (const b of sorted) {
     const end = b.startMin - BUFFER_MIN;
-    if (end - cursor >= DURATIONS[0])
+    if (end - cursor >= MIN_DURATION)
       windows.push({ startMin: cursor, endMin: end });
     cursor = Math.max(cursor, b.endMin + BUFFER_MIN);
   }
-  if (CLOSE_MIN - cursor >= DURATIONS[0])
+  if (CLOSE_MIN - cursor >= MIN_DURATION)
     windows.push({ startMin: cursor, endMin: CLOSE_MIN });
   return windows;
 }

@@ -29,12 +29,6 @@ typography:
     lineHeight: 1
     letterSpacing: "-0.035em"
     fontFeature: '"tnum"'
-  display-duration:
-    fontFamily: "Fixel Display, Fixel Text, -apple-system, system-ui, sans-serif"
-    fontSize: "24px"
-    fontWeight: 900
-    lineHeight: 1.05
-    letterSpacing: "-0.03em"
   headline:
     fontFamily: "Fixel Text, -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif"
     fontSize: "28px"
@@ -92,15 +86,6 @@ components:
     rounded: "{rounded.pill}"
     padding: "0 22px"
     height: "52px"
-  duration-option:
-    backgroundColor: "{colors.white}"
-    textColor: "{colors.ink}"
-    typography: "{typography.display-duration}"
-    rounded: "{rounded.row}"
-    height: "72px"
-  duration-option-selected:
-    backgroundColor: "{colors.mine}"
-    textColor: "{colors.white}"
   day-option-selected:
     backgroundColor: "{colors.ink}"
     textColor: "{colors.white}"
@@ -151,14 +136,14 @@ Scope note: the presentation canvas in `design/mockup/index.html` (phone bezels,
 **Key Characteristics:**
 
 - White liquid-glass tiles (26px radius, rim light, long soft shadow) over a drifting pastel field.
-- One saturated object per screen: the ultramarine booking card, or the selected duration and start.
+- One saturated object per screen: the ultramarine booking card, or the booking frame on the scrubber.
 - Black capsule primary buttons; everything is a pill or a generously rounded tile.
 - Fixel Display Black only for times and duration numerals; Fixel Text for everything else.
 - The day strip: each machine's day as a capsule ribbon with booked segments, hatched buffers and a coral now-marker.
 - No layout shift: anything that changes while someone interacts (scrubber status, the time card across scale / list / no-room states, the nearest card across lengths) keeps a fixed height; status labels are one word («Вільно», «Зайнято», «Минуло»).
-- Sliding pill: every horizontal switcher (durations, days, machines, segmented controls) has one selection pill that slides to the tapped item at once (0.45s, the system ease) and text colour follows it; without JavaScript items keep their own highlight. A dark selected day has no white top highlight.
+- Sliding pill: every horizontal switcher (days, machines, segmented controls) has one selection pill that slides to the tapped item at once (0.45s, the system ease) and text colour follows it; without JavaScript items keep their own highlight. A dark selected day has no white top highlight.
 - Nearest free time: one glass card with the soonest start across machines in Display numerals, the machine, a black «Записатися» that books in one tap and a soft «Інший час»; the other machines' first starts sit below as quiet links.
-- The time scrubber: the day slides under a fixed ultramarine frame the size of the booking (8px per 5 minutes, 96px per hour, native momentum scroll with snap points); the frame turns red on busy time and glides to the nearest free start when released.
+- The time scrubber: the day slides under a fixed ultramarine frame the size of the booking (8px per 5 minutes, 96px per hour, native momentum scroll with snap points); the frame turns red on busy time and glides to the nearest free start when released. The frame's left edge stays where the longest booking would sit centred; its right edge is a 44px-wide handle (a 12×34px ultramarine capsule with a white rim) that stretches the booking in 5-minute steps like an event in a calendar. The length rides above the frame in 11.5px ultramarine. When the edge hits the next booking, 24:00 or 2.5 hours, only the handle turns red, bumps, and the hint line says why; the hint line is always two lines tall.
 - Motion: short crossfade view transitions without blur (the ticket morphs from home to its detail), tiles rise and the ticket catches light only on the first load of the app (never on later screens), a ripple spreads from the porthole after booking, a busy machine's drum turns and a free one breathes, the now-marker pulses. Everything stops under reduced motion.
 - The porthole motif: ticket rings and machine state dots.
 - The facade mark: a black squircle holding a 3×3 grid of rounded windows — three lit white, five dim, one ultramarine («твоє вікно»).
@@ -169,7 +154,7 @@ A cool pastel field under white glass, graphite ink, and exactly three signal co
 
 ### Primary
 
-- **Ultramarine "Yours"** (mine): reserved for what belongs to the signed-in resident — the booking card, your segment in a day strip, your block in the machine timeline, the selected duration and the selected start. Also the focus outline, caret and text selection.
+- **Ultramarine "Yours"** (mine): reserved for what belongs to the signed-in resident — the booking card, your segment in a day strip, your block in the machine timeline, the booking frame and its handle. Also the focus outline, caret and text selection.
 - **Deep Ultramarine** (mine-deep): the dark end of the ticket gradient and the text colour of the white button on the ticket.
 - **Pale Ultramarine** (mine-soft): reserved token, not used in the app yet.
 
@@ -214,7 +199,6 @@ Both families are self-hosted (`apps/web/app/fonts`).
 ### Hierarchy
 
 - **Display — time** (900, 46px; 42px compact, 48px large; line-height 1; -0.035em; tabular): the start–end time on the booking card. The en dash between times drops to Fixel Text 400 at 0.6em.
-- **Display — duration** (900, 24px, 1.05, -0.03em): the numeral on duration options.
 - **Hero** (700, 44px, 1, -0.04em): sign-in headline only.
 - **Headline** (700, 28px, 1.1, -0.035em): screen titles; machine-day title steps down to 24px.
 - **Title** (700, 18px, -0.02em): section headings; tile and machine names at 17px.
@@ -233,7 +217,7 @@ Both families are self-hosted (`apps/web/app/fonts`).
 
 Single column on a phone (designed at 390px, must hold at 360px and still fit at 320px). Screen content sits in 16px side margins, with at least 16px top padding (the safe area on notched phones) and 120px bottom padding to clear the floating tab bar or action sheet. Sections are separated by 26px above a title row (title left, a 44px text link right). Inside lists and rows the gap is 8–12px; tile padding is 16px (14–18px by density).
 
-Horizontal choice rows (days) scroll sideways with hidden scrollbars rather than wrapping, bleeding to the screen edge with room for their shadows. Duration options sit in a five-column equal grid. The tab bar and the booking action sheet are fixed and centred, at most 456px wide, 12px from the sides on phones and 14px above the bottom safe area. Below 360px the duration switch tightens its item padding and the scrubber time steps down to 24px.
+Horizontal choice rows (days) scroll sideways with hidden scrollbars rather than wrapping, bleeding to the screen edge with room for their shadows. The tab bar and the booking action sheet are fixed and centred, at most 456px wide, 12px from the sides on phones and 14px above the bottom safe area. Below 360px the scrubber time steps down to 24px.
 
 Wider screens work but the phone stays the main case: from 720px the column grows to 600px; from 1024px the home page uses two columns (up to 1040px) with the machines panel sticky.
 
@@ -241,7 +225,7 @@ In the app the background is currently the flat field base (#edf2f8); the drifti
 
 ## Elevation & Depth
 
-Depth is glass, not stacking. Tiles and bars are translucent white with backdrop blur (18–22px, saturate 170–180%) and a layered shadow that combines an inner rim light along the top edge, an inner glow near the bottom, and one long, soft, cool-tinted drop. Small controls (day and duration options, avatars, icon buttons) use a lighter gloss shadow. The booking card carries its own ultramarine-tinted drop. There are no hard offset shadows and no borders around surfaces.
+Depth is glass, not stacking. Tiles and bars are translucent white with backdrop blur (18–22px, saturate 170–180%) and a layered shadow that combines an inner rim light along the top edge, an inner glow near the bottom, and one long, soft, cool-tinted drop. Small controls (day options, avatars, icon buttons) use a lighter gloss shadow. The booking card carries its own ultramarine-tinted drop. There are no hard offset shadows and no borders around surfaces.
 
 ### Shadow Vocabulary
 
@@ -256,7 +240,7 @@ Depth is glass, not stacking. Tiles and bars are translucent white with backdrop
 
 ## Shapes
 
-Soft and continuous: no square corners anywhere in the product. Glass tiles 26px, the booking card and action sheet 28px, the tab bar 30px, rows and day/duration options 18–20px, inputs 16px, timeline blocks 16px, segments inside a strip 6px. Every button, state pill, segmented control and strip track is a full capsule (999px). The mark is the facade: a 30px graphite squircle (23% radius) with a 3×3 grid of 4.5-radius windows — three white, five at 16% white, one ultramarine for «твоє вікно». It stays legible down to 32px; at 16px use it only with the wordmark beside it.
+Soft and continuous: no square corners anywhere in the product. Glass tiles 26px, the booking card and action sheet 28px, the tab bar 30px, rows and day options 18–20px, inputs 16px, timeline blocks 16px, segments inside a strip 6px. Every button, state pill, segmented control and strip track is a full capsule (999px). The mark is the facade: a 30px graphite squircle (23% radius) with a 3×3 grid of 4.5-radius windows — three white, five at 16% white, one ultramarine for «твоє вікно». It stays legible down to 32px; at 16px use it only with the wordmark beside it.
 
 Circles carry the porthole motif: the concentric rings with a water line drawn into the top-right of the booking card (white strokes at 30% opacity), and the ringed state dot before each machine name.
 
@@ -275,9 +259,9 @@ Tactile capsules that compress slightly when pressed.
 - **On the ticket:** a white 94% capsule, 44px, deep-ultramarine text.
 - **Focus:** 2px ultramarine outline with 2px offset across all controls.
 
-### Duration and Day Options
+### Day Options
 
-- **Duration:** five equal tiles, 72px tall, 20px radius; Fixel Display numeral over a 12.5px muted unit. Selected turns ultramarine.
+- **Duration:** chosen on the scrubber by stretching the frame (see the scrubber rule above); the home screen offers five quick lengths in a segmented control.
 - **Day:** 66×64px tiles, 18px radius; weekday in small muted text over the date. Selected turns graphite ink, not ultramarine — the day is a filter, not your booking.
 - **Segmented control:** capsule track at ink 7% with the white sliding pill; selected label in ink 600.
 - **Machine picker:** three equal options in an ink-6% track (22px radius); short name over the first free start in teal; the white sliding pill marks the chosen machine.

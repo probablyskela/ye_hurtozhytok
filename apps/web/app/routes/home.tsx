@@ -4,7 +4,7 @@ import { PillGroup } from "~/components/pill-group";
 import { Credit, DayStrip, Port, StripScale, Ticket } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
 import {
-  DURATIONS,
+  QUICK_DURATIONS,
   MAX_ACTIVE,
   countdown,
   durationLabel,
@@ -266,7 +266,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             label="Тривалість"
             style={{ gridAutoColumns: "1fr" }}
           >
-            {DURATIONS.map((d) => (
+            {QUICK_DURATIONS.map((d) => (
               <Link
                 data-pill-item
                 key={d}

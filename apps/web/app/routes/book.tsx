@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Form, Link, data, redirect, useNavigation } from "react-router";
 
 import { PillGroup } from "~/components/pill-group";
@@ -7,12 +7,15 @@ import { Icon, TopBar } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
 import {
   BOOKING_ERRORS,
-  DURATIONS,
   MAX_ACTIVE,
+  MAX_DURATION,
+  MIN_DURATION,
+  STEP_MIN,
   bookableDays,
   durationLabel,
   fmtMin,
   freeStarts,
+  longestFree,
   parseDuration,
   type BookingError,
 } from "~/lib/booking";
@@ -60,16 +63,21 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       endMin: b.endMin,
       mine: b.residentId === resident.id,
     })),
-    starts: m.working ? freeStarts(m.bookings, len, nowMin) : [],
+    ...fitting({ working: m.working, slots: m.bookings }, len, nowMin),
   }));
 
   // The machine from the link, otherwise the one that frees up first.
   const requested = list.find(
     (x) => x.id === Number(url.searchParams.get("m")),
   );
+  // Prefer machines where the whole wanted length fits.
   const earliest = [...list]
     .filter((x) => x.starts.length)
-    .sort((a, b) => a.starts[0] - b.starts[0])[0];
+    .sort(
+      (a, b) =>
+        Number(b.len === len) - Number(a.len === len) ||
+        a.starts[0] - b.starts[0],
+    )[0];
   const machine = requested ?? earliest ?? list[0];
   if (!machine) throw new Response("Пралок ще не додано.", { status: 404 });
   const s = Number(url.searchParams.get("s"));
@@ -90,7 +98,13 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       wd: WEEKDAYS_SHORT[weekdayIndex(k)],
       day: dayOfMonth(k),
     })),
-    machines: list,
+    machines: list.map(({ id, name, shortName, working, slots }) => ({
+      id,
+      name,
+      shortName,
+      working,
+      slots,
+    })),
     machineId: machine.id,
     start,
     active: upcoming.length,
@@ -129,17 +143,42 @@ function useHydrated() {
   return hydrated;
 }
 
+/** Free starts for a length, or, when nothing that long fits, for the longest that does. */
+function fitting(
+  m: { working: boolean; slots: { startMin: number; endMin: number }[] },
+  want: number,
+  nowMin: number | null,
+) {
+  if (!m.working) return { len: want, starts: [] as number[], longest: null };
+  const starts = freeStarts(m.slots, want, nowMin);
+  if (starts.length) return { len: want, starts, longest: want };
+  const longest = longestFree(m.slots, nowMin);
+  return longest === null
+    ? { len: want, starts, longest }
+    : { len: longest, starts: freeStarts(m.slots, longest, nowMin), longest };
+}
+
 export default function Book({ loaderData, actionData }: Route.ComponentProps) {
-  const { today, date, len, nowMin, days, machines, machineId, active } =
-    loaderData;
+  const { today, date, nowMin, days, machines, machineId, active } = loaderData;
   const allowed = loaderData.canBook;
   const hydrated = useHydrated();
   const busy = useNavigation().state === "submitting";
-  const machine = machines.find((m) => m.id === machineId)!;
-  // The person's pick belongs to one machine, day and length. A new choice
-  // there starts from the server's suggestion in the same render, so the
-  // scale never mounts on the previous machine's time.
-  const choice = `${machineId}-${date}-${len}-${loaderData.start}`;
+  // The wanted length lives here and travels in every link, so changing it
+  // never waits for the server. A day without room for it offers the longest
+  // free stretch instead, without forgetting the wish.
+  const [wanted, setWanted] = useState(loaderData.len);
+  const fits = useMemo(
+    () => machines.map((m) => fitting(m, wanted, nowMin)),
+    [machines, wanted, nowMin],
+  );
+  const index = machines.findIndex((m) => m.id === machineId);
+  const machine = { ...machines[index], ...fits[index] };
+  const len = machine.len;
+  const shortened = len < wanted;
+  // The person's pick belongs to one machine and day. A new choice there
+  // starts from the server's suggestion in the same render, so the scale
+  // never mounts on the previous machine's time.
+  const choice = `${machineId}-${date}-${loaderData.start}`;
   const [picked, setPicked] = useState<{
     choice: string;
     start: number | null;
@@ -147,13 +186,17 @@ export default function Book({ loaderData, actionData }: Route.ComponentProps) {
     choice,
     start: loaderData.start,
   });
-  const start = picked.choice === choice ? picked.start : loaderData.start;
+  const fromServer =
+    loaderData.start !== null && machine.starts.includes(loaderData.start)
+      ? loaderData.start
+      : (machine.starts[0] ?? null);
+  const start = picked.choice === choice ? picked.start : fromServer;
   const setStart = (s: number | null) => setPicked({ choice, start: s });
 
   const qs = (p: Record<string, string | number>) =>
     "?" +
     new URLSearchParams({
-      len: String(len),
+      len: String(wanted),
       d: date,
       m: String(machineId),
       ...Object.fromEntries(Object.entries(p).map(([k, v]) => [k, String(v)])),
@@ -165,7 +208,9 @@ export default function Book({ loaderData, actionData }: Route.ComponentProps) {
     <Form method="post" replace>
       <TopBar back="/" />
       <h2 className="title">Записатися</h2>
-      <p className="lede">Оберіть, скільки прати, день, пралку й час.</p>
+      <p className="lede">
+        Оберіть день і пралку, а на шкалі — час і тривалість.
+      </p>
       {actionData?.error && (
         <p className="error-note" role="alert">
           {actionData.error}
@@ -178,30 +223,6 @@ export default function Book({ loaderData, actionData }: Route.ComponentProps) {
       )}
 
       <div className="section-h" style={{ marginTop: 0 }}>
-        <h3>Скільки прати</h3>
-      </div>
-      <PillGroup className="durations" label="Скільки прати">
-        {DURATIONS.map((d) => {
-          const [num, unit] = durationLabel(d).split(" ");
-          return (
-            <Link
-              data-pill-item
-              key={d}
-              className="dur"
-              to={qs({ len: d })}
-              preventScrollReset
-              replace
-              aria-current={d === len ? "true" : undefined}
-              aria-label={durationLabel(d)}
-            >
-              <b>{num}</b>
-              <span>{unit}</span>
-            </Link>
-          );
-        })}
-      </PillGroup>
-
-      <div className="section-h">
         <h3>Коли</h3>
       </div>
       <PillGroup className="days" label="День">
@@ -226,7 +247,7 @@ export default function Book({ loaderData, actionData }: Route.ComponentProps) {
         <h3>Пралка</h3>
       </div>
       <PillGroup className="machine-pick" label="Пралка">
-        {machines.map((m) => (
+        {machines.map((m, i) => (
           <Link
             data-pill-item
             key={m.id}
@@ -236,12 +257,14 @@ export default function Book({ loaderData, actionData }: Route.ComponentProps) {
             aria-current={m.id === machineId ? "true" : undefined}
           >
             <b>{m.shortName}</b>
-            <small className={m.starts.length ? "ok" : undefined}>
+            <small className={fits[i].starts.length ? "ok" : undefined}>
               {!m.working
                 ? "не працює"
-                : m.starts.length
-                  ? `з ${fmtMin(m.starts[0])}`
-                  : "немає місця"}
+                : !fits[i].starts.length
+                  ? "немає місця"
+                  : fits[i].len < wanted
+                    ? `до ${durationLabel(fits[i].len)}`
+                    : `з ${fmtMin(fits[i].starts[0])}`}
             </small>
           </Link>
         ))}
@@ -253,35 +276,64 @@ export default function Book({ loaderData, actionData }: Route.ComponentProps) {
             <Icon name="info" small />
             <span>
               {machine.working
-                ? `${date === today ? "Сьогодні" : "Цього дня"} на цій пралці немає вікна на ${durationLabel(len)}. Оберіть іншу пралку, день чи коротший запис.`
+                ? `${date === today ? "Сьогодні" : "Цього дня"} на цій пралці немає навіть ${durationLabel(MIN_DURATION)}. Оберіть іншу пралку чи день.`
                 : "Пралка тимчасово не працює."}
             </span>
           </div>
         ) : hydrated ? (
-          <TimeScrubber
-            key={`${machineId}-${date}-${len}`}
-            bookings={machine.slots}
-            len={len}
-            nowMin={nowMin}
-            starts={machine.starts}
-            value={start}
-            onChange={setStart}
-          />
+          <>
+            <TimeScrubber
+              key={`${machineId}-${date}`}
+              bookings={machine.slots}
+              len={len}
+              nowMin={nowMin}
+              starts={machine.starts}
+              value={start}
+              onChange={setStart}
+              onLenChange={setWanted}
+              note={
+                shortened
+                  ? `Цього дня найдовше вільне вікно — ${durationLabel(len)}`
+                  : undefined
+              }
+            />
+          </>
         ) : (
-          <div className="field-row">
-            <label htmlFor="start-select">Початок</label>
-            <select
-              id="start-select"
-              name="start"
-              defaultValue={loaderData.start ?? undefined}
-              className="select"
-            >
-              {machine.starts.map((s) => (
-                <option key={s} value={s}>
-                  {fmtMin(s)}–{fmtMin(s + len)}
-                </option>
-              ))}
-            </select>
+          // Before JavaScript: two plain lists. The server re-checks the pair.
+          <div className="pick-fallback">
+            <div className="field-row">
+              <label htmlFor="start-select">Початок</label>
+              <select
+                id="start-select"
+                name="start"
+                defaultValue={fromServer ?? undefined}
+                className="select"
+              >
+                {machine.starts.map((s) => (
+                  <option key={s} value={s}>
+                    {fmtMin(s)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field-row">
+              <label htmlFor="len-select">Тривалість</label>
+              <select
+                id="len-select"
+                name="len"
+                defaultValue={len}
+                className="select"
+              >
+                {Array.from(
+                  { length: (MAX_DURATION - MIN_DURATION) / STEP_MIN + 1 },
+                  (_, i) => MIN_DURATION + i * STEP_MIN,
+                ).map((d) => (
+                  <option key={d} value={d}>
+                    {durationLabel(d)}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         )}
       </div>
@@ -300,7 +352,7 @@ export default function Book({ loaderData, actionData }: Route.ComponentProps) {
 
       <input type="hidden" name="machine" value={machineId} />
       <input type="hidden" name="date" value={date} />
-      <input type="hidden" name="len" value={len} />
+      {hydrated && <input type="hidden" name="len" value={len} />}
       {hydrated && start !== null && (
         <input type="hidden" name="start" value={start} />
       )}

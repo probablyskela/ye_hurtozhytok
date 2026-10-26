@@ -10,6 +10,8 @@ import {
   durationWords,
   fmtMin,
   longestFit,
+  longestFree,
+  maxLengthAt,
   freeStarts,
   freeWindows,
   machineNow,
@@ -34,15 +36,38 @@ describe("labels", () => {
     expect(durationLabel(90)).toBe("1,5 год");
     expect(durationLabel(120)).toBe("2 год");
     expect(durationLabel(80)).toBe("1 год 20 хв");
-    expect(longestFit(80)).toBe(60);
+    expect(durationLabel(105)).toBe("1 год 45 хв");
+    expect(durationLabel(150)).toBe("2,5 год");
+    expect(longestFit(80)).toBe(80);
+    expect(longestFit(83)).toBe(80);
     expect(longestFit(200)).toBe(150);
     expect(longestFit(20)).toBeNull();
     expect(durationWords(60)).toBe("1 година");
     expect(durationWords(150)).toBe("2,5 години");
+    expect(durationWords(105)).toBe("1 година 45 хвилин");
+    expect(durationWords(135)).toBe("2 години 15 хвилин");
   });
-  it("falls back to two hours for an unknown duration", () => {
-    expect(parseDuration("45")).toBe(120);
-    expect(parseDuration("90")).toBe(90);
+  it("takes any length from 30 minutes to 2.5 hours in 5-minute steps", () => {
+    expect(parseDuration("45")).toBe(45);
+    expect(parseDuration("105")).toBe(105);
+    expect(parseDuration("47")).toBe(120);
+    expect(parseDuration("25")).toBe(120);
+    expect(parseDuration("155")).toBe(120);
+  });
+});
+
+describe("maxLengthAt", () => {
+  const day = [slot("12:30", "14:30")];
+  it("stops 5 minutes before the next booking", () => {
+    expect(maxLengthAt(day, t("11:30"))).toBe(55);
+    expect(maxLengthAt(day, t("09:00"))).toBe(150);
+  });
+  it("stops at closing time", () => {
+    expect(maxLengthAt(day, t("23:00"))).toBe(60);
+  });
+  it("finds the longest free stretch of the day", () => {
+    expect(longestFree([slot("06:40", "23:00")], null)).toBe(55);
+    expect(longestFree([slot("06:20", "23:50")], null)).toBeNull();
   });
 });
 
@@ -110,7 +135,9 @@ describe("validateRequest", () => {
     expect(validateRequest({ ...ok, date: "2026-02-30" }, now)).toBe("date");
   });
   it("rejects lengths outside the five options", () => {
-    expect(validateRequest({ ...ok, duration: 45 }, now)).toBe("duration");
+    expect(validateRequest({ ...ok, duration: 47 }, now)).toBe("duration");
+    expect(validateRequest({ ...ok, duration: 25 }, now)).toBe("duration");
+    expect(validateRequest({ ...ok, duration: 105 }, now)).toBeNull();
     expect(validateRequest({ ...ok, duration: 180 }, now)).toBe("duration");
   });
   it("accepts 5-minute starts and rejects anything finer", () => {

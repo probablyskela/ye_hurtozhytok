@@ -10,9 +10,13 @@ import {
 import {
   BUFFER_MIN,
   CLOSE_MIN,
+  MAX_DURATION,
+  MIN_DURATION,
   OPEN_MIN,
   STEP_MIN,
+  durationLabel,
   fmtMin,
+  maxLengthAt,
   type Slot,
 } from "~/lib/booking";
 
@@ -29,6 +33,15 @@ const STATUS_LABEL = {
   past: "Минуло",
   none: "Немає місця",
 } as const;
+
+/** Why the frame's edge stopped while being stretched. */
+const LIMIT_LABEL = {
+  busy: "Далі зайнято",
+  close: "Пралки працюють до 24:00",
+  max: "Не довше 2,5 години",
+  min: "Не коротше 30 хвилин",
+} as const;
+type Limit = keyof typeof LIMIT_LABEL;
 
 const VISUALLY_HIDDEN: React.CSSProperties = {
   position: "absolute",
@@ -47,12 +60,18 @@ export type ScrubberProps = {
   starts: readonly number[];
   value: number | null;
   onChange: (start: number | null) => void;
+  /** Called while the frame's right edge is stretched, in 5-minute steps. */
+  onLenChange?: (len: number) => void;
+  /** Replaces the hint, for example when the wanted length had to shrink. */
+  note?: string;
 };
 
 /**
  * The day scrolls under a fixed frame the size of the booking. Native
  * momentum scrolling with 5-minute snap points; if the frame comes to rest
- * on a busy time it glides to the nearest free start.
+ * on a busy time it glides to the nearest free start. The frame's left edge
+ * stays put, and its right edge stretches the booking like an event in a
+ * calendar: up to 2.5 hours, closing time or the next booking.
  */
 export function TimeScrubber({
   bookings,
@@ -61,6 +80,8 @@ export function TimeScrubber({
   starts,
   value,
   onChange,
+  onLenChange,
+  note,
 }: ScrubberProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(360);
@@ -69,7 +90,13 @@ export function TimeScrubber({
   const [nudge, setNudge] = useState(0);
   const valid = useMemo(() => new Set(starts), [starts]);
   const frameW = len * PX_PER_MIN;
-  const pad = Math.max(0, (width - frameW) / 2);
+  // The frame starts where the longest booking would sit centred, so it can
+  // grow to the right without the day moving under the finger.
+  const lead = Math.max(
+    16,
+    Math.round((width - MAX_DURATION * PX_PER_MIN) / 2),
+  );
+  const trail = Math.max(0, width - lead - frameW);
   const lastStep = useRef<number | null>(null);
   const programmatic = useRef(false);
   const programmaticTimer = useRef(0);
@@ -261,7 +288,7 @@ export function TimeScrubber({
       if (!el) return;
       const rect = el.getBoundingClientRect();
       const minute =
-        OPEN_MIN + (clientX - rect.left + el.scrollLeft - pad) / PX_PER_MIN;
+        OPEN_MIN + (clientX - rect.left + el.scrollLeft - lead) / PX_PER_MIN;
       const wanted = Math.round((minute - len / 2) / STEP_MIN) * STEP_MIN;
       const target = nearestValid(
         Math.min(CLOSE_MIN - len, Math.max(OPEN_MIN, wanted)),
@@ -270,7 +297,7 @@ export function TimeScrubber({
       if (target !== wanted) setNudge((n) => n + 1);
       choose(target);
     },
-    [choose, len, nearestValid, pad],
+    [choose, len, nearestValid, lead],
   );
 
   // A mouse wheel moves the day one 5-minute step per notch; trackpads keep their own sideways scroll.
@@ -341,6 +368,65 @@ export function TimeScrubber({
     queueSettle();
   };
 
+  // Stretching the frame: its left edge (the start) stays, the right edge
+  // follows the pointer and stops at the first thing in the way.
+  const [limit, setLimit] = useState<Limit | null>(null);
+  const [resizing, setResizing] = useState(false);
+  const limitTimer = useRef(0);
+  const resize = useRef<{ x: number; len: number; max: number } | null>(null);
+  const anchor = value !== null && valid.has(value) ? value : null;
+  const maxHere = anchor === null ? len : maxLengthAt(bookings, anchor);
+  const limitAt = (start: number, max: number): Limit =>
+    max >= MAX_DURATION ? "max" : start + max >= CLOSE_MIN ? "close" : "busy";
+  const showLimit = (next: Limit | null) => {
+    window.clearTimeout(limitTimer.current);
+    setLimit(next);
+    if (next && !resize.current)
+      limitTimer.current = window.setTimeout(() => setLimit(null), 1600);
+  };
+  useEffect(() => () => window.clearTimeout(limitTimer.current), []);
+  const setLength = (raw: number, max: number) => {
+    if (!onLenChange || anchor === null) return;
+    const next = Math.min(
+      max,
+      Math.max(MIN_DURATION, Math.round(raw / STEP_MIN) * STEP_MIN),
+    );
+    showLimit(
+      raw > max + STEP_MIN / 2
+        ? limitAt(anchor, max)
+        : raw < MIN_DURATION - STEP_MIN / 2
+          ? "min"
+          : null,
+    );
+    if (next === len) return;
+    if ("vibrate" in navigator)
+      try {
+        navigator.vibrate(3);
+      } catch {}
+    onLenChange(next);
+  };
+  const onHandleDown = (e: React.PointerEvent<HTMLSpanElement>) => {
+    if (!onLenChange || anchor === null || e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    resize.current = { x: e.clientX, len, max: maxHere };
+    setResizing(true);
+  };
+  const onHandleMove = (e: React.PointerEvent<HTMLSpanElement>) => {
+    const r = resize.current;
+    if (!r) return;
+    setLength(r.len + (e.clientX - r.x) / PX_PER_MIN, r.max);
+  };
+  const onHandleUp = (e: React.PointerEvent<HTMLSpanElement>) => {
+    if (!resize.current) return;
+    resize.current = null;
+    setResizing(false);
+    if (e.currentTarget.hasPointerCapture(e.pointerId))
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    if (limit) showLimit(limit);
+  };
+
   const free = valid.has(live);
   const past =
     nowMin !== null && live < Math.ceil(nowMin / STEP_MIN) * STEP_MIN;
@@ -353,7 +439,9 @@ export function TimeScrubber({
   for (let h = OPEN_MIN / 60; h <= CLOSE_MIN / 60; h++) hours.push(h);
 
   return (
-    <div className={`scrubber is-${status}${settling ? " is-moving" : ""}`}>
+    <div
+      className={`scrubber is-${status}${settling ? " is-moving" : ""}${resizing ? " is-resizing" : ""}${limit && limit !== "min" ? " is-limit" : ""}`}
+    >
       {/* The readout changes on every step while the day moves; screen readers
           hear only the settled choice. */}
       <span aria-live="polite" style={VISUALLY_HIDDEN}>
@@ -372,7 +460,11 @@ export function TimeScrubber({
         <div
           ref={ref}
           className="scrub-track"
-          style={{ paddingInline: pad, scrollPaddingInline: pad }}
+          style={{
+            paddingLeft: lead,
+            paddingRight: trail,
+            scrollPaddingLeft: lead,
+          }}
           tabIndex={0}
           role="slider"
           aria-label="Початок запису"
@@ -413,13 +505,7 @@ export function TimeScrubber({
             placeAt(e.clientX);
           }}
         >
-          <div
-            className="scrub-day"
-            style={{
-              width: STEPS * STEP_PX + frameW,
-              ["--frame" as string]: `${frameW}px`,
-            }}
-          >
+          <div className="scrub-day" style={{ width: STEPS * STEP_PX }}>
             {Array.from({ length: STEPS + 1 }, (_, i) => (
               <span
                 key={i}
@@ -477,11 +563,44 @@ export function TimeScrubber({
         <div
           key={nudge}
           className="scrub-frame"
-          style={{ width: frameW }}
-          aria-hidden="true"
+          style={{ left: lead, width: frameW }}
         >
-          <span className="scrub-grip" />
-          <span className="scrub-grip" />
+          <span className="scrub-len" aria-hidden="true">
+            {durationLabel(len)}
+          </span>
+          <span className="scrub-grip" aria-hidden="true" />
+          {onLenChange && (
+            <span
+              className="scrub-handle"
+              tabIndex={anchor === null ? -1 : 0}
+              role="slider"
+              aria-label="Тривалість запису"
+              aria-valuemin={MIN_DURATION}
+              aria-valuemax={maxHere}
+              aria-valuenow={len}
+              aria-valuetext={durationLabel(len)}
+              aria-disabled={anchor === null || undefined}
+              onPointerDown={onHandleDown}
+              onPointerMove={onHandleMove}
+              onPointerUp={onHandleUp}
+              onPointerCancel={onHandleUp}
+              onKeyDown={(e) => {
+                const step =
+                  e.key === "ArrowRight" || e.key === "ArrowUp"
+                    ? STEP_MIN
+                    : e.key === "ArrowLeft" || e.key === "ArrowDown"
+                      ? -STEP_MIN
+                      : e.key === "Home"
+                        ? -MAX_DURATION
+                        : e.key === "End"
+                          ? MAX_DURATION
+                          : 0;
+                if (!step) return;
+                e.preventDefault();
+                setLength(len + step, maxHere);
+              }}
+            />
+          )}
         </div>
         <div className="scrub-fade left" aria-hidden="true" />
         <div className="scrub-fade right" aria-hidden="true" />
@@ -498,8 +617,17 @@ export function TimeScrubber({
             <use href="#i-back" />
           </svg>
         </button>
-        <p className="scrub-hint">
-          Тягніть шкалу або натисніть на вільне місце
+        <p
+          className={`scrub-hint${limit ? " is-limit" : note ? " is-note" : ""}`}
+          aria-live="polite"
+        >
+          {limit
+            ? LIMIT_LABEL[limit]
+            : note
+              ? note
+              : onLenChange
+                ? "Тягніть шкалу, щоб змінити час, а край рамки — тривалість"
+                : "Тягніть шкалу або натисніть на вільне місце"}
         </p>
         <button
           type="button"
