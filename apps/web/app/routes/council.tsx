@@ -80,6 +80,12 @@ export default function Council({
         .toLowerCase()
         .includes(q),
   );
+  const all = loaderData.people;
+  const stats = [
+    { label: "зареєстровано", value: all.length },
+    { label: "вказали кімнату", value: all.filter((p) => p.room).length },
+    { label: "заблоковано", value: all.filter((p) => p.blocked).length },
+  ];
   return (
     <>
       <TopBar back="/profile" title="Студрада" />
@@ -87,6 +93,14 @@ export default function Council({
         Записи будь-кого можна скасувати на сторінці пралки. Тут — блокування
         мешканців.
       </p>
+      <dl className="glass council-stats">
+        {stats.map((x) => (
+          <div key={x.label}>
+            <dt>{x.label}</dt>
+            <dd>{x.value}</dd>
+          </div>
+        ))}
+      </dl>
       {actionData && "error" in actionData && (
         <p className="error-note" role="alert">
           {actionData.error}

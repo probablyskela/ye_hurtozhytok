@@ -2373,3 +2373,34 @@ html:not(.booted) .ticket::after,
   font-weight: 500;
   color: var(--muted);
 }
+
+/* Council: how many people use the app, counted from the list itself. */
+.council-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0 0 14px;
+  padding: 14px 6px;
+}
+.council-stats div {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+.council-stats div + div {
+  border-left: 1px solid rgb(16 18 23 / 0.08);
+}
+.council-stats dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-feature-settings: "tnum";
+}
+.council-stats dt {
+  font-size: 12.5px;
+  color: var(--muted);
+}
