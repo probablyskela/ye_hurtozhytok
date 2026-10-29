@@ -18,6 +18,8 @@ no approval step.
 - `docs/system/README.md`: architecture, data model, auth, notifications, PWA.
 - `docs/run-project.md`: local setup, checks, Cloudflare deployment, Google client.
 - `docs/launch-plan.md`: launch status and what is left.
+- `docs/v2-plan.md`: draft plan for announcements, task board, complaints and
+  merging Оперета.
 - `DESIGN.md`, `PRODUCT.md`: design system and product context.
 - `CONTEXT.md`: product glossary only.
 
