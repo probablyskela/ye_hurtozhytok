@@ -1,0 +1,31 @@
+/* laundry screens: the no-JavaScript start picker of the booking page, in the app's own vocabulary */
+.pick-card .scrubber { display: grid; }
+.lp-strip { margin-top: 14px; }
+.lp-strip .strip-track { height: 22px; }
+.lp-label { margin: 18px 2px 8px; font-size: 14px; font-weight: 600; color: var(--ink-2); }
+.pick-card .seg a { padding: 0 6px; }
+.pick-card .scrub-hint { margin-top: 8px; }
+
+.lp-starts { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: 12px; }
+.lp-part > small { display: block; margin: 0 2px 6px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 6px; }
+.chip { position: relative; display: block; }
+.chip input { position: absolute; opacity: 0; pointer-events: none; }
+.chip span {
+  display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 999px;
+  background: var(--glass-strong); box-shadow: var(--shadow-gloss); cursor: pointer;
+  font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); font-feature-settings: "tnum";
+  transition: background 0.25s var(--ease), color 0.25s var(--ease), transform 0.2s var(--ease);
+}
+.chip span:hover { background: #fff; }
+.chip span:active { transform: scale(0.96); }
+.chip input:focus-visible + span { outline: 2px solid var(--mine); outline-offset: 2px; }
+/* the resident's own current choice is ultramarine */
+.chip input:checked + span { background: var(--mine); color: #fff; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25), 0 8px 18px -8px rgb(42 55 216 / 0.7); }
+
+/* booking detail: the second tap before cancelling */
+.lp-ask { margin: 14px 4px 0; font-size: 14.5px; font-weight: 600; color: var(--ink-2); }
+.lp-ask + .actions { margin-top: 8px; }
+
+/* a council member's cancel inside a busy timeline block */
+.timeline .tl-busy .pill-btn { align-self: center; }
