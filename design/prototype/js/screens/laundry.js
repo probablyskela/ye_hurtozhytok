@@ -153,9 +153,53 @@
     const cls = `ticket${big ? " big" : " compact"}${celebrate ? " celebrate" : ""}`;
     return to ? `<a class="${cls}" style="display:block;text-decoration:none" href="#${esc(to)}">${body}</a>` : `<div class="${cls}">${body}</div>`;
   }
+  const daysItems = (current, hrefFor) =>
+    EH.DAYS.map((d, i) => `<a data-pill-item="true" class="day" href="#${esc(hrefFor(d.date))}"${d.date === current ? ' aria-current="true"' : ""} aria-label="${esc(dayName(d.date))}"><small>${i === 0 ? "Сьогодні" : i === 1 ? "Завтра" : d.wd}</small><b>${d.d}</b></a>`).join("");
   function daysNav(current, hrefFor) {
-    return `<nav class="days" aria-label="День" data-keep-scroll>${EH.DAYS.map((d, i) => `<a class="day" href="#${esc(hrefFor(d.date))}"${d.date === current ? ' aria-current="true"' : ""} aria-label="${esc(dayName(d.date))}"><small>${i === 0 ? "Сьогодні" : i === 1 ? "Завтра" : d.wd}</small><b>${d.d}</b></a>`).join("")}</nav>`;
+    return `<nav class="days" aria-label="День" data-keep-scroll data-lpill><span class="pill" aria-hidden="true"></span>${daysItems(current, hrefFor)}</nav>`;
   }
+  /**
+   * components/pill-group.tsx for the days and the machines: one pill slides to
+   * the chosen item. The page is drawn anew on every tap, so the pill starts
+   * from where it stood before and glides to the new place.
+   */
+  let pillWas = {};
+  let pillPath = null;
+  function mountNavPills(root) {
+    const path = location.hash.split("?")[0];
+    if (path !== pillPath) { pillWas = {}; pillPath = path; }
+    root.querySelectorAll("nav[data-lpill]").forEach((nav) => {
+      const pill = nav.querySelector(":scope > .pill");
+      const items = [...nav.querySelectorAll(":scope > [data-pill-item]")];
+      const on = items.find((i) => i.getAttribute("aria-current") === "true");
+      if (!pill || !on) return;
+      const key = nav.getAttribute("aria-label");
+      const was = pillWas[key];
+      // the sideways list stays where it was, and the chosen item stays in view
+      if (was) nav.scrollLeft = was.scroll;
+      if (on.offsetLeft + on.offsetWidth > nav.scrollLeft + nav.clientWidth) nav.scrollLeft = on.offsetLeft + on.offsetWidth - nav.clientWidth + 16;
+      else if (on.offsetLeft < nav.scrollLeft) nav.scrollLeft = Math.max(0, on.offsetLeft - 16);
+      nav.classList.add("has-pill");
+      items.forEach((i) => i.toggleAttribute("data-pill-on", i === on));
+      const box = { w: on.offsetWidth, h: on.offsetHeight, x: on.offsetLeft, y: on.offsetTop };
+      const put = (b) => {
+        pill.style.width = `${b.w}px`;
+        pill.style.height = `${b.h}px`;
+        pill.style.transform = `translate(${b.x}px, ${b.y}px)`;
+      };
+      const track = () => (pillWas[key] = { ...box, scroll: nav.scrollLeft });
+      track();
+      nav.addEventListener("scroll", track, { passive: true });
+      if (!was || (was.x === box.x && was.w === box.w)) {
+        put(box);
+        requestAnimationFrame(() => pill.classList.add("pill-ready"));
+        return;
+      }
+      put(was);
+      requestAnimationFrame(() => { pill.classList.add("pill-ready"); requestAnimationFrame(() => put(box)); });
+    });
+  }
+
   const note = (kind, text) => `<p class="${kind}-note" role="${kind === "ok" ? "status" : "alert"}">${esc(text)}</p>`;
 
   // Links that only change a choice keep the scroll position, like preventScrollReset.
@@ -165,6 +209,29 @@
     if (keepY == null) return;
     const y = keepY; keepY = null;
     setTimeout(() => window.scrollTo(0, y), 0);
+  }
+
+  /** Every phone draws the shared data again: the store has no event for a booking changed in place. */
+  function redrawAll() {
+    let others = false;
+    try {
+      const top = window.top;
+      for (let i = 0; i < top.frames.length; i++) {
+        try { top.frames[i].App?.rerender(); others = true; } catch (e) { /* another origin */ }
+      }
+    } catch (e) { /* standalone */ }
+    if (!others) App.rerender();
+  }
+  /**
+   * lib/bookings.server.ts cancelBooking for the council: anyone's booking until it ends, even one
+   * already running (someone did not come). A running one ends quietly: the store would tell the
+   * dorm group the whole booked time is free, though most of it is already past.
+   */
+  function councilCancel(b, me) {
+    if (!b || b.status !== "active" || ended(b) || !isCouncil(me)) return false;
+    if (running(b)) { b.status = "cancelled"; redrawAll(); }
+    else EH.actions.cancelBooking(b.id, me.id);
+    return true;
   }
 
   // Per-phone, per-session state (the live app keeps these in the browser too).
@@ -264,108 +331,461 @@
   });
 
   // ================= /laundry/book =================
+  // components/time-scrubber.tsx: the day slides under a fixed frame the size of the booking.
+  const STEP_PX = 8; // pixels per 5-minute step: an hour is 96px
+  const PXM = STEP_PX / STEP;
+  const STEPS = (CLOSE - OPEN) / STEP;
+  const STATUS_LABEL = { free: "Вільно", busy: "Зайнято", past: "Минуло", none: "Немає місця" };
+  const LIMIT_LABEL = { busy: "Далі зайнято", close: "Пралки працюють до 24:00", max: "Не довше 2,5 години", min: "Не коротше 30 хвилин" };
+  const HINT = "Тягніть шкалу, щоб змінити час, а край рамки — тривалість";
+  const VH = "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap";
+  /** lib/booking.ts maxLengthAt: the longest booking from this start. */
+  function maxLengthAt(slots, start) {
+    let limit = Math.min(MAX_LEN, CLOSE - start);
+    for (const b of slots) if (b.s >= start) limit = Math.min(limit, b.s - BUF - start);
+    return Math.floor(limit / STEP) * STEP;
+  }
+  // The frame starts where the longest booking would sit centred, so it can grow to the right.
+  const leadFor = (w) => Math.max(16, Math.round((w - MAX_LEN * PXM) / 2));
+  const x5 = (m) => (m - OPEN) * PXM;
+  const scrubStatus = (at, starts, nowMin) =>
+    !starts.length ? "none" : starts.includes(at) ? "free" : nowMin != null && at < ceil5(nowMin) ? "past" : "busy";
+  /** Beginnings of free stretches: starts not directly after another start. */
+  const windowStarts = (starts) => starts.filter((s, i) => i === 0 || s - starts[i - 1] !== STEP);
+  const jumpTarget = (starts, dir, from) => {
+    const ws = windowStarts(starts);
+    return dir > 0 ? ws.find((s) => s > from) : ws.filter((s) => s < from).at(-1);
+  };
+  let trackW = 358; // the last measured scale width, so a re-render lands where it was
+
+  // The person's choice on this page, kept per link like the live page keeps it in React state.
+  let pick = { key: null, m: null, wanted: DEF_LEN, start: undefined };
+  let model = null; // what the scrubber needs after render
+
+  function scrubberHtml(slots, starts, len, start, nowMin, meId, note) {
+    const at = start ?? starts[0] ?? OPEN;
+    const status = scrubStatus(at, starts, nowMin);
+    const lead = leadFor(trackW);
+    const frameW = len * PXM;
+    const trail = Math.max(0, trackW - lead - frameW);
+    const anchor = start != null && starts.includes(start) ? start : null;
+    const maxHere = anchor == null ? len : maxLengthAt(slots, anchor);
+    let day = "";
+    for (let i = 0; i <= STEPS; i++) day += `<span class="scrub-snap" style="left:${i * STEP_PX}px"></span>`;
+    for (let h = OPEN / 60; h <= CLOSE / 60; h++) day += `<span class="scrub-hour" style="left:${x5(h * 60)}px">${String(h).padStart(2, "0")}</span>`;
+    let band = "";
+    for (const b of slots) {
+      band += `<span>${b.s - BUF >= OPEN ? `<span class="seg-buf" style="left:${x5(b.s - BUF)}px;width:${BUF * PXM}px"></span>` : ""}${b.e + BUF <= CLOSE ? `<span class="seg-buf" style="left:${x5(b.e)}px;width:${BUF * PXM}px"></span>` : ""}<span class="${b.person === meId ? "seg-mine" : "seg-busy"}" style="left:${x5(b.s)}px;width:${(b.e - b.s) * PXM}px"></span></span>`;
+    }
+    if (nowMin != null && nowMin > OPEN) band += `<span class="seg-past" style="width:${x5(Math.min(nowMin, CLOSE))}px"></span>`;
+    if (nowMin != null && nowMin >= OPEN && nowMin < CLOSE) band += `<span class="scrub-now" style="left:${x5(nowMin)}px"></span>`;
+    const label = STATUS_LABEL[status];
+    return `<div class="scrubber is-${status}">
+      <span aria-live="polite" style="${VH}" data-scrub-said>${start != null ? `Обрано ${fmt(start)}–${fmt(start + len)}` : ""}</span>
+      <div class="scrub-readout" aria-hidden="true"><span class="scrub-time">${fmt(at)}<span class="dash">–</span>${fmt(at + len)}</span><span class="scrub-status">${label}</span></div>
+      <div class="scrub-window">
+        <div class="scrub-track" style="padding-left:${lead}px;padding-right:${trail}px;scroll-padding-left:${lead}px" tabindex="0" role="slider" aria-label="Початок запису" aria-valuemin="${OPEN}" aria-valuemax="${CLOSE - len}" aria-valuenow="${at}" aria-valuetext="${fmt(at)}–${fmt(at + len)}, ${label.toLowerCase()}">
+          <div class="scrub-day" style="width:${STEPS * STEP_PX}px">${day}<div class="scrub-band">${band}</div></div>
+        </div>
+        <div class="scrub-frame" style="left:${lead}px;width:${frameW}px"><span class="scrub-len" aria-hidden="true">${esc(durationLabel(len))}</span><span class="scrub-grip" aria-hidden="true"></span><span class="scrub-handle" tabindex="${anchor == null ? -1 : 0}" role="slider" aria-label="Тривалість запису" aria-valuemin="${MIN_LEN}" aria-valuemax="${maxHere}" aria-valuenow="${len}" aria-valuetext="${esc(durationLabel(len))}"${anchor == null ? ' aria-disabled="true"' : ""}></span></div>
+        <div class="scrub-fade left" aria-hidden="true"></div><div class="scrub-fade right" aria-hidden="true"></div>
+      </div>
+      <div class="scrub-controls">
+        <button type="button" class="icon-btn" aria-label="Попереднє вільне вікно" data-scrub-jump="-1"${jumpTarget(starts, -1, at) === undefined ? " disabled" : ""}>${icon("back")}</button>
+        <p class="scrub-hint${note ? " is-note" : ""}" aria-live="polite">${esc(note || HINT)}</p>
+        <button type="button" class="icon-btn" aria-label="Наступне вільне вікно" data-scrub-jump="1"${jumpTarget(starts, 1, at) === undefined ? " disabled" : ""}>${icon("chev")}</button>
+      </div>
+    </div>`;
+  }
+
+  function sheetHtml(md) {
+    const { left, ready, start, len } = md;
+    const text = left <= 0
+      ? `<small>Усі ${MAX_ACTIVE} записи зайняті</small><b>Скасуйте один, щоб записатися</b>`
+      : ready
+        ? `<small>${esc(md.machineName)} · ${esc(dayName(md.date).toLowerCase())}</small><b class="sheet-time">${fmt(start)}–${fmt(start + len)}</b>`
+        : `<small>${esc(durationLabel(len))}</small><b>Оберіть час</b>`;
+    const disabled = left <= 0 || !md.starts.length || !ready;
+    return { text, disabled };
+  }
+
+  /** The machine list and the days, built for a wanted length; refreshed in place when the frame is stretched. */
+  function bookNavs(date, nowMin, mId, wanted) {
+    const list = S.machines.map((x) => ({ ...x, ...fitting(slotsOn(x.id, date), wanted, nowMin) }));
+    const link = (p) => q("/laundry/book", { len: wanted, d: date, m: mId, ...p });
+    const days = daysItems(date, (d) => link({ d }));
+    const machines = list.map((x) => `<a data-pill-item="true" href="#${esc(link({ m: x.id }))}"${x.id === mId ? ' aria-current="true"' : ""}><b>${esc(x.short)}</b><small${x.starts.length ? ' class="ok"' : ""}>${!x.starts.length ? "немає місця" : x.len < wanted ? `до ${esc(durationLabel(x.len))}` : `з ${fmt(x.starts[0])}`}</small></a>`).join("");
+    return { days, machines };
+  }
+
   App.route("/laundry/book", (ctx) => {
     const me = ctx.me;
     const date = dayIdx(ctx.query.d) >= 0 ? ctx.query.d : EH.TODAY;
     const nowMin = nowFor(date);
-    const wanted = parseDuration(ctx.query.len);
-    const list = S.machines.map((m) => {
-      const slots = slotsOn(m.id, date);
-      return { ...m, slots, ...fitting(slots, wanted, nowMin) };
+    const key = `${ctx.query.m || ""}|${date}|${ctx.query.s || ""}|${ctx.query.len || ""}`;
+    if (pick.key !== key) pick = { key, m: null, wanted: parseDuration(ctx.query.len), start: undefined };
+    const wanted = pick.wanted;
+    const list = S.machines.map((x) => {
+      const slots = slotsOn(x.id, date);
+      return { ...x, slots, ...fitting(slots, wanted, nowMin) };
     });
-    const requested = list.find((x) => x.id === ctx.query.m);
+    // The machine from the link, otherwise the one that frees up first (whole length preferred).
+    const requested = list.find((x) => x.id === (pick.m || ctx.query.m));
     const earliest = list.filter((x) => x.starts.length).sort((a, b) => Number(b.len === wanted) - Number(a.len === wanted) || a.starts[0] - b.starts[0])[0];
     const m = requested || earliest || list[0];
+    pick.m = m.id; // stays put while other people's bookings change the day
     const len = m.len;
-    const s = Number(ctx.query.s);
-    // Today: the nearest free start. Later days: from 10:00, so nobody books 06:00 by accident.
-    const preferred = nowMin == null ? (m.starts.find((x) => x >= 600) ?? m.starts[0]) : m.starts[0];
-    const start = m.starts.includes(s) ? s : preferred ?? null;
+    if (pick.start === undefined || pick.start === null) {
+      const s = Number(ctx.query.s);
+      // Today: the nearest free start. Later days: from 10:00, so nobody books 06:00 by accident.
+      const preferred = nowMin == null ? (m.starts.find((x) => x >= 600) ?? m.starts[0]) : m.starts[0];
+      pick.start = m.starts.includes(s) ? s : preferred ?? null;
+    }
+    const start = pick.start;
+    const ready = start != null && m.starts.includes(start);
     const active = upcoming(me.id).length;
     const left = MAX_ACTIVE - active;
-    const link = (p) => q("/laundry/book", { len: wanted, d: date, m: m.id, ...p });
+    const shortened = len < wanted;
+    const scrubNote = shortened ? `Цього дня найдовше вільне вікно — ${durationLabel(len)}` : "";
+    const navs = bookNavs(date, nowMin, m.id, wanted);
+    model = { date, nowMin, mId: m.id, machineName: m.name, slots: m.slots, starts: m.starts, wanted, len, start, ready, left, note: scrubNote, meId: me.id };
 
-    const picker = `<nav class="machine-pick" aria-label="Пралка" data-keep-scroll>${list.map((x) => `<a href="#${esc(link({ m: x.id }))}"${x.id === m.id ? ' aria-current="true"' : ""}><b>${esc(x.short)}</b><small${x.starts.length ? ' class="ok"' : ""}>${!x.starts.length ? "немає місця" : x.len < wanted ? `до ${esc(durationLabel(x.len))}` : `з ${fmt(x.starts[0])}`}</small></a>`).join("")}</nav>`;
-
-    let card;
-    if (!m.starts.length) {
-      card = `<div class="empty-note" style="margin-top:0">${icon("info", true)}<span>${date === EH.TODAY ? "Сьогодні" : "Цього дня"} на цій пралці немає навіть ${durationLabel(MIN_LEN)}. Оберіть іншу пралку чи день.</span></div>`;
-    } else {
-      // Starts every half hour plus the first start of each free stretch, grouped by part of day.
-      const shown = m.starts.filter((x, i) => x % 30 === 0 || i === 0 || m.starts[i - 1] !== x - STEP || x === start);
-      const parts = [["Ранок", OPEN, 720], ["День", 720, 1080], ["Вечір", 1080, CLOSE]];
-      const chips = parts.map(([label, a, z]) => {
-        const xs = shown.filter((x) => x >= a && x < z);
-        if (!xs.length) return "";
-        return `<div class="lp-part"><small>${label}</small><div class="chips">${xs.map((x) => `<label class="chip"><input type="radio" name="start" value="${x}"${x === start ? " checked" : ""}><span>${fmt(x)}</span></label>`).join("")}</div></div>`;
-      }).join("");
-      const shortened = len < wanted;
-      card = `<div class="scrubber is-free">
-          <div class="scrub-readout"><span class="scrub-time" data-pick-time>${fmt(start)}<span class="dash">–</span>${fmt(start + len)}</span><span class="scrub-status">Вільно</span></div>
-          <div class="lp-strip">${dayStrip(m.short, m.slots, me.id, nowMin, { pick: { s: start, e: start + len }, mini: true })}${scale()}</div>
-          <div class="lp-label">Тривалість</div>
-          ${App.seg(QUICK.map((d) => ({ href: link({ len: d, s: start }), label: durationLabel(d), on: d === wanted })), "Тривалість", "data-keep-scroll")}
-          ${shortened ? `<p class="scrub-hint is-note">Цього дня найдовше вільне вікно — ${esc(durationLabel(len))}</p>` : ""}
-          <div class="lp-label">Початок</div>
-          <fieldset class="lp-starts" aria-label="Початок">${chips}</fieldset>
-        </div>`;
-    }
+    const card = !m.starts.length
+      ? `<div class="empty-note" style="margin-top:0">${icon("info", true)}<span>${date === EH.TODAY ? "Сьогодні" : "Цього дня"} на цій пралці немає навіть ${durationLabel(MIN_LEN)}. Оберіть іншу пралку чи день.</span></div>`
+      : scrubberHtml(m.slots, m.starts, len, start, nowMin, me.id, scrubNote);
 
     const quota = `<div class="quota"><span class="quota-dots" aria-hidden="true">${[0, 1, 2].map((i) => `<i${i < active ? ' class="on"' : ""}></i>`).join("")}</span>${left > 0 ? `Ще можна мати ${left} ${left === 1 ? "запис" : "записи"} із ${MAX_ACTIVE}` : `Усі ${MAX_ACTIVE} записи зайняті`}</div>`;
 
     const html = `<form id="lbook" data-form="laundry-book">
       ${App.topbar({ back: "/laundry" })}
       <h2 class="title">Записатися</h2>
-      <p class="lede">Оберіть день і пралку, тривалість і початок.</p>
+      <p class="lede">Оберіть день і пралку, а на шкалі — час і тривалість.</p>
       ${ctx.query.err && ERRORS[ctx.query.err] ? note("error", ERRORS[ctx.query.err]) : ""}
       <div class="section-h" style="margin-top:0"><h3>Коли</h3></div>
-      ${daysNav(date, (d) => link({ d }))}
+      <nav class="days" aria-label="День" data-keep-scroll data-lpill><span class="pill" aria-hidden="true"></span>${navs.days}</nav>
       <div class="section-h"><h3>Пралка</h3></div>
-      ${picker}
+      <nav class="machine-pick" aria-label="Пралка" data-keep-scroll data-lpill><span class="pill" aria-hidden="true"></span>${navs.machines}</nav>
       <div class="glass pick-card">${card}</div>
       ${quota}
-      <input type="hidden" name="machine" value="${esc(m.id)}"><input type="hidden" name="date" value="${esc(date)}"><input type="hidden" name="len" value="${len}">
+      <input type="hidden" name="machine" value="${esc(m.id)}"><input type="hidden" name="date" value="${esc(date)}">
+      <input type="hidden" name="len" value="${len}"><input type="hidden" name="start" value="${ready ? start : ""}">
     </form>`;
 
-    const disabled = left <= 0 || !m.starts.length || start == null;
-    const sheetText = left <= 0
-      ? `<small>Усі ${MAX_ACTIVE} записи зайняті</small><b>Скасуйте один, щоб записатися</b>`
-      : start == null
-        ? `<small>${esc(durationLabel(len))}</small><b>Оберіть час</b>`
-        : `<small>${esc(m.name)} · ${esc(dayName(date).toLowerCase())}</small><b class="sheet-time" data-sheet-time>${fmt(start)}–${fmt(start + len)}</b>`;
-    const sheet = `<div class="sheet"><div class="sheet-text">${sheetText}</div><button class="btn btn-primary" type="submit" form="lbook"${disabled ? " disabled" : ""}>Записатися</button></div>`;
+    const sh = sheetHtml(model);
+    const sheet = `<div class="sheet"><div class="sheet-text">${sh.text}</div><button class="btn btn-primary" type="submit" form="lbook"${sh.disabled ? " disabled" : ""}>Записатися</button></div>`;
     return { html, sheet };
   }, {
     tab: "laundry", title: "Записатися",
     mount(root) {
       restoreScroll();
-      const form = root.querySelector("#lbook");
-      if (!form) return;
-      const len = Number(form.elements.len.value);
-      const sync = () => {
-        const r = form.querySelector('input[name="start"]:checked');
-        if (!r) return;
-        const s = Number(r.value);
-        const t = root.querySelector("[data-pick-time]");
-        if (t) t.innerHTML = `${fmt(s)}<span class="dash">–</span>${fmt(s + len)}`;
-        const st = root.querySelector("[data-sheet-time]");
-        if (st) st.textContent = `${fmt(s)}–${fmt(s + len)}`;
-        const seg = root.querySelector("[data-pick-seg]");
-        if (seg) { seg.style.left = pct(s); seg.style.width = wid(s, s + len); }
-        // the duration links keep the chosen start
-        root.querySelectorAll('.lp-strip ~ .seg a').forEach((a) => { a.href = a.getAttribute("href").replace(/([?&]s=)\d+/, `$1${s}`); });
-      };
-      form.addEventListener("change", sync);
-      setTimeout(sync, 0); // after a re-render restores the person's chosen start
+      mountNavPills(root);
+      mountScrubber(root);
     },
   });
+
+  /** The scrubber's behaviour, ported from components/time-scrubber.tsx. */
+  function mountScrubber(root) {
+    const md = model;
+    const form = root.querySelector("#lbook");
+    const sc = root.querySelector(".scrubber");
+    const syncInputs = () => {
+      if (!form) return;
+      form.elements.len.value = String(md.len);
+      form.elements.start.value = md.ready ? String(md.start) : "";
+    };
+    // core's re-render puts typed values back after mount; ours come from the choice instead
+    queueMicrotask(syncInputs);
+    if (!sc || !md) return;
+    const track = sc.querySelector(".scrub-track");
+    const frame = sc.querySelector(".scrub-frame");
+    const handle = sc.querySelector(".scrub-handle");
+    const timeEl = sc.querySelector(".scrub-time");
+    const statusEl = sc.querySelector(".scrub-status");
+    const hintEl = sc.querySelector(".scrub-hint");
+    const lenEl = sc.querySelector(".scrub-len");
+    const said = sc.querySelector("[data-scrub-said]");
+    const [prevBtn, nextBtn] = sc.querySelectorAll("[data-scrub-jump]");
+    const sheetText = root.querySelector(".sheet .sheet-text");
+    const sheetBtn = root.querySelector(".sheet .btn");
+
+    let len = md.len;
+    let starts = md.starts;
+    let valid = new Set(starts);
+    let width = track.clientWidth || trackW;
+    let lead = leadFor(width);
+    let live = md.start ?? starts[0] ?? OPEN;
+    let programmatic = false, progTimer = 0, settleTimer = 0;
+    let holding = false, movedWhileHolding = false;
+    let limit = null, limitTimer = 0, resizing = null;
+    const flags = { moving: false };
+
+    const startAt = (left) => Math.min(CLOSE - len, Math.max(OPEN, OPEN + Math.round(left / STEP_PX) * STEP));
+    const nearestValid = (s) => (valid.has(s) ? s : starts.length ? starts.reduce((best, x) => (Math.abs(x - s) < Math.abs(best - s) ? x : best), starts[0]) : null);
+    const anchor = () => (md.start != null && valid.has(md.start) ? md.start : null);
+
+    function geometry() {
+      width = track.clientWidth || width;
+      trackW = width;
+      lead = leadFor(width);
+      const frameW = len * PXM;
+      track.style.paddingLeft = `${lead}px`;
+      track.style.paddingRight = `${Math.max(0, width - lead - frameW)}px`;
+      track.style.scrollPaddingLeft = `${lead}px`;
+      frame.style.left = `${lead}px`;
+      frame.style.width = `${frameW}px`;
+    }
+    function classes() {
+      const status = scrubStatus(live, starts, md.nowMin);
+      sc.className = `scrubber is-${status}${flags.moving ? " is-moving" : ""}${resizing ? " is-resizing" : ""}${limit && limit !== "min" ? " is-limit" : ""}`;
+      return status;
+    }
+    function readout() {
+      const status = classes();
+      const label = STATUS_LABEL[status];
+      timeEl.innerHTML = `${fmt(live)}<span class="dash">–</span>${fmt(live + len)}`;
+      statusEl.textContent = label;
+      track.setAttribute("aria-valuenow", live);
+      track.setAttribute("aria-valuemax", CLOSE - len);
+      track.setAttribute("aria-valuetext", `${fmt(live)}–${fmt(live + len)}, ${label.toLowerCase()}`);
+      prevBtn.disabled = jumpTarget(starts, -1, live) === undefined;
+      nextBtn.disabled = jumpTarget(starts, 1, live) === undefined;
+    }
+    function hint() {
+      hintEl.className = `scrub-hint${limit ? " is-limit" : md.note ? " is-note" : ""}`;
+      hintEl.textContent = limit ? LIMIT_LABEL[limit] : md.note || HINT;
+    }
+    function lengthUi() {
+      const a = anchor();
+      lenEl.textContent = durationLabel(len);
+      handle.setAttribute("aria-valuenow", len);
+      handle.setAttribute("aria-valuetext", durationLabel(len));
+      handle.setAttribute("aria-valuemax", a == null ? len : maxLengthAt(md.slots, a));
+      handle.tabIndex = a == null ? -1 : 0;
+      handle.toggleAttribute("aria-disabled", a == null);
+    }
+    /** The choice moved: the sheet, the form and what a screen reader hears. */
+    function chosen(s) {
+      md.start = s;
+      md.ready = s != null && valid.has(s);
+      pick.start = s;
+      said.textContent = s != null ? `Обрано ${fmt(s)}–${fmt(s + len)}` : "";
+      const sh = sheetHtml(md);
+      if (sheetText) sheetText.innerHTML = sh.text;
+      if (sheetBtn) sheetBtn.disabled = sh.disabled;
+      syncInputs();
+    }
+    function scrollToStart(s, smooth) {
+      programmatic = true;
+      clearTimeout(settleTimer);
+      track.scrollTo({ left: x5(s), behavior: smooth ? "smooth" : "auto" });
+      clearTimeout(progTimer);
+      progTimer = setTimeout(() => (programmatic = false), smooth ? 450 : 30);
+    }
+    function nudge() {
+      frame.style.animation = "none";
+      void frame.offsetWidth;
+      frame.style.animation = "";
+    }
+    function settle() {
+      const s = startAt(track.scrollLeft);
+      const target = nearestValid(s);
+      flags.moving = false;
+      if (target === null) { classes(); chosen(null); return; }
+      if (target !== s) { nudge(); scrollToStart(target, true); }
+      live = target;
+      readout();
+      chosen(target);
+    }
+    const queueSettle = () => { clearTimeout(settleTimer); settleTimer = setTimeout(settle, 140); };
+    function choose(s) { scrollToStart(s, true); live = s; readout(); chosen(s); }
+
+    geometry();
+    scrollToStart(live, false);
+    readout();
+    hint();
+
+    const ro = new ResizeObserver(() => {
+      if (!track.isConnected) { ro.disconnect(); return; }
+      if (track.clientWidth === width) return;
+      geometry();
+      scrollToStart(live, false);
+    });
+    ro.observe(track);
+
+    track.addEventListener("scroll", () => {
+      live = startAt(track.scrollLeft);
+      if (programmatic) { readout(); return; }
+      flags.moving = true;
+      readout();
+      if (holding) { movedWhileHolding = true; clearTimeout(settleTimer); return; }
+      queueSettle();
+    }, { passive: true });
+    track.addEventListener("touchstart", () => { holding = true; movedWhileHolding = false; clearTimeout(settleTimer); }, { passive: true });
+    const touchEnd = () => { holding = false; if (movedWhileHolding) queueSettle(); };
+    track.addEventListener("touchend", touchEnd, { passive: true });
+    track.addEventListener("touchcancel", touchEnd, { passive: true });
+
+    // A mouse wheel moves the day one 5-minute step per notch; trackpads keep their own sideways scroll.
+    let acc = 0, wheelTarget = null, wheelIdle = 0;
+    track.addEventListener("wheel", (e) => {
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      e.preventDefault();
+      acc += e.deltaY * (e.deltaMode === 1 ? 100 / 3 : e.deltaMode === 2 ? 100 : 1);
+      const steps = Math.trunc(acc / 100);
+      if (!steps) return;
+      acc -= steps * 100;
+      const max = track.scrollWidth - track.clientWidth;
+      const from = wheelTarget ?? Math.round(track.scrollLeft / STEP_PX) * STEP_PX;
+      wheelTarget = Math.min(max, Math.max(0, from + steps * STEP_PX));
+      track.scrollTo({ left: wheelTarget, behavior: "smooth" });
+      clearTimeout(wheelIdle);
+      wheelIdle = setTimeout(() => (wheelTarget = null), 400);
+    }, { passive: false });
+
+    // Mouse: grab and drag the day like on a phone.
+    let drag = null, suppressClick = false;
+    track.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      drag = { x: e.clientX, left: track.scrollLeft, moved: false };
+      holding = true; movedWhileHolding = false;
+      clearTimeout(settleTimer);
+      track.style.scrollSnapType = "none";
+      track.setPointerCapture(e.pointerId);
+    });
+    track.addEventListener("pointermove", (e) => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x;
+      if (Math.abs(dx) > 3) drag.moved = true;
+      track.scrollLeft = drag.left - dx;
+    });
+    const dragEnd = (e) => {
+      const d = drag;
+      if (!d) return;
+      drag = null; holding = false;
+      if (track.hasPointerCapture(e.pointerId)) track.releasePointerCapture(e.pointerId);
+      suppressClick = d.moved;
+      track.style.scrollSnapType = "";
+      if (!d.moved) return;
+      track.scrollTo({ left: Math.round(track.scrollLeft / STEP_PX) * STEP_PX, behavior: "smooth" });
+      queueSettle();
+    };
+    track.addEventListener("pointerup", dragEnd);
+    track.addEventListener("pointercancel", dragEnd);
+
+    // A click or tap on the day centres the booking there (or on the nearest free start).
+    track.addEventListener("click", (e) => {
+      if (suppressClick) { suppressClick = false; return; }
+      const rect = track.getBoundingClientRect();
+      const minute = OPEN + (e.clientX - rect.left + track.scrollLeft - lead) / PXM;
+      const wanted = Math.round((minute - len / 2) / STEP) * STEP;
+      const target = nearestValid(Math.min(CLOSE - len, Math.max(OPEN, wanted)));
+      if (target === null) return;
+      if (target !== wanted) nudge();
+      choose(target);
+    });
+
+    // Keys step to the neighbouring free start (5 minutes); buttons skip whole windows.
+    track.addEventListener("keydown", (e) => {
+      if (e.key === "Home" || e.key === "End") {
+        e.preventDefault();
+        const edge = e.key === "Home" ? starts[0] : starts.at(-1);
+        if (edge !== undefined) choose(edge);
+        return;
+      }
+      const dir = e.key === "ArrowRight" || e.key === "ArrowUp" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowDown" ? -1 : 0;
+      if (!dir) return;
+      e.preventDefault();
+      const from = programmatic && md.start != null ? md.start : live;
+      const side = starts.filter((s) => (dir > 0 ? s > from : s < from));
+      const next = dir > 0 ? side[0] : side.at(-1);
+      if (next !== undefined) choose(next);
+    });
+    sc.querySelectorAll("[data-scrub-jump]").forEach((btn) => btn.addEventListener("click", () => {
+      const from = programmatic && md.start != null ? md.start : live;
+      const next = jumpTarget(starts, Number(btn.dataset.scrubJump), from);
+      if (next !== undefined) choose(next);
+    }));
+
+    // Stretching the frame: its left edge (the start) stays, the right edge stops at the first thing in the way.
+    const limitAt = (s, max) => (max >= MAX_LEN ? "max" : s + max >= CLOSE ? "close" : "busy");
+    function showLimit(next) {
+      clearTimeout(limitTimer);
+      limit = next;
+      classes(); hint();
+      if (next && !resizing) limitTimer = setTimeout(() => { limit = null; classes(); hint(); }, 1600);
+    }
+    function setLength(raw, max) {
+      const a = anchor();
+      if (a == null) return;
+      const next = Math.min(max, Math.max(MIN_LEN, Math.round(raw / STEP) * STEP));
+      showLimit(raw > max + STEP / 2 ? limitAt(a, max) : raw < MIN_LEN - STEP / 2 ? "min" : null);
+      if (next === len) return;
+      len = next;
+      // The wish follows the frame; the day's free starts are counted for the new length.
+      md.len = len; md.wanted = len; md.note = ""; pick.wanted = len;
+      ({ starts } = fitting(md.slots, len, md.nowMin));
+      md.starts = starts;
+      valid = new Set(starts);
+      geometry();
+      live = a;
+      lengthUi(); readout(); hint();
+      chosen(a);
+      refreshNavs();
+    }
+    /** The links carry the new wish, and the machines say where it fits; the pills stay where they are. */
+    function refreshNavs() {
+      const tpl = document.createElement("div");
+      const navs = bookNavs(md.date, md.nowMin, md.mId, len);
+      for (const [sel, html] of [["nav.days[data-lpill]", navs.days], ["nav.machine-pick[data-lpill]", navs.machines]]) {
+        const nav = root.querySelector(sel);
+        if (!nav) continue;
+        tpl.innerHTML = html;
+        const fresh = [...tpl.children];
+        nav.querySelectorAll(":scope > [data-pill-item]").forEach((a, i) => {
+          if (!fresh[i]) return;
+          a.setAttribute("href", fresh[i].getAttribute("href"));
+          const small = a.querySelector("small"), next = fresh[i].querySelector("small");
+          if (small && next && sel.includes("machine")) small.outerHTML = next.outerHTML;
+        });
+      }
+    }
+    handle.addEventListener("pointerdown", (e) => {
+      if (anchor() == null || e.button !== 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+      handle.setPointerCapture(e.pointerId);
+      resizing = { x: e.clientX, len, max: maxLengthAt(md.slots, anchor()) };
+      classes();
+    });
+    handle.addEventListener("pointermove", (e) => {
+      if (!resizing) return;
+      setLength(resizing.len + (e.clientX - resizing.x) / PXM, resizing.max);
+    });
+    const handleUp = (e) => {
+      if (!resizing) return;
+      resizing = null;
+      if (handle.hasPointerCapture(e.pointerId)) handle.releasePointerCapture(e.pointerId);
+      classes();
+      if (limit) showLimit(limit);
+    };
+    handle.addEventListener("pointerup", handleUp);
+    handle.addEventListener("pointercancel", handleUp);
+    handle.addEventListener("click", (e) => e.stopPropagation());
+    handle.addEventListener("keydown", (e) => {
+      const step = e.key === "ArrowRight" || e.key === "ArrowUp" ? STEP : e.key === "ArrowLeft" || e.key === "ArrowDown" ? -STEP : e.key === "Home" ? -MAX_LEN : e.key === "End" ? MAX_LEN : 0;
+      if (!step) return;
+      e.preventDefault();
+      const a = anchor();
+      if (a != null) setLength(len + step, maxLengthAt(md.slots, a));
+    });
+  }
 
   App.form("laundry-book", (data, ctx) => {
     const len = Number(data.len), start = Number(data.start);
     if (!data.start) return;
     const r = tryBook(ctx.me, data.machine, data.date, start, len);
     if (r.error) ctx.go(q("/laundry/book", { len, d: data.date, m: data.machine, err: r.error }), { replace: true });
-    else ctx.go(`/laundry/booking/${r.booking.id}?new=1`);
+    else { pick = { key: null }; ctx.go(`/laundry/booking/${r.booking.id}?new=1`); }
   });
 
   // ================= /laundry/machine/:id =================
@@ -408,7 +828,7 @@
       } else {
         const p = EH.person(b.person);
         const tg = p.tg ? ` · <a href="https://t.me/${esc(p.tg)}" target="_blank" rel="noreferrer">@${esc(p.tg)}</a>` : "";
-        const cancel = council
+        const cancel = council && !ended(b)
           ? `<button class="pill-btn danger" type="button" data-act="laundry-council-cancel" data-id="${b.id}" aria-label="Скасувати запис: ${esc(p.name)}, ${fmt(b.s)}">${armed === b.id ? "Так, скасувати" : "Скасувати"}</button>`
           : "";
         grid += `<div class="tl-block tl-busy" style="top:${top}px;height:${height}px">${time}<span class="tl-body"><b>${esc(p.name)}</b><span>${esc(roomLabel(p.room))}${tg}</span></span>${cancel}</div>`;
@@ -432,7 +852,7 @@
       </div>
       <div class="glass rule" style="margin-top:14px">${icon("info")}<span>Між записами є ${BUF} хвилин запасу. Якщо людини немає ${NO_SHOW} хвилин від початку, пралку може взяти будь-хто.</span></div>
       ${credit}`;
-  }, { tab: "laundry", title: "Пралка", mount: restoreScroll });
+  }, { tab: "laundry", title: "Пралка", mount(root) { restoreScroll(); mountNavPills(root); } });
 
   App.act("laundry-council-cancel", (el, ctx) => {
     if (!isCouncil(ctx.me)) return;
@@ -440,8 +860,8 @@
     if (armed !== id) { armed = id; keepY = window.scrollY; App.rerender(); return; }
     armed = null;
     const b = S.bookings.find((x) => x.id === id);
-    EH.actions.cancelBooking(id, ctx.me.id);
     keepY = window.scrollY;
+    if (!councilCancel(b, ctx.me)) { App.rerender(); return; }
     ctx.go(q(`/laundry/machine/${b.machine}`, { d: b.date, ok: 1 }), { replace: true });
   });
 
@@ -503,9 +923,9 @@
       ctx.go(`/laundry/booking/${el.dataset.id}?err=cancel`, { replace: true });
       return;
     }
+    if (b.person !== me.id) { councilCancel(b, me); ctx.go(q(`/laundry/machine/${b.machine}`, { d: b.date, ok: 1 })); return; }
     const before = S.bot.length;
     EH.actions.cancelBooking(b.id, me.id);
-    if (b.person !== me.id) { ctx.go(q(`/laundry/machine/${b.machine}`, { d: b.date, ok: 1 })); return; }
     ctx.go(S.bot.length > before ? "/laundry?cancelled=1&freed=1" : "/laundry?cancelled=1");
   });
   App.act("laundry-release", (el, ctx) => {
@@ -516,7 +936,7 @@
       // lib/bookings.server.ts releaseBooking: the end moves to the next 5-minute mark
       const end = Math.min(ceil5(now()), b.e);
       if (end <= b.s) EH.actions.cancelBooking(b.id, ctx.me.id);
-      else b.e = end;
+      else { b.e = end; redrawAll(); }
     }
     ctx.go("/laundry?released=1");
   });
