@@ -19,6 +19,8 @@ colors:
   booked-port: "#9aa2b1"
   now: "#e5484d"
   danger: "#c4282e"
+  work: "#8f5200"
+  work-dot: "#e8950f"
   porthole-mint: "#5ee0c8"
   white: "#ffffff"
 typography:
@@ -150,7 +152,7 @@ Scope note: the presentation canvas in `design/mockup/index.html` (phone bezels,
 
 ## Colors
 
-A cool pastel field under white glass, graphite ink, and exactly three signal colours that each mean one thing.
+A cool pastel field under white glass, graphite ink, and three signal colours that each mean one thing (a fourth, amber «в роботі», arrives with v2).
 
 ### Primary
 
@@ -165,6 +167,10 @@ A cool pastel field under white glass, graphite ink, and exactly three signal co
 ### Tertiary
 
 - **Coral Now** (now): the now-marker only — the vertical line and dot on day strips, the horizontal line and time pill on the timeline.
+
+### Fourth signal (v2, in `design/mockup/v2.html`, not in the app yet)
+
+- **Amber "In work"** (work, work-dot): a task or complaint someone is working on right now — the «В роботі» and «Розглядаємо» status pills (text in work #8f5200, dot in work-dot #e8950f, fill work-dot at 16%), the current step of a progress track, the unread dot in an inbox and the «N днів без відповіді» warning. Never decoration, never a heading, never a button.
 
 ### Neutral
 
@@ -181,7 +187,7 @@ Hairlines are ink at 8% alpha; glass is white at 56% (tiles) and 78% (controls).
 
 ### Named Rules
 
-**The Three Signals Rule.** Ultramarine means yours, teal means free, coral means now. No colour takes a second job, and no fourth signal colour is added. Danger red appears only on destructive actions.
+**The Four Signals Rule.** Ultramarine means yours, teal means free, coral means now, amber means in work (added with the v2 board and complaints). No colour takes a second job, and no fifth signal colour is added. Danger red appears only on destructive actions; a rejected complaint is not destructive and stays neutral.
 
 **The Ultramarine Is Yours Rule.** Never use ultramarine for other people's bookings, for general accents, for headings or for decorative fills. If it is not the resident's own booking or own current choice, it is not ultramarine.
 
@@ -282,7 +288,15 @@ Tactile capsules that compress slightly when pressed.
 
 - **Top bar:** mark and wordmark (19px/700, −0.035em) left, 40px glass avatar right; inner screens use a 44px round glass back button.
 - **Tab bar:** floating glass bar (30px radius, white 62%, blur 22px) with three columns: «Головна», a central black capsule «Записатися» with a plus icon, «Мої записи». Tab labels 12px/600, muted; current page in ink.
+- **Five-item tab bar (v2 mockup):** «Головна · Оголошення · Записатися · Дошка · Моє»; the centre becomes a 46px black disc raised 20px above the bar with its label in line with the others; labels 11.5px.
 - **Action sheet:** in the booking flow the same floating glass shape (white 72%) shows the chosen machine and time with a primary button.
+
+### Statuses and Progress (v2 mockup)
+
+- **Status pill:** one capsule shape, five states. «Нове / Надіслано» on ink 7%; «Розглядаємо» as an amber ring with a hollow dot; «В роботі» amber on amber 16%; «Готово / Вирішено» slate with a white check; «Відхилено» a neutral outline, never red.
+- **Progress track:** steps joined by a 2px line; done steps slate with a check, the current step an amber dot whose ring breathes (stops under reduced motion), later steps hollow. The same track sits on a public task and inside the resident's own complaint card.
+- **Complaint card:** the resident's own complaint uses the ticket's ultramarine document card (porthole included), because it is theirs; the track inside it turns white and amber.
+- **Anonymous plate:** the one graphite tile in the product, used only where the resident is absent (anonymous complaint form).
 
 ### Day Strip (signature)
 

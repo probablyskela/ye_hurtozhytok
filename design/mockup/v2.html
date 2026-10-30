@@ -1,0 +1,1668 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>єГуртожиток · друга версія</title>
+<meta name="description" content="Мокап другої версії єГуртожитку: оголошення, прозора дошка завдань і електронні звернення.">
+<meta name="theme-color" content="#dfeef5">
+<style>
+@font-face { font-family: "Fixel Text"; src: url("fonts/FixelText-Regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Fixel Text"; src: url("fonts/FixelText-Medium.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Fixel Text"; src: url("fonts/FixelText-SemiBold.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Fixel Text"; src: url("fonts/FixelText-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Fixel Display"; src: url("fonts/FixelDisplay-Black.woff2") format("woff2"); font-weight: 900; font-display: swap; }
+
+:root {
+  --ink: #101217;
+  --ink-2: #2b2f38;
+  --muted: #525a6b;
+  --faint: #626a7c;
+  --line: rgb(16 18 23 / 0.08);
+  --field-a: #cdeee2;
+  --field-b: #cfe0f9;
+  --field-c: #e4daf6;
+  --glass: rgb(255 255 255 / 0.56);
+  --glass-strong: rgb(255 255 255 / 0.78);
+  --mine: #2a37d8;
+  --mine-deep: #1b23a3;
+  --mine-soft: #e3e6ff;
+  --free: #0b6c61;
+  --free-soft: rgb(15 143 126 / 0.13);
+  --busy: rgb(16 18 23 / 0.16);
+  --now: #e5484d;
+  --danger: #c4282e;
+  --r-tile: 26px;
+  --r-row: 18px;
+  --ease: cubic-bezier(.32, .72, 0, 1);
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --shadow-glass:
+    inset 0 1px 1px rgb(255 255 255 / .95),
+    inset 0 -1px 1px rgb(255 255 255 / .35),
+    inset 0 -22px 34px -26px rgb(255 255 255 / .8),
+    0 1px 2px rgb(16 18 23 / .05),
+    0 20px 40px -24px rgb(31 45 90 / .28);
+  --shadow-gloss: inset 0 1px 0 #fff, 0 1px 2px rgb(16 18 23 / .08), 0 6px 16px -6px rgb(16 18 23 / .2);
+  --font: "Fixel Text", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-display: "Fixel Display", "Fixel Text", -apple-system, system-ui, sans-serif;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: #e6eef6;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--mine); color: #fff; }
+input, button, textarea { font: inherit; color: inherit; caret-color: var(--mine); }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--mine); outline-offset: 2px; border-radius: 12px; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgb(16 18 23 / .14); border-radius: 99px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ---------- presentation canvas ---------- */
+.canvas {
+  min-height: 100vh;
+  padding: 40px 32px 64px;
+  background:
+    radial-gradient(60% 50% at 10% 0%, rgb(216 243 234 / .9), transparent 70%),
+    radial-gradient(50% 50% at 95% 20%, rgb(235 227 248 / .9), transparent 70%),
+    radial-gradient(70% 60% at 50% 100%, rgb(217 231 251 / .95), transparent 70%),
+    #e9f0f7;
+}
+.canvas-head {
+  max-width: 1320px;
+  margin: 0 auto 36px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.canvas-head h1 {
+  margin: 14px 0 6px;
+  font-size: clamp(30px, 3.4vw, 44px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+  text-wrap: balance;
+}
+.canvas-head p { margin: 0; color: var(--muted); max-width: 60ch; }
+.jump {
+  display: flex; gap: 4px; padding: 4px;
+  border-radius: 999px; background: rgb(16 18 23 / .06);
+  flex-wrap: wrap;
+}
+.jump a {
+  padding: 8px 14px; border-radius: 999px;
+  color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500;
+  min-height: 36px; display: inline-flex; align-items: center;
+  transition: background .25s var(--ease), color .25s var(--ease);
+}
+.jump a:hover { background: rgb(255 255 255 / .6); color: var(--ink); }
+
+.phones {
+  max-width: 1320px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 48px 40px;
+}
+.shot { display: flex; flex-direction: column; align-items: center; gap: 14px; scroll-margin-top: 24px; }
+.shot figcaption { text-align: center; max-width: 340px; }
+.shot figcaption b { display: block; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.shot figcaption span { color: var(--muted); font-size: 13.5px; }
+figure { margin: 0; }
+
+.phone {
+  position: relative;
+  width: 390px;
+  height: 844px;
+  border-radius: 54px;
+  padding: 10px;
+  background: #0d0f14;
+  box-shadow: 0 50px 90px -40px rgb(24 32 70 / .55), 0 0 0 1px rgb(255 255 255 / .08) inset;
+}
+.screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 44px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #eef3f8;
+}
+.field {
+  position: absolute; inset: -20%;
+  z-index: -1;
+  background:
+    radial-gradient(45% 35% at 15% 10%, var(--field-a), transparent 70%),
+    radial-gradient(45% 40% at 90% 30%, var(--field-c), transparent 70%),
+    radial-gradient(60% 45% at 30% 85%, var(--field-b), transparent 70%),
+    #edf2f8;
+  animation: drift 26s ease-in-out infinite alternate;
+}
+@keyframes drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(-4%, 3%, 0) scale(1.06); }
+}
+.scroll {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 54px 16px 120px;
+  scrollbar-width: none;
+}
+.scroll::-webkit-scrollbar { display: none; }
+.status {
+  position: absolute; top: 0; left: 0; right: 0; height: 48px; z-index: 5;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 30px 0 34px; font-size: 15px; font-weight: 600;
+  pointer-events: none;
+}
+.status i { display: flex; gap: 5px; align-items: center; }
+.status svg { width: 17px; height: 12px; }
+
+/* ---------- shared product UI ---------- */
+.glass {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  backdrop-filter: blur(18px) saturate(170%);
+  box-shadow: var(--shadow-glass);
+  border-radius: var(--r-tile);
+}
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  min-height: 44px; margin-bottom: 18px;
+}
+.brand { display: inline-flex; align-items: center; gap: 9px; text-decoration: none; color: var(--ink); }
+.mark { width: 30px; height: 30px; flex: none; filter: drop-shadow(0 4px 8px rgb(16 18 23 / .3)); }
+.wordmark { font-weight: 700; font-size: 19px; letter-spacing: -0.035em; }
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--glass-strong); box-shadow: var(--shadow-gloss);
+  font-weight: 600; font-size: 14px; color: var(--ink-2);
+  border: 0;
+}
+.icon-btn {
+  width: 44px; height: 44px; border-radius: 50%; border: 0;
+  display: grid; place-items: center;
+  background: var(--glass-strong); box-shadow: var(--shadow-gloss);
+  color: var(--ink);
+  transition: transform .2s var(--ease);
+}
+.icon-btn:active { transform: scale(.94); }
+.ico { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.ico.sm { width: 18px; height: 18px; }
+
+h2.title {
+  margin: 0 0 4px; font-size: 28px; line-height: 1.1; letter-spacing: -0.035em; font-weight: 700;
+  text-wrap: balance;
+}
+.lede { margin: 0 0 20px; color: var(--muted); font-size: 15px; }
+.section-h {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  margin: 26px 4px 10px;
+}
+.section-h h3 { margin: 0; font-size: 18px; letter-spacing: -0.02em; font-weight: 700; }
+.section-h a, .link {
+  color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgb(16 18 23 / .25); font-weight: 600; font-size: 14px; text-decoration: none;
+  min-height: 44px; display: inline-flex; align-items: center;
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 52px; padding: 0 22px; border-radius: 999px; border: 0;
+  font-weight: 600; font-size: 16px; letter-spacing: -0.01em;
+  text-decoration: none;
+  transition: transform .2s var(--ease), filter .2s var(--ease), box-shadow .2s var(--ease);
+}
+.btn:active { transform: scale(.97); }
+.btn-primary {
+  color: #fff;
+  background: linear-gradient(180deg, #2b2f38, #0d0f14);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .16), 0 10px 22px -10px rgb(16 18 23 / .6);
+}
+.btn-primary:hover { filter: brightness(1.15); }
+.btn-primary[disabled] { background: rgb(16 18 23 / .18); color: rgb(16 18 23 / .45); box-shadow: none; cursor: not-allowed; }
+.btn-soft { background: var(--glass-strong); box-shadow: var(--shadow-gloss); color: var(--ink); }
+.btn-soft:hover { background: #fff; }
+.btn-ghost-danger { background: transparent; color: var(--danger); }
+.btn-ghost-danger:hover { background: rgb(196 40 46 / .07); }
+.btn.block { width: 100%; }
+
+.chip {
+  flex: none; color: var(--ink); text-decoration: none;
+  min-height: 44px; padding: 0 16px; border-radius: 999px; border: 0;
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--glass-strong); box-shadow: var(--shadow-gloss);
+  font-weight: 600; font-size: 15px; letter-spacing: -0.01em;
+  transition: background .25s var(--ease), color .25s var(--ease), transform .2s var(--ease);
+}
+.chip small { font-weight: 500; color: var(--muted); font-size: 13px; }
+.chip:active { transform: scale(.96); }
+.chip[aria-pressed="true"] { background: var(--mine); color: #fff; box-shadow: inset 0 1px 0 rgb(255 255 255 / .25), 0 8px 18px -8px rgb(42 55 216 / .7); }
+.chip[aria-pressed="true"] small { color: rgb(255 255 255 / .78); }
+.chip-row { display: flex; gap: 8px; overflow-x: auto; padding: 4px 4px 8px; margin: 0 -4px; scrollbar-width: none; }
+.chip-row::-webkit-scrollbar { display: none; }
+
+/* segmented control with gliding thumb */
+.seg {
+  position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+  padding: 3px; border-radius: 999px; background: rgb(16 18 23 / .07);
+}
+.seg button {
+  position: relative; z-index: 1; border: 0; background: transparent;
+  min-height: 40px; border-radius: 999px; padding: 0 10px;
+  font-weight: 500; font-size: 14px; color: var(--muted);
+  transition: color .3s var(--ease);
+  white-space: nowrap;
+}
+.seg button[aria-pressed="true"] { color: var(--ink); font-weight: 600; }
+.seg .thumb {
+  position: absolute; z-index: 0; top: 3px; bottom: 3px; left: 3px;
+  border-radius: 999px; background: #fff; box-shadow: var(--shadow-gloss);
+  transition: transform .42s var(--ease), width .42s var(--ease);
+}
+
+/* ---------- the booking document card (signature object) ---------- */
+.ticket {
+  position: relative; overflow: hidden;
+  border-radius: 28px; padding: 20px 20px 18px;
+  color: #fff;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgb(110 125 255 / .3), transparent 55%),
+    radial-gradient(80% 70% at 0% 100%, rgb(20 28 140 / .45), transparent 60%),
+    linear-gradient(155deg, #3442e6 0%, #2a37d8 45%, #1b23a3 100%);
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / .35),
+    inset 0 -30px 50px -40px rgb(160 180 255 / .7),
+    0 26px 44px -22px rgb(27 35 163 / .6);
+}
+.ticket .porthole {
+  position: absolute; right: -54px; top: -40px; width: 210px; height: 210px; opacity: .3; pointer-events: none;
+}
+.ticket-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; position: relative; }
+.ticket-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px 5px 8px; border-radius: 999px; background: rgb(255 255 255 / .16);
+  font-size: 13px; font-weight: 600;
+}
+.ticket-tag .dot { width: 7px; height: 7px; border-radius: 50%; background: #7ff0da; box-shadow: 0 0 0 3px rgb(127 240 218 / .25); }
+.ticket-when { position: relative; margin-top: 18px; font-size: 14px; color: rgb(255 255 255 / .8); font-weight: 500; }
+.ticket-time, .tnum, .chip, .sheet-text b, .tl-block .t, .strip-scale, .day b, .dur b, .tl-hour span, .status {
+  font-feature-settings: "tnum";
+}
+.ticket-time {
+  position: relative; display: flex; align-items: baseline; gap: 8px;
+  font-family: var(--font-display); font-weight: 900; font-size: 46px; line-height: 1; letter-spacing: -0.035em;
+  margin: 4px 0 2px;
+}
+.ticket-time .dash { font-family: var(--font); font-weight: 400; font-size: .6em; opacity: .6; align-self: center; transform: translateY(-.08em); }
+.ticket-machine { position: relative; font-size: 18px; font-weight: 600; letter-spacing: -0.015em; }
+.ticket-foot {
+  position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-top: 16px; padding-top: 14px; border-top: 1px solid rgb(255 255 255 / .18);
+  font-size: 14px; color: rgb(255 255 255 / .86);
+}
+.ticket-foot b { color: #fff; font-weight: 600; }
+.ticket-cta {
+  min-height: 44px; padding: 0 16px; border-radius: 999px; border: 0;
+  background: rgb(255 255 255 / .94); color: var(--mine-deep); font-weight: 600; font-size: 14px;
+  display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+  box-shadow: 0 6px 14px -6px rgb(0 0 0 / .35);
+}
+.ticket.big { padding: 24px 22px 22px; }
+.ticket.big .ticket-time { font-size: 48px; margin-top: 6px; }
+.ticket.big .porthole { width: 260px; height: 260px; right: -70px; top: -50px; }
+
+/* ---------- day strip (signature move) ---------- */
+.strip { position: relative; }
+.strip-track {
+  position: relative; height: 26px; border-radius: 999px; overflow: hidden;
+  background: var(--free-soft);
+  box-shadow: inset 0 0 0 1px rgb(15 143 126 / .12);
+}
+.seg-busy, .seg-buf, .seg-mine, .seg-past, .seg-pick { position: absolute; top: 0; bottom: 0; }
+.seg-busy { background: #b9c0cc; border-radius: 6px; }
+.seg-buf { background: repeating-linear-gradient(-45deg, rgb(16 18 23 / .1) 0 3px, transparent 3px 6px); }
+.seg-mine { background: linear-gradient(180deg, #4250ee, #2a37d8); border-radius: 6px; }
+.seg-past { left: 0; background: rgb(238 243 248 / .62); -webkit-backdrop-filter: grayscale(1); backdrop-filter: grayscale(1); }
+.seg-pick {
+  border-radius: 6px;
+  background: repeating-linear-gradient(-45deg, #2a37d8 0 6px, #3b49ea 6px 12px);
+  box-shadow: 0 0 0 2px #fff, 0 6px 14px -4px rgb(42 55 216 / .7);
+  transform-origin: left center;
+  transition: left .5s var(--ease), width .5s var(--ease);
+  animation: pick-in .55s var(--ease-out);
+}
+@keyframes pick-in { from { transform: scaleX(.2); opacity: 0; } to { transform: scaleX(1); opacity: 1; } }
+.strip-now {
+  position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--now); border-radius: 2px;
+}
+.strip-now::before {
+  content: ""; position: absolute; top: -4px; left: 50%; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%;
+  background: var(--now); box-shadow: 0 0 0 3px rgb(229 72 77 / .2);
+}
+.strip-scale { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11.5px; color: var(--faint); font-weight: 500; }
+
+/* machine tiles on home */
+.machines { display: grid; gap: 12px; }
+.machine {
+  display: block; padding: 16px 16px 14px; text-decoration: none; color: inherit;
+  transition: transform .3s var(--ease);
+}
+.machine:active { transform: scale(.985); }
+.machine-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.machine-name { font-weight: 700; font-size: 17px; letter-spacing: -0.02em; }
+.state {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600;
+  padding: 5px 10px; border-radius: 999px; white-space: nowrap;
+}
+.state::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.state.free { color: var(--free); background: var(--free-soft); }
+.state.busy { color: var(--ink-2); background: rgb(16 18 23 / .07); }
+.machine-sub { margin-top: 10px; font-size: 13.5px; color: var(--muted); }
+
+
+/* home: one panel, three ribbons */
+.ticket.compact { padding: 18px 18px 14px; }
+.ticket.compact .ticket-time { font-size: 42px; }
+.ticket.compact .ticket-foot { margin-top: 12px; padding-top: 10px; }
+.now-panel { padding: 8px 14px 12px; }
+.now-row {
+  display: grid; grid-template-columns: 22px 112px minmax(0, 1fr); gap: 10px; align-items: center;
+  min-height: 48px; text-decoration: none; color: inherit;
+}
+.now-row + .now-row { border-top: 1px solid var(--line); }
+.now-name b { display: block; font-size: 14.5px; font-weight: 700; letter-spacing: -0.015em; line-height: 1.2; }
+.now-name small { display: block; white-space: nowrap; font-size: 12.5px; color: var(--muted); font-weight: 500; }
+.now-name small.ok { color: var(--free); font-weight: 600; }
+.now-row .strip-track { height: 20px; }
+.now-scale { margin-left: 154px; }
+.port { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 2px currentColor; position: relative; }
+.port::after { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: currentColor; opacity: .85; }
+.port.free { color: var(--free); }
+.port.busy { color: #9aa2b1; }
+
+
+/* profile */
+.me { display: flex; align-items: center; gap: 14px; margin: 4px 4px 6px; }
+.me-av { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; flex: none;
+  background: linear-gradient(160deg, #2b2f38, #0d0f14); color: #fff; font-weight: 700; font-size: 22px; letter-spacing: -0.02em;
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / .2), 0 12px 24px -12px rgb(16 18 23 / .6); }
+.me > div b { display: block; font-size: 22px; letter-spacing: -0.03em; font-weight: 700; line-height: 1.15; }
+.me > div span { display: block; font-size: 13.5px; color: var(--muted); word-break: break-all; }
+.me-note { margin: 0 4px 16px 82px; font-size: 13px; color: var(--muted); }
+.form { padding: 18px 16px 16px; display: grid; gap: 18px; }
+.field-row { display: grid; gap: 6px; }
+.field-row label { font-size: 14px; font-weight: 600; padding-left: 4px; }
+.field-row small { font-size: 13px; color: var(--muted); padding-left: 4px; line-height: 1.4; }
+.field-row input, .affix {
+  min-height: 52px; width: 100%; border: 0; border-radius: 16px; padding: 0 16px;
+  background: rgb(255 255 255 / .8); box-shadow: inset 0 0 0 1px rgb(16 18 23 / .12);
+  font-size: 17px; font-weight: 600; letter-spacing: -0.01em;
+  transition: box-shadow .25s var(--ease), background .25s var(--ease);
+}
+.field-row input:focus { outline: none; background: #fff; box-shadow: inset 0 0 0 2px var(--ink), 0 0 0 4px rgb(16 18 23 / .08); }
+.affix { display: flex; align-items: center; gap: 2px; padding: 0 0 0 16px; }
+.affix span { color: var(--muted); font-weight: 600; font-size: 17px; }
+.affix input { box-shadow: none; padding-left: 0; background: transparent; min-height: 50px; }
+.affix:focus-within { background: #fff; box-shadow: inset 0 0 0 2px var(--ink), 0 0 0 4px rgb(16 18 23 / .08); }
+.affix input:focus { box-shadow: none; background: transparent; }
+.field-row input:user-invalid { box-shadow: inset 0 0 0 2px var(--danger); }
+.preview-who { margin-top: 18px; padding: 0 4px; }
+.preview-who small { display: block; font-size: 13px; color: var(--muted); margin-bottom: 10px; font-weight: 500; }
+.preview-who .tl-block.who-demo { position: relative; inset: auto; z-index: auto; }
+.tl-block .c a, .who-demo a { color: inherit; font-weight: 600; text-underline-offset: 2px; }
+
+/* tab bar */
+.tabbar {
+  position: absolute; left: 12px; right: 12px; bottom: 14px; z-index: 6;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  padding: 6px; border-radius: 30px;
+  background: rgb(255 255 255 / .62);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+  box-shadow: var(--shadow-glass);
+}
+.tab {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  min-height: 52px; justify-content: center; border-radius: 22px;
+  color: var(--muted); text-decoration: none; font-size: 12px; font-weight: 600;
+}
+.tab[aria-current="page"] { color: var(--ink); }
+.tab-main {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 52px; padding: 0 22px; border-radius: 999px;
+  background: linear-gradient(180deg, #2b2f38, #0d0f14); color: #fff;
+  font-weight: 600; font-size: 15px; text-decoration: none;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .16), 0 10px 20px -10px rgb(16 18 23 / .7);
+}
+
+/* booking flow */
+.durations { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.dur {
+  min-height: 72px; border: 0; border-radius: 20px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
+  background: var(--glass-strong); box-shadow: var(--shadow-gloss);
+  transition: background .3s var(--ease), color .3s var(--ease), transform .2s var(--ease);
+}
+.dur b { font-family: var(--font-display); font-weight: 900; font-size: 24px; line-height: 1.05; letter-spacing: -0.03em; }
+.dur span { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.dur:hover { background: #fff; }
+.dur:active { transform: scale(.96); }
+.dur[aria-checked="true"] { background: var(--mine); color: #fff; box-shadow: inset 0 1px 0 rgb(255 255 255 / .25), 0 10px 20px -10px rgb(42 55 216 / .75); }
+.dur[aria-checked="true"] span { color: rgb(255 255 255 / .8); }
+
+.days { display: flex; gap: 6px; overflow-x: auto; padding: 4px 4px 8px; margin: 0 -4px; scrollbar-width: none; }
+.days::-webkit-scrollbar { display: none; }
+.day {
+  flex: none; width: 66px; min-height: 64px; border-radius: 18px; border: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  background: var(--glass-strong); box-shadow: var(--shadow-gloss);
+  transition: background .3s var(--ease), color .3s var(--ease);
+}
+.day small { font-size: 12px; color: var(--muted); font-weight: 600; }
+.day b { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; }
+.day[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.day[aria-pressed="true"] small { color: rgb(255 255 255 / .7); }
+
+.slots { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.slot-machine { padding: 16px; }
+.slot-machine .machine-head { margin-bottom: 10px; }
+.slot-machine .chip-row { margin-top: 12px; }
+.empty-note {
+  margin-top: 12px; display: flex; gap: 10px; align-items: flex-start;
+  font-size: 14px; color: var(--muted); padding: 10px 12px; border-radius: 14px; background: rgb(16 18 23 / .04);
+}
+.empty-note .ico { color: var(--faint); margin-top: 1px; }
+
+.sheet {
+  position: absolute; left: 12px; right: 12px; bottom: 14px; z-index: 6;
+  padding: 14px 14px 14px 18px; border-radius: 28px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: rgb(255 255 255 / .72);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+  box-shadow: var(--shadow-glass);
+}
+.sheet-text { min-width: 0; }
+.sheet-text small { display: block; font-size: 13px; color: var(--muted); font-weight: 500; }
+.sheet-text b { display: block; font-size: 17px; letter-spacing: -0.02em; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.quota {
+  display: flex; align-items: center; gap: 10px; margin: 18px 4px 0; font-size: 13.5px; color: var(--muted);
+}
+.quota-dots { display: flex; gap: 4px; }
+.quota-dots i { width: 18px; height: 6px; border-radius: 99px; background: rgb(16 18 23 / .12); }
+.quota-dots i.on { background: var(--ink-2); }
+
+/* machine day timeline */
+.day-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.day-head h2 { margin: 0; font-size: 24px; letter-spacing: -0.03em; font-weight: 700; line-height: 1.15; }
+.day-head .state { margin-top: 4px; }
+.timeline { position: relative; margin-top: 14px; padding: 14px 14px 14px 0; }
+.tl-grid { position: relative; margin-left: 52px; }
+.tl-hour {
+  position: absolute; left: -52px; right: 0; height: 0;
+  border-top: 1px dashed rgb(16 18 23 / .08);
+}
+.tl-hour span { position: absolute; left: 10px; top: -9px; font-size: 12px; color: var(--faint); font-weight: 600; }
+.tl-block {
+  position: absolute; z-index: 2; left: 0; right: 0; border-radius: 16px; padding: 9px 12px;
+  display: flex; flex-direction: column; justify-content: center; overflow: hidden;
+}
+.tl-block .t { font-size: 12.5px; font-weight: 600; opacity: .7; }
+.tl-block .n { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.tl-block .c { font-size: 13px; opacity: .75; }
+.tl-busy { background: rgb(255 255 255 / .7); box-shadow: var(--shadow-gloss); }
+.tl-mine { background: linear-gradient(160deg, #3b49ea, #1b23a3); color: #fff; box-shadow: 0 14px 26px -14px rgb(27 35 163 / .8); }
+.tl-mine .t, .tl-mine .c { opacity: .85; }
+.tl-free {
+  border: 1.5px dashed rgb(15 127 113 / .45); background: rgb(15 143 126 / .06); color: var(--free);
+  flex-direction: row; align-items: center; justify-content: space-between; gap: 10px;
+  text-decoration: none;
+}
+.tl-free .n { font-size: 14.5px; }
+.tl-free .plus {
+  width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none;
+  background: var(--free); color: #fff;
+}
+.tl-buf {
+  position: absolute; left: 0; right: 0;
+  background: repeating-linear-gradient(-45deg, rgb(16 18 23 / .07) 0 3px, transparent 3px 7px);
+  border-radius: 6px;
+}
+.tl-now { position: absolute; left: -10px; right: -4px; height: 0; border-top: 2px solid var(--now); z-index: 1; }
+.tl-now::after { content: ""; position: absolute; left: 0; width: 10px; top: -2px; border-top: 2px solid var(--now); z-index: 3; }
+.tl-now::before {
+  content: "13:40"; position: absolute; left: -44px; top: -11px;
+  font-size: 11.5px; font-weight: 700; color: #fff; background: var(--now); padding: 2px 6px; border-radius: 99px;
+}
+.past-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 12px 16px; border-radius: 16px; background: rgb(16 18 23 / .04);
+  font-size: 13.5px; color: var(--muted);
+}
+.rule {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px 16px; font-size: 14px; color: var(--ink-2); line-height: 1.45;
+}
+.rule .ico { color: var(--ink-2); margin-top: 1px; }
+
+/* sign-in */
+.signin { display: flex; flex-direction: column; min-height: 100%; }
+.signin-hero { margin: 34px 4px 22px; }
+.signin-hero h2 {
+  margin: 0 0 12px; font-weight: 700;
+  font-size: 44px; line-height: 1; letter-spacing: -0.04em; text-wrap: balance;
+}
+.signin-hero p { margin: 0; color: var(--muted); font-size: 16px; max-width: 32ch; }
+.preview { padding: 16px; }
+.preview-row { display: grid; grid-template-columns: 76px 1fr; gap: 10px; align-items: center; }
+.preview-row + .preview-row { margin-top: 12px; }
+.preview-row span { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.preview .strip-track { height: 20px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 14px; font-size: 12.5px; color: var(--muted); }
+.legend i { display: inline-block; width: 14px; height: 8px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
+.signin-actions { margin-top: auto; padding-top: 28px; }
+.helper { margin: 12px 8px 0; text-align: center; font-size: 13.5px; color: var(--muted); }
+.credit {
+  margin: 22px 4px 0; padding-top: 14px; border-top: 1px solid var(--line);
+  font-size: 12.5px; color: var(--faint); text-align: center; line-height: 1.5;
+}
+
+/* booking detail */
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.notify { padding: 16px; display: flex; gap: 14px; align-items: flex-start; margin-top: 14px; }
+.notify-ico { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: rgb(16 18 23 / .06); color: var(--ink-2); flex: none; }
+.notify b { display: block; font-size: 15.5px; letter-spacing: -0.01em; }
+.notify p { margin: 2px 0 10px; font-size: 13.5px; color: var(--muted); }
+.switch {
+  position: relative; width: 51px; height: 31px; border-radius: 99px; border: 0; flex: none; margin-left: auto;
+  background: rgb(16 18 23 / .16); transition: background .3s var(--ease);
+}
+.switch::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%;
+  background: #fff; box-shadow: 0 3px 8px rgb(0 0 0 / .18); transition: transform .35s var(--ease);
+}
+.switch[aria-checked="true"] { background: var(--free); }
+.switch[aria-checked="true"]::after { transform: translateX(20px); }
+.rules { margin-top: 14px; padding: 4px 0; }
+.rules .rule + .rule { border-top: 1px solid var(--line); }
+.who { margin-top: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+.who-av { width: 40px; height: 40px; border-radius: 50%; background: #fff; box-shadow: var(--shadow-gloss); display: grid; place-items: center; font-weight: 700; font-size: 14px; flex: none; }
+.who b { display: block; font-size: 15px; }
+.who span { font-size: 13.5px; color: var(--muted); }
+
+.toast {
+  position: absolute; left: 50%; top: 58px; z-index: 8; transform: translate(-50%, -20px); opacity: 0;
+  padding: 10px 16px; border-radius: 999px; background: var(--ink); color: #fff; font-size: 14px; font-weight: 600;
+  display: inline-flex; gap: 8px; align-items: center; white-space: nowrap;
+  transition: transform .45s var(--ease), opacity .3s var(--ease);
+  pointer-events: none;
+}
+.toast.show { transform: translate(-50%, 0); opacity: 1; }
+
+.note {
+  max-width: 1320px; margin: 40px auto 0; text-align: center; color: var(--muted); font-size: 13.5px;
+}
+
+/* ---------- small screens: show screens edge to edge ---------- */
+@media (max-width: 560px) {
+  .canvas { padding: 20px 0 40px; }
+  .canvas-head { padding: 0 16px; margin-bottom: 24px; }
+  .jump { width: 100%; }
+  .phones { gap: 36px; }
+  .shot { width: 100%; }
+  .jump { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .jump a { flex: none; }
+  .phone { width: 100%; height: auto; padding: 0; border-radius: 0; background: transparent; box-shadow: none; }
+  .screen { border-radius: 0; height: auto; overflow: clip; }
+  .status { display: none; }
+  .scroll { height: auto; overflow: visible; padding: 16px 16px 24px; }
+  .scroll[style] { padding-bottom: 24px !important; }
+  .tabbar, .sheet { position: sticky; left: auto; right: auto; margin: 0 12px; bottom: 14px; }
+  .shot figcaption { padding: 0 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass, .tabbar, .sheet { background: #fbfcfd; -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+
+/* ================= v2: announcements, board, complaints ================= */
+:root {
+  --work: #8f5200;
+  --work-dot: #e8950f;
+  --work-soft: rgb(232 149 15 / .16);
+  --work-ring: rgb(232 149 15 / .5);
+}
+
+/* five-item tab bar: the central «Записатися» becomes a black disc */
+.tabbar.five { grid-template-columns: repeat(2, minmax(0, 1fr)) 72px repeat(2, minmax(0, 1fr)); align-items: end; padding: 6px 4px; }
+.tabbar.five .tab { min-height: 0; padding: 8px 0 6px; justify-content: flex-end; font-size: 11.5px; letter-spacing: -0.01em; white-space: nowrap; }
+.tab-disc {
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 2px; padding-bottom: 6px;
+  color: var(--ink); text-decoration: none; font-size: 11.5px; white-space: nowrap; font-weight: 600; letter-spacing: -0.01em;
+}
+.tab-disc span {
+  width: 46px; height: 46px; margin-top: -20px; border-radius: 50%;
+  display: grid; place-items: center; color: #fff;
+  background: linear-gradient(180deg, #2b2f38, #0d0f14);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .16), 0 0 0 4px rgb(255 255 255 / .7), 0 12px 22px -10px rgb(16 18 23 / .75);
+  transition: transform .2s var(--ease);
+}
+.tab-disc:active span { transform: scale(.94); }
+.tab .badge-dot { position: relative; }
+.tab .badge-dot::after {
+  content: ""; position: absolute; top: -1px; right: -3px; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--work-dot); box-shadow: 0 0 0 2px #fff;
+}
+
+/* status pills: one shape, five states. Amber means «в роботі» and only that. */
+.st {
+  display: inline-flex; align-items: center; gap: 6px; flex: none;
+  padding: 4px 10px 4px 8px; border-radius: 999px; white-space: nowrap;
+  font-size: 13px; font-weight: 600; line-height: 1.35;
+  color: var(--ink-2); background: rgb(16 18 23 / .07);
+}
+.st::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+.st.review { color: var(--work); background: transparent; box-shadow: inset 0 0 0 1.5px var(--work-ring); }
+.st.review::before { background: transparent; box-shadow: inset 0 0 0 1.5px var(--work-dot); }
+.st.work { color: var(--work); background: var(--work-soft); }
+.st.work::before { background: var(--work-dot); }
+.st.done { color: #fff; background: var(--ink-2); }
+.st.done::before { display: none; }
+.st.done .ico { width: 14px; height: 14px; stroke-width: 2.4; }
+.st.no { color: var(--muted); background: transparent; box-shadow: inset 0 0 0 1px rgb(16 18 23 / .14); }
+.st.no::before { display: none; }
+
+/* small meta line */
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 13px; color: var(--muted); }
+.meta span { display: inline-flex; align-items: center; gap: 5px; }
+.meta .ico { width: 15px; height: 15px; color: var(--faint); }
+
+/* announcements */
+.ann-hero { position: relative; padding: 16px 16px 14px; display: block; text-decoration: none; color: inherit; }
+.ann-flag {
+  display: inline-flex; align-items: center; gap: 6px; margin-bottom: 8px;
+  font-size: 13px; font-weight: 600; color: var(--ink-2);
+}
+.ann-flag .ico { width: 16px; height: 16px; }
+.ann-title { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; text-wrap: balance; }
+.ann-body { margin: 6px 0 12px; font-size: 14.5px; color: var(--ink-2); line-height: 1.45; }
+.ann-when {
+  display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center;
+  padding-top: 12px; border-top: 1px solid var(--line);
+}
+.ann-when .t { font-family: var(--font-display); font-weight: 900; font-size: 30px; line-height: 1; letter-spacing: -0.03em; font-feature-settings: "tnum"; }
+.ann-when .d b { display: block; font-size: 14.5px; font-weight: 600; letter-spacing: -0.01em; }
+.ann-when .d span { display: block; font-size: 13px; color: var(--muted); }
+.ann-list { display: grid; gap: 10px; }
+.ann-row {
+  display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 14px; align-items: start;
+  padding: 14px 14px 14px 12px; text-decoration: none; color: inherit;
+}
+.cal-leaf {
+  width: 52px; border-radius: 14px; overflow: hidden; text-align: center;
+  background: #fff; box-shadow: var(--shadow-gloss);
+}
+.cal-leaf small { display: block; padding: 3px 0 2px; font-size: 11px; font-weight: 600; color: #fff; background: var(--ink-2); }
+.cal-leaf b { display: block; padding: 3px 0 5px; font-size: 21px; font-weight: 700; letter-spacing: -0.03em; font-feature-settings: "tnum"; }
+.ann-row h4 { margin: 1px 0 3px; font-size: 16px; font-weight: 700; letter-spacing: -0.015em; line-height: 1.25; }
+.ann-row p { margin: 0 0 6px; font-size: 14px; color: var(--muted); line-height: 1.4; }
+.history {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  min-height: 52px; padding: 0 16px; margin-top: 12px; border-radius: 18px;
+  background: rgb(16 18 23 / .04); color: var(--ink-2); font-size: 14.5px; font-weight: 600; text-decoration: none;
+}
+.history small { color: var(--muted); font-weight: 500; font-size: 13.5px; }
+
+/* board */
+.boards { margin-bottom: 12px; }
+.report {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0;
+  padding: 12px 6px; margin-bottom: 14px;
+}
+.report div { padding: 0 10px; }
+.report div + div { border-left: 1px solid var(--line); }
+.report b { display: block; font-size: 22px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; font-feature-settings: "tnum"; }
+.report span { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.3; }
+.report-cap { margin: -6px 4px 14px; font-size: 12.5px; color: var(--faint); }
+.cols { margin-bottom: 12px; }
+.cols button b { font-weight: 700; margin-left: 4px; font-feature-settings: "tnum"; color: inherit; }
+.task-list { display: grid; gap: 10px; }
+.task {
+  display: block; padding: 14px 16px; text-decoration: none; color: inherit;
+  transition: transform .3s var(--ease);
+}
+.task:active { transform: scale(.985); }
+.task-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.task h3 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: -0.015em; line-height: 1.3; text-wrap: pretty; }
+.task .meta { margin-top: 8px; }
+.from-c {
+  display: inline-flex; align-items: center; gap: 5px; margin-top: 10px;
+  font-size: 12.5px; font-weight: 600; color: var(--ink-2);
+  padding: 3px 9px 3px 7px; border-radius: 999px; background: rgb(16 18 23 / .05);
+}
+.from-c .ico { width: 14px; height: 14px; }
+.age { font-feature-settings: "tnum"; }
+.write-cta {
+  display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 16px; margin-bottom: 14px;
+  text-decoration: none; color: inherit;
+}
+.write-cta p { margin: 0; flex: 1; font-size: 14px; color: var(--muted); line-height: 1.35; }
+.write-cta p b { display: block; color: var(--ink); font-size: 15px; letter-spacing: -0.01em; }
+.write-cta .btn { min-height: 44px; padding: 0 16px; font-size: 14.5px; flex: none; }
+
+/* progress track: the signature of v2. Done steps in ink, the current step amber and breathing. */
+.track { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; margin: 4px 0 0; padding: 0; list-style: none; }
+.track li { position: relative; display: flex; flex-direction: column; align-items: center; gap: 7px; text-align: center; font-size: 12px; font-weight: 600; color: var(--faint); line-height: 1.2; }
+.track li::before {
+  content: ""; position: absolute; top: 8px; right: 50%; width: 100%; height: 2px; border-radius: 2px;
+  background: rgb(16 18 23 / .12); z-index: 0;
+}
+.track li:first-child::before { display: none; }
+.track .n {
+  position: relative; z-index: 1; width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; box-shadow: inset 0 0 0 2px rgb(16 18 23 / .16);
+}
+.track .on { color: var(--ink); }
+.track .on::before { background: var(--ink-2); }
+.track .on .n { background: var(--ink-2); box-shadow: none; }
+.track .on .n::after {
+  content: ""; position: absolute; left: 5px; top: 3.5px; width: 4px; height: 8px;
+  border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+.track .cur { color: var(--work); }
+.track .cur::before { background: linear-gradient(90deg, var(--ink-2), var(--work-dot)); }
+.track .cur .n { background: var(--work-dot); box-shadow: 0 0 0 4px var(--work-soft); }
+.track .cur .n::after {
+  content: ""; position: absolute; inset: -4px; border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--work-ring); animation: breathe 2.4s var(--ease-out) infinite;
+}
+@keyframes breathe { 0% { transform: scale(.8); opacity: .9; } 100% { transform: scale(1.6); opacity: 0; } }
+.track li small { display: block; font-weight: 500; color: var(--faint); font-size: 11.5px; font-feature-settings: "tnum"; }
+
+/* task detail */
+.detail { padding: 18px 16px 16px; }
+.detail h2 { margin: 10px 0 6px; font-size: 24px; line-height: 1.15; letter-spacing: -0.03em; font-weight: 700; text-wrap: balance; }
+.detail .track { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+.facts { margin-top: 12px; padding: 4px 0; }
+.fact { display: grid; grid-template-columns: 22px 1fr; gap: 12px; align-items: start; padding: 12px 16px; font-size: 14.5px; }
+.fact + .fact { border-top: 1px solid var(--line); }
+.fact .ico { color: var(--ink-2); margin-top: 1px; }
+.fact small { display: block; color: var(--muted); font-size: 13px; }
+.log { margin: 0; padding: 4px 4px 0 6px; list-style: none; }
+.log li { position: relative; padding: 0 0 14px 22px; font-size: 14px; color: var(--ink-2); }
+.log li::before { content: ""; position: absolute; left: 0; top: 7px; width: 8px; height: 8px; border-radius: 50%; background: rgb(16 18 23 / .2); }
+.log li::after { content: ""; position: absolute; left: 3.5px; top: 18px; bottom: 0; width: 1px; background: rgb(16 18 23 / .12); }
+.log li:last-child::after { display: none; }
+.log li:first-child::before { background: var(--work-dot); }
+.log time { display: block; font-size: 12.5px; color: var(--faint); font-feature-settings: "tnum"; }
+.private-note { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; padding: 12px 14px; border-radius: 16px; background: rgb(16 18 23 / .04); font-size: 13.5px; color: var(--muted); line-height: 1.45; }
+.private-note .ico { color: var(--faint); margin-top: 1px; width: 18px; height: 18px; }
+
+/* complaint form */
+.form-block { padding: 16px; }
+.form-block + .form-block { margin-top: 12px; }
+.lbl { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 0 2px 10px; font-size: 14px; font-weight: 600; }
+.lbl small { font-weight: 500; color: var(--muted); font-size: 13px; }
+.to-group + .to-group { margin-top: 12px; }
+.to-group > small { display: block; margin: 0 2px 6px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.topics { display: flex; flex-wrap: wrap; gap: 6px; }
+.topic {
+  display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 0 14px 0 11px;
+  border: 0; border-radius: 999px; background: var(--glass-strong); box-shadow: var(--shadow-gloss);
+  font-size: 14.5px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink);
+  transition: background .25s var(--ease), color .25s var(--ease), transform .2s var(--ease);
+}
+.topic .ico { width: 18px; height: 18px; color: var(--ink-2); transition: color .25s var(--ease); }
+.topic:hover { background: #fff; }
+.topic:active { transform: scale(.96); }
+.topic[aria-checked="true"] { background: var(--mine); color: #fff; box-shadow: inset 0 1px 0 rgb(255 255 255 / .25), 0 8px 18px -8px rgb(42 55 216 / .7); }
+.topic[aria-checked="true"] .ico { color: #fff; }
+.route {
+  display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 10px 12px; border-radius: 16px;
+  background: rgb(16 18 23 / .04); font-size: 14px; color: var(--ink-2);
+}
+.route .ico { color: var(--ink-2); width: 20px; height: 20px; }
+.route b { font-weight: 700; }
+textarea.area {
+  width: 100%; min-height: 128px; resize: vertical; border: 0; border-radius: 16px; padding: 14px 16px;
+  background: rgb(255 255 255 / .8); box-shadow: inset 0 0 0 1px rgb(16 18 23 / .12);
+  font-size: 16px; line-height: 1.45; color: var(--ink);
+  transition: box-shadow .25s var(--ease), background .25s var(--ease);
+}
+textarea.area::placeholder, .field-row input::placeholder { color: #6b7385; }
+textarea.area:focus { outline: none; background: #fff; box-shadow: inset 0 0 0 2px var(--ink), 0 0 0 4px rgb(16 18 23 / .08); }
+.count { display: block; margin: 6px 4px 0; text-align: right; font-size: 12.5px; color: var(--faint); font-feature-settings: "tnum"; }
+.add-photo {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; margin-top: 10px; padding: 0 16px;
+  border: 1.5px dashed rgb(16 18 23 / .2); border-radius: 16px; background: transparent;
+  font-size: 14.5px; font-weight: 600; color: var(--ink-2);
+}
+.add-photo small { margin-left: auto; font-weight: 500; color: var(--muted); font-size: 13px; }
+.who-sees { margin-top: 12px; }
+.who-sees .seg { margin-bottom: 12px; }
+.promise { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.promise li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; padding: 9px 2px; font-size: 14px; line-height: 1.4; color: var(--ink-2); }
+.promise li + li { border-top: 1px solid var(--line); }
+.promise .ico { width: 20px; height: 20px; color: var(--ink-2); }
+.promise li.warn .ico { color: var(--work); }
+.anon-mark {
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px; margin-bottom: 12px; border-radius: var(--r-tile);
+  background: linear-gradient(160deg, #2b2f38, #0d0f14); color: #fff;
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / .18), 0 18px 30px -18px rgb(16 18 23 / .7);
+}
+.anon-mark .mask { width: 42px; height: 42px; flex: none; border-radius: 50%; display: grid; place-items: center; background: rgb(255 255 255 / .1); }
+.anon-mark b { display: block; font-size: 15.5px; letter-spacing: -0.01em; }
+.anon-mark span { display: block; font-size: 13px; color: rgb(255 255 255 / .74); line-height: 1.4; }
+.tickets { display: flex; align-items: center; gap: 10px; margin: 12px 2px 0; font-size: 13.5px; color: var(--muted); }
+.tickets i { width: 26px; height: 16px; border-radius: 5px; background: rgb(16 18 23 / .1); position: relative; }
+.tickets i.on { background: var(--ink-2); }
+.tickets i::before, .tickets i::after { content: ""; position: absolute; top: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--field-base, #edf2f8); }
+.tickets i::before { left: -3px; } .tickets i::after { right: -3px; }
+.submit-bar { margin-top: 16px; display: grid; gap: 8px; }
+.submit-bar small { text-align: center; font-size: 13px; color: var(--muted); }
+
+/* «Моє» hub */
+.hub { padding: 4px 0; }
+.hub-row {
+  display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center;
+  min-height: 64px; padding: 10px 14px; text-decoration: none; color: inherit;
+}
+.hub-row + .hub-row { border-top: 1px solid var(--line); }
+.hub-ico { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: rgb(16 18 23 / .06); color: var(--ink-2); }
+.hub-row b { display: block; font-size: 15.5px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.25; }
+.hub-row span.sub { display: block; font-size: 13px; color: var(--muted); line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hub-row > .ico { color: var(--faint); }
+.mine-list { display: grid; gap: 10px; }
+.mine-c {
+  display: block; padding: 14px 16px; text-decoration: none; color: inherit;
+}
+.mine-c h4 { margin: 0; font-size: 15.5px; font-weight: 700; letter-spacing: -0.012em; line-height: 1.3; }
+.mine-c .meta { margin-top: 6px; }
+.count-pill { display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 8px; border-radius: 999px; background: var(--work-dot); color: #1d1300; font-size: 13px; font-weight: 700; font-feature-settings: "tnum"; }
+
+/* complaint document card: the ticket's sibling, for what is yours */
+.c-doc {
+  position: relative; overflow: hidden; border-radius: 28px; padding: 18px 18px 16px; color: #fff;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgb(110 125 255 / .3), transparent 55%),
+    radial-gradient(80% 70% at 0% 100%, rgb(20 28 140 / .45), transparent 60%),
+    linear-gradient(155deg, #3442e6 0%, #2a37d8 45%, #1b23a3 100%);
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / .35), inset 0 -30px 50px -40px rgb(160 180 255 / .7), 0 26px 44px -22px rgb(27 35 163 / .6);
+}
+.c-doc .porthole { position: absolute; right: -60px; top: -50px; width: 200px; height: 200px; opacity: .22; pointer-events: none; }
+.c-doc-top { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13.5px; color: rgb(255 255 255 / .82); font-weight: 500; }
+.c-doc-top b { color: #fff; font-weight: 600; }
+.c-doc h2 { position: relative; margin: 12px 0 6px; font-size: 21px; line-height: 1.2; letter-spacing: -0.025em; font-weight: 700; text-wrap: balance; }
+.c-doc p { position: relative; margin: 0; font-size: 14.5px; color: rgb(255 255 255 / .86); line-height: 1.45; }
+.c-doc .track { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgb(255 255 255 / .18); }
+.c-doc .track li { color: rgb(255 255 255 / .55); }
+.c-doc .track li small { color: rgb(255 255 255 / .55); }
+.c-doc .track li::before { background: rgb(255 255 255 / .22); }
+.c-doc .track .n { background: transparent; box-shadow: inset 0 0 0 2px rgb(255 255 255 / .4); }
+.c-doc .track .on { color: #fff; }
+.c-doc .track .on::before { background: #fff; }
+.c-doc .track .on .n { background: #fff; }
+.c-doc .track .on .n::after { border-color: var(--mine-deep); }
+.c-doc .track .cur { color: #ffd38a; }
+.c-doc .track .cur small { color: rgb(255 211 138 / .85); }
+.c-doc .track .cur::before { background: linear-gradient(90deg, #fff, var(--work-dot)); }
+.c-doc .track .cur .n { background: var(--work-dot); box-shadow: 0 0 0 4px rgb(232 149 15 / .3); }
+.c-doc .track .cur .n::after { box-shadow: 0 0 0 2px rgb(255 200 110 / .7); }
+.on-board {
+  display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: center;
+  margin-top: 12px; padding: 12px 14px; text-decoration: none; color: inherit;
+}
+.on-board small { display: block; font-size: 12.5px; color: var(--muted); }
+.on-board b { display: block; font-size: 14.5px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.3; }
+.on-board > .ico { color: var(--ink-2); }
+
+/* conversation */
+.thread { display: grid; gap: 10px; margin-top: 4px; }
+.msg { max-width: 86%; padding: 10px 14px 9px; border-radius: 20px; font-size: 14.5px; line-height: 1.42; }
+.msg small { display: block; margin-bottom: 2px; font-size: 12px; font-weight: 600; }
+.msg time { display: block; white-space: nowrap; margin-top: 3px; font-size: 11.5px; text-align: right; font-feature-settings: "tnum"; }
+.msg.them { justify-self: start; border-bottom-left-radius: 8px; background: var(--glass-strong); box-shadow: var(--shadow-gloss); }
+.msg.them small { color: var(--ink-2); }
+.msg.them time { color: var(--faint); }
+.msg.own { justify-self: end; border-bottom-right-radius: 8px; background: linear-gradient(160deg, #3b49ea, #2a37d8); color: #fff; box-shadow: 0 10px 20px -12px rgb(27 35 163 / .8); }
+.msg.own time { color: rgb(255 255 255 / .72); }
+.sys { justify-self: center; font-size: 12.5px; color: var(--muted); padding: 2px 10px; text-align: center; }
+.sys b { color: var(--work); font-weight: 600; }
+.composer {
+  position: absolute; left: 12px; right: 12px; bottom: 14px; z-index: 6;
+  display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 18px; border-radius: 30px;
+  background: rgb(255 255 255 / .72); -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%);
+  box-shadow: var(--shadow-glass);
+}
+.composer input { flex: 1; min-width: 0; min-height: 44px; border: 0; background: transparent; font-size: 15.5px; }
+.composer input:focus { outline: none; }
+.composer input::placeholder { color: #6b7385; }
+.send { width: 46px; height: 46px; border-radius: 50%; border: 0; display: grid; place-items: center; flex: none; color: #fff; background: linear-gradient(180deg, #2b2f38, #0d0f14); box-shadow: inset 0 1px 0 rgb(255 255 255 / .16), 0 8px 16px -8px rgb(16 18 23 / .7); }
+
+/* council inbox */
+.inbox { padding: 2px 0; }
+.in-row {
+  display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: start;
+  padding: 13px 14px; text-decoration: none; color: inherit;
+}
+.in-row + .in-row { border-top: 1px solid var(--line); }
+.in-row.unread h3::after { content: ""; display: inline-block; width: 8px; height: 8px; margin-left: 7px; border-radius: 50%; background: var(--work-dot); vertical-align: 2px; }
+.in-row h3 { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: -0.012em; line-height: 1.3; }
+.in-row p { margin: 3px 0 7px; font-size: 13.5px; color: var(--muted); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.in-row .meta { font-size: 12.5px; }
+.anon-tag { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: var(--ink-2); }
+.overdue { color: var(--work); font-weight: 600; }
+
+/* council review */
+.review-card { padding: 16px; }
+.review-card .meta { margin-top: 10px; }
+.review-card blockquote { margin: 12px 0 0; padding: 0; font-size: 15px; line-height: 1.5; color: var(--ink); }
+.author { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13.5px; color: var(--muted); }
+.author b { color: var(--ink); font-weight: 600; font-size: 14.5px; display: block; }
+.author .who-av { width: 36px; height: 36px; font-size: 13px; }
+.publish { margin-top: 12px; padding: 16px; display: grid; gap: 14px; }
+.publish .field-row input { font-size: 16px; }
+.check-row { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--ink-2); }
+.check-row .switch { margin-left: auto; }
+.act-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.act-grid .btn { min-height: 48px; font-size: 15px; padding: 0 12px; }
+
+.legend-v2 { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 18px auto 0; max-width: 820px; }
+
+@media (max-width: 560px) {
+  .composer { position: sticky; left: auto; right: auto; margin: 0 12px; bottom: 14px; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .composer { background: #fbfcfd; -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-washer" viewBox="0 0 24 24"><rect x="4" y="2.8" width="16" height="18.4" rx="3.5"/><circle cx="12" cy="13" r="4.6"/><path d="M9.6 13.6c1.1-.9 2.3.9 4.8 0"/><path d="M7.5 6h3"/><circle cx="16" cy="6" r=".6" fill="currentColor"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M14.5 5.5 8 12l6.5 6.5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.5 1.5H5z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.8" y="5" width="16.4" height="15.2" rx="3.2"/><path d="M3.8 9.8h16.4M8.3 3v4M15.7 3v4"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3 6 13.5h5.2L10.5 21 18 10.4h-5.3z"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3.5s-6 6.4-6 10.6a6 6 0 0 0 12 0c0-4.2-6-10.6-6-10.6z"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M12 11v5.2M12 7.8v.2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5.5 12.5 4 4 9-9.5"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9.5 5.5 6.5 6.5-6.5 6.5"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19z"/></symbol>
+  <symbol id="i-horn" viewBox="0 0 24 24"><path d="M4 10v4a1.5 1.5 0 0 0 1.5 1.5H7l9 4.5V4L7 8.5H5.5A1.5 1.5 0 0 0 4 10z"/><path d="M7.5 15.5 9 20.5h2.5"/><path d="M19.5 9.5a3.5 3.5 0 0 1 0 5"/></symbol>
+  <symbol id="i-board" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="3.2"/><path d="M9.2 4v16M14.8 4v16"/><path d="M5.6 7.5h1.6M11.2 7.5h1.6M11.2 10.5h1.6M16.8 7.5h1.6"/></symbol>
+  <symbol id="i-me" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.8 20c1.2-3.6 4-5.3 7.2-5.3s6 1.7 7.2 5.3"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.8-6.5-11a6.5 6.5 0 0 1 13 0c0 5.2-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 18.5V7.5A3 3 0 0 1 8 4.5h8a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H8.5z"/><path d="M8.5 9h7M8.5 12h4.5"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M12 19V5.5M6.5 11 12 5.5l5.5 5.5"/></symbol>
+  <symbol id="i-mask" viewBox="0 0 24 24"><path d="M3.5 8.5c2.6-1.3 5.4-2 8.5-2s5.9.7 8.5 2c0 5.2-2.5 9-5.4 9-1.4 0-2-1.3-3.1-1.3S10.3 17.5 8.9 17.5C6 17.5 3.5 13.7 3.5 8.5z"/><path d="M7 11c.9-.8 2-.8 2.9 0M14.1 11c.9-.8 2-.8 2.9 0"/></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M4 4l16 16"/><path d="M9.8 6.2A9.6 9.6 0 0 1 12 6c5 0 8.3 4.2 9 6-.3.8-1.2 2.2-2.6 3.5M6.4 7.9C4.7 9.1 3.5 10.8 3 12c.7 1.8 4 6 9 6 1.4 0 2.6-.3 3.7-.8"/><path d="M10 10.2a2.6 2.6 0 0 0 3.7 3.7"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6.5" y="2.8" width="11" height="18.4" rx="2.8"/><path d="M10.5 18h3"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4.5M12 17v.2"/></symbol>
+  <symbol id="i-chair" viewBox="0 0 24 24"><path d="M7 3.5h10v8H7z"/><path d="M5.5 11.5h13v3h-13zM7 14.5V21M17 14.5V21"/></symbol>
+  <symbol id="i-broom" viewBox="0 0 24 24"><path d="M19.5 3.5 12 11"/><path d="M12 11c-3-1.5-6.5.5-7.5 4l-1 4.5 4.5-1c3.5-1 5.5-4.5 4-7.5z"/><path d="M6 15.5l2.5 2.5"/></symbol>
+  <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/></symbol>
+  <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18.2 6.5a8 8 0 0 1 0 11"/></symbol>
+  <symbol id="i-door" viewBox="0 0 24 24"><path d="M6 21V4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21"/><path d="M3.5 21h17M14.5 12v.5"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.2 5 6v5.6c0 4.3 3 7.9 7 9.2 4-1.3 7-4.9 7-9.2V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5.5 21V4M5.5 4.5h11l-2 4 2 4h-11"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7H8l1.5-2h5L16 7h2.5A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.8" r="3.3"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.6"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.2"/><path d="M3.5 19c.9-3 3-4.4 5.5-4.4s4.6 1.4 5.5 4.4"/><path d="M15.5 6.2a3 3 0 0 1 0 5.6M17.5 14.9c1.4.6 2.4 1.9 3 4.1"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M4 13.5 6.3 5.6A1.5 1.5 0 0 1 7.7 4.5h8.6a1.5 1.5 0 0 1 1.4 1.1L20 13.5V18a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18z"/><path d="M4 13.5h4.5l1.2 2h4.6l1.2-2H20"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24"><path d="M5 8.5h13M14.5 5 18 8.5 14.5 12M19 15.5H6M9.5 12 6 15.5 9.5 19"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="logo-facade" viewBox="0 0 100 100"><defs><linearGradient id="lf-ink" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#2b2f38"/><stop offset="1" stop-color="#0d0f14"/></linearGradient><linearGradient id="lf-mine" x1="0" y1="0" x2=".7" y2="1"><stop offset="0" stop-color="#4250ee"/><stop offset="1" stop-color="#1b23a3"/></linearGradient></defs><rect width="100" height="100" rx="23" fill="url(#lf-ink)"/><g fill="rgb(255 255 255 / .16)"><rect x="20" y="20" width="16" height="16" rx="4.5"/><rect x="64" y="20" width="16" height="16" rx="4.5"/><rect x="42" y="42" width="16" height="16" rx="4.5"/><rect x="20" y="64" width="16" height="16" rx="4.5"/><rect x="64" y="64" width="16" height="16" rx="4.5"/></g><g fill="#fff"><rect x="42" y="20" width="16" height="16" rx="4.5"/><rect x="20" y="42" width="16" height="16" rx="4.5"/><rect x="42" y="64" width="16" height="16" rx="4.5"/></g><rect x="64" y="42" width="16" height="16" rx="4.5" fill="url(#lf-mine)"/></symbol>
+  <symbol id="porthole" viewBox="0 0 200 200"><circle cx="100" cy="100" r="96" fill="none" stroke="#fff" stroke-width="2"/><circle cx="100" cy="100" r="74" fill="none" stroke="#fff" stroke-width="10"/><circle cx="100" cy="100" r="52" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M58 112c18-14 30 12 56 0s26-12 34-6" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+</svg>
+
+<main class="canvas">
+  <header class="canvas-head">
+    <div>
+      <a class="brand" href="index.html" aria-label="єГуртожиток: мокап першої версії">
+        <svg class="mark" aria-hidden="true"><use href="#logo-facade"/></svg>
+        <span class="wordmark">єГуртожиток</span>
+      </a>
+      <h1>Оголошення, дошка й звернення — мокап другої версії</h1>
+      <p>Десять екранів телефона за планом <code>docs/v2-plan.md</code>. Сьогодні четвер, 30 жовтня, 13:40. Імена, кімнати, звернення й завдання вигадані для прикладу. Теми звернень, «З іменем / Анонімно» та вкладки працюють.</p>
+    </div>
+    <nav class="jump" aria-label="Екрани">
+      <a href="#s-home">Головна</a>
+      <a href="#s-ann">Оголошення</a>
+      <a href="#s-board">Дошка</a>
+      <a href="#s-task">Завдання</a>
+      <a href="#s-new">Звернення</a>
+      <a href="#s-anon">Анонімно</a>
+      <a href="#s-me">Моє</a>
+      <a href="#s-mine">Моє звернення</a>
+      <a href="#s-inbox">Вхідні</a>
+      <a href="#s-review">Розгляд</a>
+    </nav>
+  </header>
+
+  <div class="phones">
+
+    <!-- 1. HOME with the five-item tab bar -->
+    <figure class="shot" id="s-home">
+      <div class="phone"><div class="screen">
+        <div class="field" aria-hidden="true"></div>
+        <div class="status" aria-hidden="true">13:40<i><svg viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg></i></div>
+        <div class="scroll">
+          <div class="topbar">
+            <a class="brand" href="#s-home"><svg class="mark" aria-hidden="true"><use href="#logo-facade"/></svg><span class="wordmark">єГуртожиток</span></a>
+            <a class="avatar" href="#s-me" aria-label="Моє: Олена Гриценко" style="text-decoration:none">ОГ</a>
+          </div>
+          <h2 class="title" style="margin-bottom:16px">Привіт, Олено</h2>
+
+          <a class="glass ann-hero" href="#s-ann">
+            <span class="ann-flag"><svg class="ico"><use href="#i-bell"/></svg>Важливе оголошення</span>
+            <h3 class="ann-title">Вимкнуть гарячу воду на 5 і 6 поверхах</h3>
+            <div class="ann-when">
+              <span class="t">09:00</span>
+              <span class="d"><b>Завтра, пʼятниця</b><span>до 18:00 · студрада</span></span>
+            </div>
+          </a>
+
+          <div class="section-h" style="margin-top:20px"><h3>Мій запис</h3><a href="#s-me">Усі</a></div>
+          <a class="ticket compact" href="#s-me" style="display:block;text-decoration:none">
+            <svg class="porthole" aria-hidden="true"><use href="#porthole"/></svg>
+            <div class="ticket-when" style="margin-top:0">Сьогодні, четвер</div>
+            <div class="ticket-time">18:00<span class="dash">–</span>20:00</div>
+            <div class="ticket-machine">6 поверх, №1</div>
+            <div class="ticket-foot"><span>Почнеться через <b>4 год 20 хв</b></span><span class="ticket-cta">Деталі<svg class="ico sm"><use href="#i-chev"/></svg></span></div>
+          </a>
+
+          <div class="section-h"><h3>Пралки зараз</h3><a href="#s-home">Розклад</a></div>
+          <div class="glass now-panel">
+            <a class="now-row" href="#s-home">
+              <span class="port free" aria-hidden="true"></span>
+              <span class="now-name"><b>4 поверх</b><small class="ok">вільна до 15:30</small></span>
+              <div class="strip" role="img" aria-label="4 поверх: зайнято 09:00–11:00, 15:30–17:30, 19:00–21:00"><div class="strip-track"><span class="seg-busy" style="left:16.67%;width:11.11%"></span><span class="seg-busy" style="left:52.78%;width:11.11%"></span><span class="seg-busy" style="left:72.22%;width:11.11%"></span><span class="seg-past" style="width:42.59%"></span></div><span class="strip-now" style="left:42.59%"></span></div>
+            </a>
+            <a class="now-row" href="#s-home">
+              <span class="port busy" aria-hidden="true"></span>
+              <span class="now-name"><b>6 пов., №1</b><small>зайнята до 14:30</small></span>
+              <div class="strip" role="img" aria-label="6 поверх, №1: зайнято 12:30–14:30, ваш запис 18:00–20:00"><div class="strip-track"><span class="seg-busy" style="left:36.11%;width:11.11%"></span><span class="seg-mine" style="left:66.67%;width:11.11%"></span><span class="seg-past" style="width:42.59%"></span></div><span class="strip-now" style="left:42.59%"></span></div>
+            </a>
+            <a class="now-row" href="#s-home">
+              <span class="port busy" aria-hidden="true"></span>
+              <span class="now-name"><b>6 пов., №2</b><small>зайнята до 15:00</small></span>
+              <div class="strip" role="img" aria-label="6 поверх, №2: зайнято 13:00–15:00, 18:30–20:30"><div class="strip-track"><span class="seg-busy" style="left:38.89%;width:11.11%"></span><span class="seg-busy" style="left:69.44%;width:11.11%"></span><span class="seg-past" style="width:42.59%"></span></div><span class="strip-now" style="left:42.59%"></span></div>
+            </a>
+            <div class="strip-scale now-scale"><span>06</span><span>12</span><span>18</span><span>24</span></div>
+          </div>
+        </div>
+        <nav class="tabbar five" aria-label="Розділи">
+          <a class="tab" href="#s-home" aria-current="page"><svg class="ico"><use href="#i-home"/></svg>Головна</a>
+          <a class="tab" href="#s-ann"><span class="badge-dot"><svg class="ico"><use href="#i-horn"/></svg></span>Оголошення</a>
+          <a class="tab-disc" href="#s-home"><span><svg class="ico"><use href="#i-plus"/></svg></span>Записатися</a>
+          <a class="tab" href="#s-board"><svg class="ico"><use href="#i-board"/></svg>Дошка</a>
+          <a class="tab" href="#s-me"><svg class="ico"><use href="#i-me"/></svg>Моє</a>
+        </nav>
+      </div></div>
+      <figcaption><b>Головна з новим меню</b><span>П’ять пунктів знизу, «Записатися» лишається в центрі. Важливе оголошення стоїть над вашим записом, доки не мине.</span></figcaption>
+    </figure>
+
+    <!-- 2. ANNOUNCEMENTS -->
+    <figure class="shot" id="s-ann">
+      <div class="phone"><div class="screen">
+        <div class="field" aria-hidden="true"></div>
+        <div class="status" aria-hidden="true">13:40<i><svg viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg></i></div>
+        <div class="scroll">
+          <h2 class="title" style="margin-top:4px">Оголошення</h2>
+          <p class="lede">Від студради для всіх мешканців. Найближчі зверху.</p>
+
+          <article class="glass ann-hero">
+            <span class="ann-flag"><svg class="ico"><use href="#i-bell"/></svg>Важливе · прийшло сповіщення</span>
+            <h3 class="ann-title">Вимкнуть гарячу воду на 5 і 6 поверхах</h3>
+            <p class="ann-body">Ремонт труби в підвалі. Пралки на 6 поверсі працюватимуть лише на холодних програмах.</p>
+            <div class="ann-when">
+              <span class="t">09:00</span>
+              <span class="d"><b>Завтра, пʼятниця, 31 жовтня</b><span>до 18:00 · Марта Гнатів, студрада</span></span>
+            </div>
+          </article>
+
+          <div class="section-h"><h3>Цього тижня й далі</h3></div>
+          <div class="ann-list">
+            <a class="glass ann-row" href="#s-ann">
+              <span class="cal-leaf"><small>Нд</small><b>2</b></span>
+              <div>
+                <h4>Збори мешканців</h4>
+                <p>Звіт студради за жовтень і вибори старост поверхів.</p>
+                <div class="meta"><span><svg class="ico"><use href="#i-clock"/></svg>19:00</span><span><svg class="ico"><use href="#i-pin"/></svg>Читальна зала, 1 поверх</span></div>
+              </div>
+            </a>
+            <a class="glass ann-row" href="#s-ann">
+              <span class="cal-leaf"><small>Ср</small><b>5</b></span>
+              <div>
+                <h4>Генеральне прибирання кухонь</h4>
+                <p>Звільніть полиці в холодильниках до вечора вівторка.</p>
+                <div class="meta"><span><svg class="ico"><use href="#i-clock"/></svg>10:00</span><span><svg class="ico"><use href="#i-pin"/></svg>Усі поверхи</span></div>
+              </div>
+            </a>
+          </div>
+          <a class="history" href="#s-ann">Історія <small>14 оголошень<svg class="ico sm" style="vertical-align:-4px;margin-left:4px"><use href="#i-chev"/></svg></small></a>
+        </div>
+        <nav class="tabbar five" aria-label="Розділи">
+          <a class="tab" href="#s-home"><svg class="ico"><use href="#i-home"/></svg>Головна</a>
+          <a class="tab" href="#s-ann" aria-current="page"><svg class="ico"><use href="#i-horn"/></svg>Оголошення</a>
+          <a class="tab-disc" href="#s-home"><span><svg class="ico"><use href="#i-plus"/></svg></span>Записатися</a>
+          <a class="tab" href="#s-board"><svg class="ico"><use href="#i-board"/></svg>Дошка</a>
+          <a class="tab" href="#s-me"><svg class="ico"><use href="#i-me"/></svg>Моє</a>
+        </nav>
+      </div></div>
+      <figcaption><b>Оголошення</b><span>Подія з датою — листок календаря, час — тими самими цифрами, що й записи. Позначка «важливе» розсилає сповіщення, бот повторює оголошення в групі гуртожитку.</span></figcaption>
+    </figure>
+
+    <!-- 3. BOARD -->
+    <figure class="shot" id="s-board">
+      <div class="phone"><div class="screen">
+        <div class="field" aria-hidden="true"></div>
+        <div class="status" aria-hidden="true">13:40<i><svg viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg></i></div>
+        <div class="scroll">
+          <h2 class="title" style="margin:4px 0 14px">Дошка</h2>
+          <div class="seg boards" data-seg role="group" aria-label="Чия дошка">
+            <span class="thumb" aria-hidden="true"></span>
+            <button type="button" aria-pressed="true">Студрада</button>
+            <button type="button">Оперзагін</button>
+          </div>
+
+          <div class="glass report" role="group" aria-label="Звернення до студради за жовтень">
+            <div><b>23</b><span>звернення надійшло</span></div>
+            <div><b>15</b><span>вирішено</span></div>
+            <div><b>2,5 дня</b><span>у середньому до рішення</span></div>
+          </div>
+
+          <a class="glass write-cta" href="#s-new">
+            <p><b>Щось зламалось чи заважає?</b>Студрада чи оперзагін отримає одразу.</p>
+            <span class="btn btn-primary">Написати</span>
+          </a>
+
+          <div class="seg cols" data-seg role="group" aria-label="Колонка">
+            <span class="thumb" aria-hidden="true"></span>
+            <button type="button">Нові<b>4</b></button>
+            <button type="button" aria-pressed="true">В роботі<b>3</b></button>
+            <button type="button">Готово<b>15</b></button>
+          </div>
+
+          <div class="task-list">
+            <a class="glass task" href="#s-task">
+              <div class="task-top"><h3>Тече кран у душі, 6 поверх</h3><span class="st work">В роботі</span></div>
+              <div class="meta"><span><svg class="ico"><use href="#i-pin"/></svg>6 поверх, душ ліворуч</span><span class="age">4-й день</span></div>
+              <span class="from-c"><svg class="ico"><use href="#i-chat"/></svg>Зі звернення</span>
+            </a>
+            <a class="glass task" href="#s-task">
+              <div class="task-top"><h3>Не світить лампа на сходах між 3 і 4 поверхом</h3><span class="st work">В роботі</span></div>
+              <div class="meta"><span><svg class="ico"><use href="#i-pin"/></svg>Сходи, крило А</span><span class="age">2-й день</span></div>
+              <span class="from-c"><svg class="ico"><use href="#i-chat"/></svg>Зі звернення</span>
+            </a>
+            <a class="glass task" href="#s-task">
+              <div class="task-top"><h3>Домовитися про другу сушарку для пральні</h3><span class="st work">В роботі</span></div>
+              <div class="meta"><span><svg class="ico"><use href="#i-pin"/></svg>Пральня, 6 поверх</span><span class="age">9-й день</span></div>
+            </a>
+          </div>
+        </div>
+        <nav class="tabbar five" aria-label="Розділи">
+          <a class="tab" href="#s-home"><svg class="ico"><use href="#i-home"/></svg>Головна</a>
+          <a class="tab" href="#s-ann"><svg class="ico"><use href="#i-horn"/></svg>Оголошення</a>
+          <a class="tab-disc" href="#s-home"><span><svg class="ico"><use href="#i-plus"/></svg></span>Записатися</a>
+          <a class="tab" href="#s-board" aria-current="page"><svg class="ico"><use href="#i-board"/></svg>Дошка</a>
+          <a class="tab" href="#s-me"><svg class="ico"><use href="#i-me"/></svg>Моє</a>
+        </nav>
+      </div></div>
+      <figcaption><b>Прозора дошка</b><span>Дві дошки — студради й оперзагону. Мешканці бачать картки без імені й кімнати автора; бурштиновий означає лише «в роботі». Згори — лічильник за місяць, щоб було видно, що звернення не зникають.</span></figcaption>
+    </figure>
+
+    <!-- 4. TASK -->
+    <figure class="shot" id="s-task">
+      <div class="phone"><div class="screen">
+        <div class="field" aria-hidden="true"></div>
+        <div class="status" aria-hidden="true">13:40<i><svg viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg></i></div>
+        <div class="scroll">
+          <div class="topbar"><a class="icon-btn" href="#s-board" aria-label="Назад до дошки"><svg class="ico"><use href="#i-back"/></svg></a><span class="meta">Дошка студради · №41</span></div>
+
+          <article class="glass detail">
+            <span class="st work">В роботі</span>
+            <h2>Тече кран у душі, 6 поверх</h2>
+            <div class="meta"><span><svg class="ico"><use href="#i-pin"/></svg>6 поверх, душ ліворуч</span></div>
+            <ol class="track" aria-label="Хід роботи">
+              <li class="on"><span class="n"></span>Нове<small>26 жов</small></li>
+              <li class="cur" aria-current="step"><span class="n"></span>В роботі<small>27 жов</small></li>
+              <li><span class="n"></span>Готово<small>&nbsp;</small></li>
+            </ol>
+          </article>
+
+          <div class="glass facts">
+            <div class="fact"><svg class="ico"><use href="#i-chat"/></svg><div>Виникло зі звернення мешканця<small>Хто написав, на дошці не показуємо.</small></div></div>
+            <div class="fact"><svg class="ico"><use href="#i-users"/></svg><div>Займається студрада<small>Передали сантехніку гуртожитку 28 жовтня.</small></div></div>
+          </div>
+
+          <div class="section-h"><h3>Що відбувалося</h3></div>
+          <ol class="log">
+            <li><time>28 жов, 16:10</time>Передали сантехніку, обіцяв до понеділка</li>
+            <li><time>27 жов, 09:30</time>Взяли в роботу</li>
+            <li><time>26 жов, 22:05</time>Додано на дошку</li>
+          </ol>
+        </div>
+        <nav class="tabbar five" aria-label="Розділи">
+          <a class="tab" href="#s-home"><svg class="ico"><use href="#i-home"/></svg>Головна</a>
+          <a class="tab" href="#s-ann"><svg class="ico"><use href="#i-horn"/></svg>Оголошення</a>
+          <a class="tab-disc" href="#s-home"><span><svg class="ico"><use href="#i-plus"/></svg></span>Записатися</a>
+          <a class="tab" href="#s-board" aria-current="page"><svg class="ico"><use href="#i-board"/></svg>Дошка</a>
+          <a class="tab" href="#s-me"><svg class="ico"><use href="#i-me"/></svg>Моє</a>
+        </nav>
+      </div></div>
+      <figcaption><b>Завдання очима мешканця</b><span>Смужка кроків показує, де зараз робота: пройдені кроки графітові, поточний бурштиновий і «дихає». Історія — із журналу змін, як в Опереті.</span></figcaption>
+    </figure>
+
+    <!-- 5. NEW COMPLAINT, with name -->
+    <figure class="shot" id="s-new">
+      <div class="phone"><div class="screen">
+        <div class="field" aria-hidden="true"></div>
+        <div class="status" aria-hidden="true">13:40<i><svg viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg></i></div>
+        <div class="scroll" style="padding-bottom:28px">
+          <div class="topbar"><a class="icon-btn" href="#s-board" aria-label="Назад"><svg class="ico"><use href="#i-back"/></svg></a></div>
+          <h2 class="title">Нове звернення</h2>
+          <p class="lede">Оберіть, про що, — звернення саме дійде до тих, хто це вирішує.</p>
+
+          <form class="complaint" data-form="named" onsubmit="return false">
+            <div class="glass form-block">
+              <div class="lbl">Про що</div>
+              <div class="to-group">
+                <small>Студрада</small>
+                <div class="topics" role="radiogroup" aria-label="Тема">
+                  <button type="button" class="topic" role="radio" aria-checked="false" data-to="студрада"><svg class="ico"><use href="#i-bolt"/></svg>Електрика</button>
+                  <button type="button" class="topic" role="radio" aria-checked="true" data-to="студрада"><svg class="ico"><use href="#i-drop"/></svg>Сантехніка</button>
+                  <button type="button" class="topic" role="radio" aria-checked="false" data-to="студрада"><svg class="ico"><use href="#i-chair"/></svg>Меблі й вікна</button>
+                  <button type="button" class="topic" role="radio" aria-checked="false" data-to="студрада"><svg class="ico"><use href="#i-washer"/></svg>Пралки</button>
+                  <button type="button" class="topic" role="radio" aria-checked="false" data-to="студрада"><svg class="ico"><use href="#i-broom"/></svg>Чистота</button>
+                  <button type="button" class="topic" role="radio" aria-checked="false" data-to="студрада"><svg class="ico"><use href="#i-dots"/></svg>Інше</button>
+                </div>
+              </div>
+              <div class="to-group">
+                <small>Оперзагін</small>
+                <div class="topics" role="radiogroup" aria-label="Тема">
+                  <button type="button" class="topic" role="radio" aria-checked="false" data-to="оперзагін"><svg class="ico"><use href="#i-sound"/></svg>Шум</button>
+                  <button type="button" class="topic" role="radio" aria-checked="false" data-to="оперзагін"><svg class="ico"><use href="#i-door"/></svg>Сторонні</button>
+                  <button type="button" class="topic" role="radio" aria-checked="false" data-to="оперзагін"><svg class="ico"><use href="#i-shield"/></svg>Безпека</button>
+                  <button type="button" class="topic" role="radio" aria-checked="false" data-to="оперзагін"><svg class="ico"><use href="#i-flag"/></svg>Порушення правил</button>
+                </div>
+              </div>
+              <div class="to-group">
+                <small>Команда застосунку</small>
+                <div class="topics" role="radiogroup" aria-label="Тема">
+                  <button type="button" class="topic" role="radio" aria-checked="false" data-to="команда застосунку"><svg class="ico"><use href="#i-phone"/></svg>Про застосунок</button>
+                </div>
+              </div>
+              <div class="route" aria-live="polite"><svg class="ico"><use href="#i-inbox"/></svg><span>Отримає: <b data-route>студрада</b></span></div>
+            </div>
+
+            <div class="glass form-block">
+              <div class="field-row">
+                <label for="c-place">Де саме</label>
+                <input id="c-place" value="6 поверх, душ ліворуч">
+              </div>
+              <div class="field-row" style="margin-top:16px">
+                <label for="c-text">Що сталося</label>
+                <textarea class="area" id="c-text" maxlength="1000">Кран у лівій душовій не закривається до кінця, вода тече цілу ніч. Під дверима вже калюжа.</textarea>
+                <span class="count">96 / 1000</span>
+              </div>
+              <button type="button" class="add-photo"><svg class="ico sm"><use href="#i-camera"/></svg>Додати фото<small>до 3</small></button>
+            </div>
+
+            <div class="glass form-block who-sees">
+              <div class="lbl">Хто знатиме, що це ви</div>
+              <div class="seg" data-seg data-anon role="group" aria-label="Як надіслати">
+                <span class="thumb" aria-hidden="true"></span>
+                <button type="button" aria-pressed="true" data-mode="named">З іменем</button>
+                <button type="button" data-mode="anon">Анонімно</button>
+              </div>
+              <ul class="promise" data-show="named">
+                <li><svg class="ico"><use href="#i-me"/></svg><span>Отримувач бачить ваше ім’я й кімнату <b>612</b> і може уточнити деталі.</span></li>
+                <li><svg class="ico"><use href="#i-bell"/></svg><span>Сповіщення, коли звернення візьмуть у роботу й вирішать.</span></li>
+                <li><svg class="ico"><use href="#i-eye-off"/></svg><span>На дошці ваше ім’я не показується нікому.</span></li>
+              </ul>
+              <ul class="promise" data-show="anon" hidden>
+                <li><svg class="ico"><use href="#i-lock"/></svg><span>Ніхто не дізнається, хто написав, — навіть ті, хто має доступ до бази.</span></li>
+                <li class="warn"><svg class="ico"><use href="#i-alert"/></svg><span>Сповіщень не буде: статус видно лише на цьому телефоні.</span></li>
+              </ul>
+            </div>
+
+            <div class="submit-bar">
+              <button class="btn btn-primary block" type="submit">Надіслати студраді</button>
+              <small>Відкритих звернень з іменем: 1 з 5</small>
+            </div>
+          </form>
+        </div>
+      </div></div>
+      <figcaption><b>Нове звернення</b><span>Тема сама визначає отримувача, і це видно до надсилання. Перемикач «З іменем / Анонімно» чесно пише, що кожен вибір означає. Спробуйте натиснути тему й перемикач.</span></figcaption>
+    </figure>
+
+    <!-- 6. NEW COMPLAINT, anonymous -->
+    <figure class="shot" id="s-anon">
+      <div class="phone"><div class="screen">
+        <div class="field" aria-hidden="true"></div>
+        <div class="status" aria-hidden="true">13:40<i><svg viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg></i></div>
+        <div class="scroll" style="padding-bottom:28px">
+          <div class="topbar"><a class="icon-btn" href="#s-new" aria-label="Назад"><svg class="ico"><use href="#i-back"/></svg></a></div>
+          <h2 class="title" style="margin-bottom:14px">Анонімне звернення</h2>
+
+          <div class="anon-mark">
+            <span class="mask"><svg class="ico"><use href="#i-mask"/></svg></span>
+            <span><b>Без імені, без кімнати, без входу</b><span>Звернення піде окремо від вашого акаунта, з одноразовим анонімним квитком.</span></span>
+          </div>
+
+          <div class="glass form-block">
+            <div class="lbl">Про що</div>
+            <div class="topics" role="radiogroup" aria-label="Тема">
+              <button type="button" class="topic" role="radio" aria-checked="true"><svg class="ico"><use href="#i-sound"/></svg>Шум</button>
+              <button type="button" class="topic" role="radio" aria-checked="false"><svg class="ico"><use href="#i-door"/></svg>Сторонні</button>
+              <button type="button" class="topic" role="radio" aria-checked="false"><svg class="ico"><use href="#i-shield"/></svg>Безпека</button>
+              <button type="button" class="topic" role="radio" aria-checked="false"><svg class="ico"><use href="#i-flag"/></svg>Порушення правил</button>
+              <button type="button" class="topic" role="radio" aria-checked="false"><svg class="ico"><use href="#i-dots"/></svg>Інша тема</button>
+            </div>
+            <div class="route"><svg class="ico"><use href="#i-inbox"/></svg><span>Отримає: <b>оперзагін</b></span></div>
+          </div>
+
+          <div class="glass form-block">
+            <div class="field-row">
+              <label for="a-place">Де саме <small style="display:inline;padding:0;font-weight:500">поверх, без номера кімнати</small></label>
+              <input id="a-place" value="5 поверх, крило Б">
+            </div>
+            <div class="field-row" style="margin-top:16px">
+              <label for="a-text">Що відбувається</label>
+              <textarea class="area" id="a-text" maxlength="1000">Майже щоночі після 01:00 гучна музика в кінці коридору, до 3–4 ранку.</textarea>
+            </div>
+          </div>
+
+          <div class="glass form-block">
+            <ul class="promise">
+              <li><svg class="ico"><use href="#i-lock"/></svg><span>Сервер перевіряє лише, що квиток справжній. Хто його отримав — не знає ніхто.</span></li>
+              <li class="warn"><svg class="ico"><use href="#i-alert"/></svg><span>Сповіщень не буде. Статус і відповіді — у «Моє» на цьому телефоні.</span></li>
+              <li class="warn"><svg class="ico"><use href="#i-alert"/></svg><span>Не пишіть того, що вас видає: номер кімнати, ім’я, «мій сусід».</span></li>
+            </ul>
+            <div class="tickets" aria-label="Анонімних квитків цього тижня: 2 з 3"><i class="on"></i><i class="on"></i><i></i><span>Лишилось 2 анонімні звернення цього тижня</span></div>
+          </div>
+
+          <div class="submit-bar">
+            <button class="btn btn-primary block" type="button">Надіслати анонімно</button>
+          </div>
+        </div>
+      </div></div>
+      <figcaption><b>Справді анонімно</b><span>Темна плашка — єдиний темний блок у застосунку: тут вас немає. Квитки видаються наперед, тож час надсилання нікого не видає. Ліміт — 3 на тиждень.</span></figcaption>
+    </figure>
+
+    <!-- 7. «МОЄ» -->
+    <figure class="shot" id="s-me">
+      <div class="phone"><div class="screen">
+        <div class="field" aria-hidden="true"></div>
+        <div class="status" aria-hidden="true">13:40<i><svg viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg></i></div>
+        <div class="scroll">
+          <div class="me" style="margin-top:4px">
+            <span class="me-av">ОГ</span>
+            <div><b>Олена Гриценко</b><span>кімната 612 · @olena_h</span></div>
+          </div>
+
+          <div class="section-h"><h3>Мої звернення</h3><a href="#s-new">Написати</a></div>
+          <div class="mine-list">
+            <a class="glass mine-c" href="#s-mine">
+              <div class="task-top"><h4>Тече кран у душі, 6 поверх</h4><span class="st work">В роботі</span></div>
+              <div class="meta"><span><svg class="ico"><use href="#i-drop"/></svg>Сантехніка · студрада</span><span><svg class="ico"><use href="#i-chat"/></svg>нова відповідь</span></div>
+            </a>
+            <a class="glass mine-c" href="#s-mine">
+              <div class="task-top"><h4>Шум після 01:00, 5 поверх</h4><span class="st review">Розглядаємо</span></div>
+              <div class="meta"><span class="anon-tag"><svg class="ico"><use href="#i-mask"/></svg>Анонімне</span><span>оперзагін · лише на цьому телефоні</span></div>
+            </a>
+            <a class="glass mine-c" href="#s-mine">
+              <div class="task-top"><h4>Пралка на 4 поверсі не зливає воду</h4><span class="st done"><svg class="ico"><use href="#i-check"/></svg>Вирішено</span></div>
+              <div class="meta"><span><svg class="ico"><use href="#i-washer"/></svg>Пралки · 14 жовтня</span></div>
+            </a>
+          </div>
+
+          <div class="section-h"><h3>Пралки</h3></div>
+          <div class="glass hub">
+            <a class="hub-row" href="#s-home"><span class="hub-ico"><svg class="ico"><use href="#i-cal"/></svg></span><span><b>Мої записи</b><span class="sub">Сьогодні 18:00–20:00 · ще 1</span></span><svg class="ico sm"><use href="#i-chev"/></svg></a>
+          </div>
+          <div class="glass hub" style="margin-top:12px">
+            <a class="hub-row" href="#s-me"><span class="hub-ico"><svg class="ico"><use href="#i-me"/></svg></span><span><b>Профіль</b><span class="sub">Кімната, Telegram, сповіщення, вихід</span></span><svg class="ico sm"><use href="#i-chev"/></svg></a>
+          </div>
+        </div>
+        <nav class="tabbar five" aria-label="Розділи">
+          <a class="tab" href="#s-home"><svg class="ico"><use href="#i-home"/></svg>Головна</a>
+          <a class="tab" href="#s-ann"><svg class="ico"><use href="#i-horn"/></svg>Оголошення</a>
+          <a class="tab-disc" href="#s-home"><span><svg class="ico"><use href="#i-plus"/></svg></span>Записатися</a>
+          <a class="tab" href="#s-board"><svg class="ico"><use href="#i-board"/></svg>Дошка</a>
+          <a class="tab" href="#s-me" aria-current="page"><svg class="ico"><use href="#i-me"/></svg>Моє</a>
+        </nav>
+      </div></div>
+      <figcaption><b>Моє</b><span>Усе особисте в одному місці: звернення, записи, профіль. Анонімне звернення видно лише на телефоні, з якого його надіслали. У студради й оперів тут ще «Вхідні» та «Загін».</span></figcaption>
+    </figure>
+
+    <!-- 8. ONE COMPLAINT (mine) -->
+    <figure class="shot" id="s-mine">
+      <div class="phone"><div class="screen">
+        <div class="field" aria-hidden="true"></div>
+        <div class="status" aria-hidden="true">13:40<i><svg viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg></i></div>
+        <div class="scroll">
+          <div class="topbar"><a class="icon-btn" href="#s-me" aria-label="Назад до «Моє»"><svg class="ico"><use href="#i-back"/></svg></a><span class="meta">Звернення №27</span></div>
+
+          <article class="c-doc">
+            <svg class="porthole" aria-hidden="true"><use href="#porthole"/></svg>
+            <div class="c-doc-top"><span><b>Сантехніка</b> · студраді</span><span>26 жов, 22:01</span></div>
+            <h2>Тече кран у душі, 6 поверх</h2>
+            <p>Кран у лівій душовій не закривається до кінця, вода тече цілу ніч.</p>
+            <ol class="track" aria-label="Хід звернення">
+              <li class="on"><span class="n"></span>Надіслано<small>26 жов</small></li>
+              <li class="on"><span class="n"></span>Розглянули<small>27 жов</small></li>
+              <li class="cur" aria-current="step"><span class="n"></span>В роботі<small>з 27 жов</small></li>
+              <li><span class="n"></span>Вирішено<small>&nbsp;</small></li>
+            </ol>
+          </article>
+
+          <a class="glass on-board" href="#s-task">
+            <svg class="ico"><use href="#i-board"/></svg>
+            <span><small>Усі бачать на дошці, без вашого імені</small><b>Тече кран у душі, 6 поверх</b></span>
+            <svg class="ico sm"><use href="#i-chev"/></svg>
+          </a>
+
+          <div class="section-h"><h3>Листування</h3></div>
+          <div class="thread">
+            <div class="msg them"><small>Марта, студрада</small>Дякуємо! Кран в одній кабінці чи в обох?<time>27 жов, 09:28</time></div>
+            <div class="msg own">Лише в лівій, права нормальна.<time>27 жов, 10:02</time></div>
+            <div class="sys">Студрада взяла звернення <b>в роботу</b></div>
+            <div class="msg them"><small>Марта, студрада</small>Передали сантехніку, обіцяв до понеділка. Напишіть, якщо стане гірше.<time>28 жов, 16:10</time></div>
+          </div>
+        </div>
+        <form class="composer" onsubmit="return false">
+          <input aria-label="Відповідь студраді" placeholder="Відповісти студраді">
+          <button class="send" type="submit" aria-label="Надіслати"><svg class="ico"><use href="#i-send"/></svg></button>
+        </form>
+      </div></div>
+      <figcaption><b>Моє звернення</b><span>Ваше — ультрамариновою карткою, як запис на пралку. Той самий хід кроків, що на дошці, плюс листування з тим, хто його веде.</span></figcaption>
+    </figure>
+
+    <!-- 9. COUNCIL INBOX -->
+    <figure class="shot" id="s-inbox">
+      <div class="phone"><div class="screen">
+        <div class="field" aria-hidden="true"></div>
+        <div class="status" aria-hidden="true">13:40<i><svg viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg></i></div>
+        <div class="scroll">
+          <div class="topbar"><a class="icon-btn" href="#s-me" aria-label="Назад до «Моє»"><svg class="ico"><use href="#i-back"/></svg></a><span class="meta">Марта Гнатів · студрада</span></div>
+          <h2 class="title">Звернення до студради</h2>
+          <p class="lede">Відповісти треба протягом 2 днів, інакше звернення підсвічується.</p>
+
+          <div class="seg cols" data-seg role="group" aria-label="Стан">
+            <span class="thumb" aria-hidden="true"></span>
+            <button type="button" aria-pressed="true">Нові<b>3</b></button>
+            <button type="button">Розглядаємо<b>2</b></button>
+            <button type="button">В роботі<b>4</b></button>
+          </div>
+
+          <div class="glass inbox">
+            <a class="in-row unread" href="#s-review">
+              <span class="hub-ico"><svg class="ico"><use href="#i-bolt"/></svg></span>
+              <div>
+                <h3>Іскрить розетка біля плити</h3>
+                <p>На кухні 3 поверху ліва розетка іскрить, коли вмикаєш чайник. Вже двічі вибивало світло.</p>
+                <div class="meta"><span>Денис Ткач, 302</span><span>40 хв тому</span></div>
+              </div>
+            </a>
+            <a class="in-row unread" href="#s-review">
+              <span class="hub-ico"><svg class="ico"><use href="#i-broom"/></svg></span>
+              <div>
+                <h3>Сміття на сходах між 5 і 6</h3>
+                <p>Третій день стоять пакети біля вікна, вже пахне.</p>
+                <div class="meta"><span class="anon-tag"><svg class="ico"><use href="#i-mask"/></svg>Анонімне</span><span>3 год тому</span></div>
+              </div>
+            </a>
+            <a class="in-row" href="#s-review">
+              <span class="hub-ico"><svg class="ico"><use href="#i-chair"/></svg></span>
+              <div>
+                <h3>Не закривається вікно в 418</h3>
+                <p>Ручка провертається, вікно не зачиняється, дме.</p>
+                <div class="meta"><span>Юлія Бойко, 418</span><span class="overdue">2 дні без відповіді</span></div>
+              </div>
+            </a>
+          </div>
+          <a class="history" href="#s-inbox">Закриті <small>15 вирішено · 2 відхилено<svg class="ico sm" style="vertical-align:-4px;margin-left:4px"><use href="#i-chev"/></svg></small></a>
+        </div>
+        <nav class="tabbar five" aria-label="Розділи">
+          <a class="tab" href="#s-home"><svg class="ico"><use href="#i-home"/></svg>Головна</a>
+          <a class="tab" href="#s-ann"><svg class="ico"><use href="#i-horn"/></svg>Оголошення</a>
+          <a class="tab-disc" href="#s-home"><span><svg class="ico"><use href="#i-plus"/></svg></span>Записатися</a>
+          <a class="tab" href="#s-board"><svg class="ico"><use href="#i-board"/></svg>Дошка</a>
+          <a class="tab" href="#s-me" aria-current="page"><span class="badge-dot"><svg class="ico"><use href="#i-me"/></svg></span>Моє</a>
+        </nav>
+      </div></div>
+      <figcaption><b>Вхідні звернення студради</b><span>Нові позначені бурштиновою крапкою, прострочені — бурштиновим текстом. Анонімні виглядають так само, як усі, лише без імені. Опери бачать таку саму сторінку для своїх тем.</span></figcaption>
+    </figure>
+
+    <!-- 10. COUNCIL REVIEW -->
+    <figure class="shot" id="s-review">
+      <div class="phone"><div class="screen">
+        <div class="field" aria-hidden="true"></div>
+        <div class="status" aria-hidden="true">13:40<i><svg viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg></i></div>
+        <div class="scroll" style="padding-bottom:28px">
+          <div class="topbar"><a class="icon-btn" href="#s-inbox" aria-label="Назад до вхідних"><svg class="ico"><use href="#i-back"/></svg></a><span class="meta">Звернення №31</span></div>
+
+          <article class="glass review-card">
+            <div class="task-top"><span class="ann-flag" style="margin:0"><svg class="ico"><use href="#i-bolt"/></svg>Електрика</span><span class="st">Нове</span></div>
+            <blockquote>На кухні 3 поверху ліва розетка іскрить, коли вмикаєш чайник. Вже двічі вибивало світло на поверсі.</blockquote>
+            <div class="meta"><span><svg class="ico"><use href="#i-pin"/></svg>Кухня, 3 поверх</span><span><svg class="ico"><use href="#i-clock"/></svg>сьогодні, 13:00</span></div>
+            <div class="author"><span class="who-av">ДТ</span><span><b>Денис Ткач</b>кімната 302 · @den_tkach</span></div>
+          </article>
+
+          <div class="glass publish">
+            <div class="field-row">
+              <label for="r-title">Як це побачать на дошці</label>
+              <input id="r-title" value="Іскрить розетка на кухні, 3 поверх">
+              <small>Без імені й кімнати. Усі мешканці бачать цей рядок і хід роботи.</small>
+            </div>
+            <div class="check-row"><span>Показувати на дошці</span><button type="button" class="switch" role="switch" aria-checked="true" aria-label="Показувати на дошці"></button></div>
+            <button class="btn btn-primary block" type="button">Взяти в роботу</button>
+          </div>
+
+          <div class="act-grid">
+            <button class="btn btn-soft" type="button"><svg class="ico sm"><use href="#i-chat"/></svg>Уточнити</button>
+            <button class="btn btn-soft" type="button"><svg class="ico sm"><use href="#i-swap"/></svg>Оперзагону</button>
+          </div>
+          <button class="btn btn-ghost-danger block" type="button" style="margin-top:4px">Відхилити з поясненням</button>
+        </div>
+      </div></div>
+      <figcaption><b>Розгляд звернення</b><span>«Взяти в роботу» створює завдання на дошці з формулюванням, яке студрада пише сама. Звернення можна передати оперзагону, якщо тему обрали не ту. Відхилити — лише з поясненням для автора.</span></figcaption>
+    </figure>
+
+  </div>
+
+  <p class="note">Мокап, не застосунок: дані вигадані, кнопки нічого не надсилають. Перша версія — <a class="link" style="display:inline;min-height:0;text-decoration:underline" href="index.html">мокап запису на пралки</a>.</p>
+</main>
+
+<script>
+(() => {
+  // segmented controls with a gliding thumb (same behaviour as the v1 mockup)
+  document.querySelectorAll("[data-seg]").forEach(root => {
+    const thumb = root.querySelector(".thumb");
+    const btns = [...root.querySelectorAll("button")];
+    let ready = false;
+    const place = () => {
+      const on = btns.find(x => x.getAttribute("aria-pressed") === "true") || btns[0];
+      if (!ready) thumb.style.transition = "none";
+      thumb.style.width = on.offsetWidth + "px";
+      thumb.style.transform = `translateX(${on.offsetLeft - 3}px)`;
+      if (!ready) { thumb.offsetWidth; thumb.style.transition = ""; ready = true; }
+    };
+    if ("ResizeObserver" in window) new ResizeObserver(() => { ready = false; place(); }).observe(root);
+    btns.forEach(x => x.addEventListener("click", () => {
+      btns.forEach(y => y.setAttribute("aria-pressed", String(y === x)));
+      place();
+      if (root.hasAttribute("data-anon")) {
+        const block = root.closest(".who-sees");
+        block.querySelectorAll("[data-show]").forEach(u => u.hidden = u.dataset.show !== x.dataset.mode);
+        const form = root.closest("form");
+        const submit = form.querySelector("[type=submit]");
+        const to = form.querySelector("[data-route]").textContent;
+        submit.textContent = x.dataset.mode === "anon" ? "Надіслати анонімно" : sendLabel(to);
+        form.querySelector(".submit-bar small").textContent = x.dataset.mode === "anon"
+          ? "Лишилось 2 анонімні звернення цього тижня"
+          : "Відкритих звернень з іменем: 1 з 5";
+      }
+    }));
+    place();
+  });
+
+  function sendLabel(to) {
+    return to === "оперзагін" ? "Надіслати оперзагону" : to === "студрада" ? "Надіслати студраді" : "Надіслати команді";
+  }
+
+  // topics: one choice across all groups in a form; the recipient follows it
+  document.querySelectorAll(".topics").forEach(group => {
+    group.addEventListener("click", e => {
+      const btn = e.target.closest(".topic");
+      if (!btn) return;
+      const scope = btn.closest("form") || btn.closest(".form-block");
+      scope.querySelectorAll(".topic").forEach(t => t.setAttribute("aria-checked", String(t === btn)));
+      const route = scope.querySelector("[data-route]");
+      if (route && btn.dataset.to) {
+        route.textContent = btn.dataset.to;
+        const anon = scope.querySelector("[data-mode=anon]")?.getAttribute("aria-pressed") === "true";
+        if (!anon) scope.querySelector("[type=submit]").textContent = sendLabel(btn.dataset.to);
+      }
+    });
+  });
+
+  // switches
+  document.querySelectorAll(".switch").forEach(s => s.addEventListener("click", () => {
+    s.setAttribute("aria-checked", String(s.getAttribute("aria-checked") !== "true"));
+  }));
+
+  // live character count
+  document.querySelectorAll("textarea.area").forEach(t => {
+    const c = t.parentElement.querySelector(".count");
+    if (!c) return;
+    const upd = () => c.textContent = `${t.value.length} / ${t.maxLength}`;
+    t.addEventListener("input", upd); upd();
+  });
+})();
+</script>
+</body>
+</html>

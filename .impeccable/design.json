@@ -288,6 +288,18 @@
           "oklch(84% 0.000 90)",
           "oklch(95% 0.000 90)"
         ]
+      },
+      "work": {
+        "role": "signal",
+        "displayName": "Amber In Work",
+        "canonical": "#8f5200",
+        "note": "v2: text of «в роботі» / «розглядаємо» statuses"
+      },
+      "work-dot": {
+        "role": "signal",
+        "displayName": "Amber Dot",
+        "canonical": "#e8950f",
+        "note": "v2: status dots, current progress step, inbox unread; 16% as pill fill"
       }
     },
     "typographyMeta": {
@@ -481,8 +493,8 @@
     ],
     "rules": [
       {
-        "name": "The Three Signals Rule",
-        "body": "Ultramarine means yours, teal means free, coral means now. No colour takes a second job, and no fourth signal colour is added. Danger red appears only on destructive actions.",
+        "name": "The Four Signals Rule",
+        "body": "Ultramarine means yours, teal means free, coral means now, amber means in work (added with the v2 board and complaints). No colour takes a second job, and no fifth signal colour is added. Danger red appears only on destructive actions; a rejected complaint is not destructive and stays neutral.",
         "section": "colors"
       },
       {
