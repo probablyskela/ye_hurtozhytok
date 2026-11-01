@@ -2,15 +2,27 @@ import type { Role } from "./db/schema";
 
 export type Actor = { id: number; roles: readonly Role[]; blocked?: boolean };
 
-/** Members and the head of the student council. */
+/** The site manager can do everything every role can, plus manage roles. */
+export function isSiteManager(actor: { roles: readonly Role[] }): boolean {
+  return actor.roles.includes("site_manager");
+}
+
+/** Has the student council's rights: members, the head, the site manager. */
 export function isCouncil(actor: { roles: readonly Role[] }): boolean {
   return (
-    actor.roles.includes("council") || actor.roles.includes("council_head")
+    actor.roles.includes("council") ||
+    actor.roles.includes("council_head") ||
+    isSiteManager(actor)
   );
 }
 
-export function isSiteManager(actor: { roles: readonly Role[] }): boolean {
-  return actor.roles.includes("site_manager");
+/** Has the squad's rights: members, the head, the site manager. */
+export function isSquad(actor: { roles: readonly Role[] }): boolean {
+  return (
+    actor.roles.includes("squad") ||
+    actor.roles.includes("squad_head") ||
+    isSiteManager(actor)
+  );
 }
 
 /** Anyone signed in, not blocked, with a room in the profile may book. */
@@ -34,12 +46,14 @@ export function canRelease(
   return booking.residentId === actor.id;
 }
 
-/** The council blocks people, but never itself or another council member. */
+/** Only the site manager blocks people: anyone but themselves or another site manager. */
 export function canBlock(
   actor: Actor,
   target: { id: number; roles: readonly Role[] },
 ): boolean {
-  return isCouncil(actor) && target.id !== actor.id && !isCouncil(target);
+  return (
+    isSiteManager(actor) && target.id !== actor.id && !isSiteManager(target)
+  );
 }
 
 /** Only the site manager hands out and takes away roles. */

@@ -11,7 +11,7 @@ import { fullName } from "~/lib/names";
 import { roomLabel } from "~/lib/profile";
 import { searchFrom } from "~/lib/search-params";
 import { canBlock, isCouncil } from "~/lib/permissions";
-import { isRole } from "~/lib/roles";
+import { ROLE_LABELS } from "~/lib/roles";
 import { listResidents, setBlocked } from "~/lib/residents.server";
 import type { Route } from "./+types/council";
 
@@ -27,11 +27,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     throw new Response("Ця сторінка лише для студради.", { status: 403 });
   const people = await listResidents(env);
   return {
-    people: people.map((raw) => {
-      const p = {
-        ...raw,
-        roles: (raw.roles?.split(",") ?? []).filter(isRole),
-      };
+    people: people.map((p) => {
       return {
         ...p,
         full:
@@ -42,7 +38,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
                 patronymic: p.patronymic,
               })
             : p.name,
-        council: isCouncil(p),
+        roleLabels: p.roles.map((r) => ROLE_LABELS[r]),
         canBlock: canBlock(me, p),
       };
     }),
@@ -99,8 +95,8 @@ export default function Council({
     <>
       <TopBar back="/me" title="Студрада" />
       <p className="lede">
-        Записи будь-кого можна скасувати на сторінці пралки. Тут — блокування
-        мешканців.
+        Хто зареєструвався й де живе. Записи будь-кого можна скасувати на
+        сторінці пралки; блокує розпорядник.
       </p>
       <dl className="glass council-stats">
         {stats.map((x) => (
@@ -138,7 +134,11 @@ export default function Council({
             <span style={{ flex: 1, minWidth: 0 }}>
               <b>
                 {p.full}{" "}
-                {p.council && <span className="council-tag">студрада</span>}
+                {p.roleLabels.map((label) => (
+                  <span className="council-tag" key={label}>
+                    {label}
+                  </span>
+                ))}
               </b>
               <span className="sub">
                 {roomLabel(p.room)} · {p.email}

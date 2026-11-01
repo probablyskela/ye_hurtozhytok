@@ -4,6 +4,7 @@ import { activity, getDb } from "./db";
 import { bookings, residents, roleGrants, type Resident } from "./db/schema";
 import { kyivNow } from "./time";
 import { canBlock, type Actor } from "./permissions";
+import { sortRoles } from "./roles";
 import { rolesFor } from "./roles.server";
 import { PROFILE_ERRORS, normalizeRoom, normalizeTelegram } from "./profile";
 
@@ -38,25 +39,40 @@ export async function saveProfile(
 }
 
 export async function listResidents(env: Env) {
-  return getDb(env)
-    .select({
-      id: residents.id,
-      name: residents.name,
-      firstName: residents.firstName,
-      lastName: residents.lastName,
-      patronymic: residents.patronymic,
-      email: residents.email,
-      room: residents.room,
-      telegram: residents.telegram,
-      // Comma-separated roles granted to the person's email, or null.
-      roles: sql<
-        string | null
-      >`(select group_concat(${roleGrants.role}) from ${roleGrants} where ${roleGrants.email} = lower(${residents.email}))`,
-      blocked: residents.blocked,
-    })
-    .from(residents)
-    .orderBy(asc(residents.room), asc(residents.lastName), asc(residents.name))
-    .all();
+  const db = getDb(env);
+  const [people, grants] = await Promise.all([
+    db
+      .select({
+        id: residents.id,
+        name: residents.name,
+        firstName: residents.firstName,
+        lastName: residents.lastName,
+        patronymic: residents.patronymic,
+        email: residents.email,
+        room: residents.room,
+        telegram: residents.telegram,
+        blocked: residents.blocked,
+      })
+      .from(residents)
+      .orderBy(
+        asc(residents.room),
+        asc(residents.lastName),
+        asc(residents.name),
+      )
+      .all(),
+    db
+      .select({ email: roleGrants.email, role: roleGrants.role })
+      .from(roleGrants)
+      .all(),
+  ]);
+  return people.map((p) => ({
+    ...p,
+    roles: sortRoles(
+      grants
+        .filter((g) => g.email === p.email.toLowerCase())
+        .map((g) => g.role),
+    ),
+  }));
 }
 
 /** Blocking also ends the person's open sessions and cancels bookings that have not started. */

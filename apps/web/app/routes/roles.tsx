@@ -9,10 +9,11 @@ import {
 
 import { Credit, TopBar } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
-import { canManageRoles, canRevokeRole } from "~/lib/permissions";
+import { canBlock, canManageRoles, canRevokeRole } from "~/lib/permissions";
 import { roomLabel } from "~/lib/profile";
 import { searchFrom } from "~/lib/search-params";
 import { ROLES, ROLE_LABELS, type Role } from "~/lib/roles";
+import { setBlocked } from "~/lib/residents.server";
 import { grantRole, listPeople, setRoles } from "~/lib/roles.server";
 import type { Route } from "./+types/roles";
 
@@ -23,11 +24,11 @@ export const meta: Route.MetaFunction = () => [
 
 /** What each role lets a person do in the app today. */
 const RIGHTS: Record<Role, string> = {
-  council: "скасовує будь-які записи, блокує мешканців",
+  council: "скасовує будь-які записи, бачить список мешканців",
   council_head: "те саме, що студрада",
   squad: "права зʼявляться з переїздом Оперети",
   squad_head: "права зʼявляться з переїздом Оперети",
-  site_manager: "видає й знімає ролі",
+  site_manager: "може все: права студради й оперзагону, ролі й блокування",
 };
 
 const FILTERS = [
@@ -60,6 +61,9 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       ...p,
       // Roles this person's checkbox may not untick (my own site-manager role).
       locked: p.roles.filter((role) => !canRevokeRole(me, { ...p, role })),
+      canBlock:
+        p.residentId !== null &&
+        canBlock(me, { id: p.residentId, roles: p.roles }),
     })),
   };
 }
@@ -79,6 +83,27 @@ export async function action({ request, context }: Route.ActionArgs) {
           ? " Людина ще не входила — роль увімкнеться після першого входу."
           : ""
       }`,
+    };
+  }
+  const intent = form.get("intent");
+  if (intent === "block" || intent === "unblock") {
+    const ok = await setBlocked(
+      env,
+      me,
+      Number(form.get("id")),
+      intent === "block",
+    );
+    if (!ok)
+      return data(
+        { error: "Не вдалося змінити блокування.", email: null },
+        { status: 403 },
+      );
+    return {
+      email: String(form.get("email")),
+      note:
+        intent === "block"
+          ? "Заблоковано: записуватися не можна, записи, що ще не почалися, скасовано."
+          : "Розблоковано.",
     };
   }
   const result = await setRoles(env, me, form);
@@ -268,6 +293,33 @@ export default function Roles({
                 {busyFor === p.email ? "Зберігаємо…" : "Зберегти ролі"}
               </button>
             </Form>
+            {p.canBlock && p.residentId !== null && (
+              <Form
+                method="post"
+                className="role-form"
+                preventScrollReset
+                onSubmit={(e) => {
+                  if (
+                    !p.blocked &&
+                    !confirm(
+                      `Заблокувати: ${p.name ?? p.email}? Записи цієї людини, які ще не почалися, буде скасовано.`,
+                    )
+                  )
+                    e.preventDefault();
+                }}
+              >
+                <input type="hidden" name="id" value={p.residentId} />
+                <input type="hidden" name="email" value={p.email} />
+                <button
+                  className={`btn block ${p.blocked ? "btn-soft" : "btn-ghost-danger"}`}
+                  type="submit"
+                  name="intent"
+                  value={p.blocked ? "unblock" : "block"}
+                >
+                  {p.blocked ? "Розблокувати" : "Заблокувати"}
+                </button>
+              </Form>
+            )}
           </details>
         ))}
       </div>

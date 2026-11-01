@@ -114,7 +114,7 @@ export default function Laundry({ loaderData }: Route.ComponentProps) {
       </h2>
       {blocked && (
         <p className="error-note" role="alert">
-          Студрада заблокувала ваш акаунт: записуватися зараз не можна.
+          Ваш акаунт заблоковано: записуватися зараз не можна.
         </p>
       )}
 

@@ -90,7 +90,7 @@ export default function Me({ loaderData }: Route.ComponentProps) {
       )}
       {p.blocked && (
         <p className="error-note" role="alert">
-          Студрада заблокувала ваш акаунт: записуватися зараз не можна.
+          Ваш акаунт заблоковано: записуватися зараз не можна.
         </p>
       )}
 
@@ -166,7 +166,7 @@ export default function Me({ loaderData }: Route.ComponentProps) {
                 to="/council"
                 icon="shield"
                 title="Студрада"
-                sub="Мешканці й блокування"
+                sub="Мешканці гуртожитку"
               />
             )}
             {p.siteManager && (

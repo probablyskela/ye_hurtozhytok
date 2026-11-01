@@ -8,6 +8,7 @@ import {
   canRelease,
   canRevokeRole,
   isCouncil,
+  isSquad,
 } from "./permissions";
 
 const resident = { id: 1, roles: [], room: "612" };
@@ -28,11 +29,17 @@ describe("permissions", () => {
     expect(canBook({ ...resident, room: null })).toBe(false);
     expect(canBook({ ...resident, blocked: true })).toBe(false);
   });
-  it("counts members and the head as the council", () => {
+  it("counts members, the head and the site manager as the council", () => {
     expect(isCouncil(council)).toBe(true);
     expect(isCouncil(head)).toBe(true);
+    expect(isCouncil(manager)).toBe(true);
     expect(isCouncil(squad)).toBe(false);
-    expect(isCouncil(manager)).toBe(false);
+    expect(isCouncil(resident)).toBe(false);
+  });
+  it("gives the site manager the squad's rights too", () => {
+    expect(isSquad(squad)).toBe(true);
+    expect(isSquad(manager)).toBe(true);
+    expect(isSquad(council)).toBe(false);
   });
   it("lets people cancel their own bookings and the council any", () => {
     expect(canCancel(resident, { residentId: 1 })).toBe(true);
@@ -40,19 +47,23 @@ describe("permissions", () => {
     expect(canCancel(council, { residentId: 1 })).toBe(true);
     expect(canCancel(head, { residentId: 1 })).toBe(true);
     expect(canCancel(squad, { residentId: 1 })).toBe(false);
+    expect(canCancel(manager, { residentId: 1 })).toBe(true);
   });
   it("lets only the owner free a machine early", () => {
     expect(canRelease(resident, { residentId: 1 })).toBe(true);
     expect(canRelease(council, { residentId: 1 })).toBe(false);
   });
-  it("lets the council block residents but not each other", () => {
-    expect(canBlock(council, other)).toBe(true);
-    expect(canBlock(council, squad)).toBe(true);
-    expect(canBlock(council, council)).toBe(false);
-    expect(canBlock(council, head)).toBe(false);
-    expect(canBlock(head, { id: 4, roles: ["council"] })).toBe(false);
+  it("leaves blocking to the site manager", () => {
+    expect(canBlock(council, other)).toBe(false);
+    expect(canBlock(head, other)).toBe(false);
     expect(canBlock(resident, other)).toBe(false);
-    expect(canBlock(manager, other)).toBe(false);
+  });
+  it("lets the site manager block anyone but a site manager or themselves", () => {
+    expect(canBlock(manager, other)).toBe(true);
+    expect(canBlock(manager, council)).toBe(true);
+    expect(canBlock(manager, manager)).toBe(false);
+    expect(canBlock(manager, { id: 8, roles: ["site_manager"] })).toBe(false);
+    expect(canBlock(council, manager)).toBe(false);
   });
   it("leaves roles to the site manager", () => {
     expect(canManageRoles(manager)).toBe(true);
