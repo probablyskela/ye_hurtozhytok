@@ -452,16 +452,16 @@ export function Port({ free }: { free: boolean }) {
   );
 }
 
-/** The team behind the app: one quiet line, never a banner. */
-export const TEAM_CREDIT =
-  "Зроблено командою Софії Полупан — кандидатки на посаду голови студради.";
+/** Who made the app: one quiet line, never a banner. */
+export const AUTHOR_CREDIT =
+  "Зроблено Антоном Михальчуком — студентом катедри СШІ.";
 
 export function Credit({ children }: { children?: ReactNode }) {
   return (
     <p className="credit">
       {children}
       {children && <br />}
-      {TEAM_CREDIT}
+      {AUTHOR_CREDIT}
     </p>
   );
 }

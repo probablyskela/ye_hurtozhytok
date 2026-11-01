@@ -24,7 +24,7 @@ Later modules: announcements, a transparent student-council task board, online p
 
 ## Positioning
 
-The app is built by the team of Софія Полупан, a candidate for head of the student council, ahead of the council elections. It is the team's argument in the campaign: instead of promising, it shows working, useful software for the dorm. Its persuasive power comes from being genuinely better than the notebook, not from campaign messaging.
+The app is an independent student project by Антон Михальчук, a student of the СШІ department at Lviv Polytechnic: working, useful software for the dorm instead of promises. Its value comes from being genuinely better than the notebook, not from messaging.
 
 ## Operating Context
 
@@ -38,7 +38,7 @@ The app is built by the team of Софія Полупан, a candidate for head 
 
 - Ukrainian only, plain language, no English loanwords or slang («запис», not «бронь/слот»).
 - Phone first; installed-PWA use on iPhone and Android is the main case. Forms work without JavaScript; offline is read-only.
-- The campaign credit is one faint line at the end of the main pages and on the stickers.
+- The author credit is one faint line at the end of the main pages and on the stickers.
 
 ## Brand Commitments
 
@@ -58,7 +58,7 @@ Live at https://ehurtozhytok.pages.dev; launch plan and remaining steps in `docs
 ## Product Principles
 
 1. Faster than the notebook: booking a time takes fewer taps than finding a pen.
-2. Show, don't campaign: usefulness is the message; campaign credit stays modest and honest.
+2. Show, don't tell: usefulness is the message; the author credit stays modest and honest.
 3. Trust through clarity: always obvious what is free, what is yours, and what happens next.
 4. One hand, one glance: every key action reachable by thumb, every state readable at a glance near the machine.
 5. Fair by default: limits and buffers are visible rules, not hidden surprises.
