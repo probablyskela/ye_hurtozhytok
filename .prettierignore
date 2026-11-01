@@ -12,3 +12,4 @@ infra/d1/migrations/meta/
 *.tsbuildinfo
 design/mockup/
 .claude/
+design/prototype/assets/

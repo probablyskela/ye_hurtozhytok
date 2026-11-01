@@ -1,0 +1,457 @@
+/* Звернення: new form, one complaint, handler inbox. Extends app.css + proto.css. */
+
+.c-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- new complaint ---------- */
+.c-new .field-row + .field-row {
+  margin-top: 16px;
+}
+.c-new .field-row input {
+  font-size: 16px;
+}
+.c-new .field-row input::placeholder {
+  color: #6b7385;
+  font-weight: 500;
+}
+.c-new .route-line b {
+  font-weight: 700;
+  color: var(--ink);
+}
+.c-new .route-line .ico {
+  color: var(--ink-2);
+  flex: none;
+}
+.count {
+  display: block;
+  margin: 0 4px;
+  text-align: right;
+  font-size: 12.5px;
+  color: var(--faint);
+  font-feature-settings: "tnum";
+}
+.count + small {
+  margin-top: -2px;
+}
+
+/* «З іменем / Анонімно»: the real segmented control, with radios inside */
+.c-anon {
+  margin-bottom: 10px;
+}
+.c-anon label {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  transition: color 0.3s var(--ease);
+}
+.c-anon input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.c-anon label:has(input:checked) {
+  color: var(--ink);
+  font-weight: 600;
+}
+.c-anon:not(.has-pill) label:has(input:checked) {
+  background: #fff;
+  box-shadow: var(--shadow-gloss);
+}
+.c-anon label:has(input:focus-visible) {
+  outline: 2px solid var(--mine);
+  outline-offset: 2px;
+}
+.c-anon label:has(input:disabled) {
+  color: var(--faint);
+  cursor: not-allowed;
+}
+.c-anon label:has(input:disabled) span {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.tickets {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 2px 0;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+.tickets .pips {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+.tickets i {
+  position: relative;
+  width: 26px;
+  height: 16px;
+  border-radius: 5px;
+  background: rgb(16 18 23 / 0.1);
+}
+.tickets i.on {
+  background: var(--ink-2);
+}
+.tickets i::before,
+.tickets i::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f2f5f9;
+}
+.tickets i::before {
+  left: -3px;
+}
+.tickets i::after {
+  right: -3px;
+}
+.c-hint {
+  margin: 8px 2px 0;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.c-submit-note {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+.c-submit-note .error-note {
+  margin: 0;
+}
+.c-submit-note .c-hint {
+  margin: 0 4px;
+}
+/* the send sheet: «Отримає» on the left, the black capsule on the right */
+.c-new-sheet .sheet-text b {
+  color: var(--ink);
+  text-overflow: ellipsis;
+}
+.c-new-sheet .btn {
+  flex: none;
+}
+
+/* ---------- one complaint: author ---------- */
+.c-doc-top > span:first-child {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+}
+.c-doc-top .ico {
+  width: 16px;
+  height: 16px;
+  color: #fff;
+}
+.c-doc-topic {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.85);
+}
+.c-doc-topic .ico {
+  width: 15px;
+  height: 15px;
+}
+.c-doc-topic + h2 {
+  margin-top: 4px;
+}
+.c-doc-top > span:last-child {
+  white-space: nowrap;
+  font-feature-settings: "tnum";
+}
+.c-anon-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 4px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.c-anon-note .ico {
+  width: 16px;
+  height: 16px;
+}
+.on-board {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+  padding: 12px 14px;
+  min-height: 64px;
+  text-decoration: none;
+  color: inherit;
+}
+.on-board small {
+  display: block;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.on-board b {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+.on-board > .ico {
+  color: var(--ink-2);
+}
+.on-board > .ico.sm {
+  color: var(--faint);
+}
+.c-reason {
+  margin-top: 12px;
+}
+.c-reason .rule b {
+  display: block;
+  color: var(--ink);
+  font-weight: 600;
+  margin-bottom: 1px;
+}
+.c-again {
+  margin-top: 18px;
+}
+.empty-note > span {
+  line-height: 1.45;
+}
+.thread .sys {
+  margin: 0;
+}
+
+/* ---------- one complaint: handler ---------- */
+.review-card {
+  padding: 16px;
+}
+.c-topic {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.c-topic .ico {
+  width: 16px;
+  height: 16px;
+}
+.review-card blockquote {
+  margin: 10px 0 0;
+  padding: 0;
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.review-card .meta {
+  margin-top: 10px;
+}
+.author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.author b {
+  display: block;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 14.5px;
+}
+.author .who-av {
+  width: 36px;
+  height: 36px;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.author .who-av .ico {
+  width: 18px;
+  height: 18px;
+}
+.author a {
+  color: var(--ink-2);
+  font-weight: 600;
+  text-underline-offset: 2px;
+}
+.publish {
+  margin-top: 12px;
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+}
+.publish .field-row input {
+  font-size: 16px;
+}
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 4px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.check-row .switch {
+  margin-left: auto;
+}
+.act-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+.act-grid.one {
+  grid-template-columns: 1fr;
+}
+.act-grid .btn {
+  min-height: 48px;
+  font-size: 14.5px;
+  padding: 6px 12px;
+  gap: 7px;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.25;
+}
+@media (max-width: 419px) {
+  .act-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.c-details {
+  min-height: 88px;
+}
+.c-reject-open {
+  margin-top: 4px;
+  gap: 6px;
+}
+.c-take-note {
+  margin: 0 2px;
+}
+.c-resolve {
+  margin-top: 12px;
+  display: grid;
+  gap: 12px;
+}
+.c-resolve .field-row input {
+  font-size: 16px;
+}
+.c-reject {
+  margin-top: 12px;
+  display: grid;
+  gap: 12px;
+}
+.c-reject .error-note {
+  margin: 0;
+}
+.c-reject .actions {
+  margin-top: 0;
+}
+.c-not-yours .ico {
+  display: block;
+  margin: 0 auto 8px;
+  color: var(--faint);
+}
+
+/* ---------- inbox ---------- */
+.c-seg {
+  margin-bottom: 12px;
+}
+/* four states with counts: fill the track when they fit, scroll sideways (like the day strip) when not */
+.c-seg .seg {
+  grid-auto-columns: minmax(max-content, 1fr) !important;
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.c-seg .seg::-webkit-scrollbar {
+  display: none;
+}
+.c-seg .seg a {
+  padding: 0 8px;
+  font-size: 13.5px;
+}
+.c-seg .seg-count {
+  margin-left: 3px;
+}
+/* all four tabs still fit without scrolling on the narrowest phones */
+@media (max-width: 340px) {
+  .c-seg .seg a {
+    padding: 0 5px;
+    font-size: 13px;
+  }
+  .c-seg .seg-count {
+    margin-left: 2px;
+  }
+}
+.c-inbox {
+  padding: 2px 0;
+}
+.in-row {
+  align-items: flex-start;
+  padding: 13px 14px;
+}
+.in-row b {
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: -0.012em;
+  text-wrap: pretty;
+}
+.in-row .c-excerpt {
+  margin: 3px 0 7px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.in-row .meta {
+  font-size: 12.5px;
+}
+.in-row .meta .anon-tag .ico {
+  width: 14px;
+  height: 14px;
+  color: var(--ink-2);
+}
+.in-row .meta .st {
+  font-size: 12px;
+  padding: 2px 8px 2px 7px;
+}
+.c-foot {
+  margin: 10px 4px 0;
+}
+.c-foot .link {
+  gap: 4px;
+}

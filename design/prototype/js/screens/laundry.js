@@ -11,9 +11,16 @@
   const fmt = App.time;
 
   // ---------- booking rules (lib/booking.ts) ----------
-  const OPEN = 360, CLOSE = 1440, STEP = 5, BUF = 5;
-  const MIN_LEN = 30, MAX_LEN = 150, DEF_LEN = 120, MAX_ACTIVE = 3;
-  const NO_SHOW = 15, GRACE = 10;
+  const OPEN = 360,
+    CLOSE = 1440,
+    STEP = 5,
+    BUF = 5;
+  const MIN_LEN = 30,
+    MAX_LEN = 150,
+    DEF_LEN = 120,
+    MAX_ACTIVE = 3;
+  const NO_SHOW = 15,
+    GRACE = 10;
   const QUICK = [30, 60, 90, 120, 150];
 
   const ERRORS = {
@@ -24,31 +31,38 @@
     past: "Цей час уже минув. Оберіть інший.",
     taken: "Цей час щойно зайняли. Оберіть інший початок.",
     limit: `У вас уже ${MAX_ACTIVE} записи. Скасуйте один або дочекайтеся, поки він закінчиться.`,
-    cancel: "Не вдалося скасувати: запис уже почався, закінчився або скасований. Під час прання можна звільнити пралку раніше.",
+    cancel:
+      "Не вдалося скасувати: запис уже почався, закінчився або скасований. Під час прання можна звільнити пралку раніше.",
   };
 
   const durationLabel = (m) => {
     if (m < 60) return `${m} хв`;
-    const h = Math.floor(m / 60), r = m % 60;
+    const h = Math.floor(m / 60),
+      r = m % 60;
     if (r === 30) return `${h},5 год`;
     return r ? `${h} год ${r} хв` : `${h} год`;
   };
   const durationWords = (m) => {
     if (m < 60) return `${m} хвилин`;
-    const h = Math.floor(m / 60), r = m % 60;
+    const h = Math.floor(m / 60),
+      r = m % 60;
     if (r === 30) return `${h},5 години`;
     const hours = h === 1 ? "1 година" : `${h} години`;
     return r ? `${hours} ${r} хвилин` : hours;
   };
-  const isDuration = (v) => Number.isInteger(v) && v % STEP === 0 && v >= MIN_LEN && v <= MAX_LEN;
+  const isDuration = (v) =>
+    Number.isInteger(v) && v % STEP === 0 && v >= MIN_LEN && v <= MAX_LEN;
   const parseDuration = (v) => (isDuration(Number(v)) ? Number(v) : DEF_LEN);
   const ceil5 = (m) => Math.ceil(m / STEP) * STEP;
-  const longestFit = (m) => (m < MIN_LEN ? null : Math.min(MAX_LEN, Math.floor(m / STEP) * STEP));
-  const clashes = (s, e, slots) => slots.some((b) => s < b.e + BUF && e + BUF > b.s);
+  const longestFit = (m) =>
+    m < MIN_LEN ? null : Math.min(MAX_LEN, Math.floor(m / STEP) * STEP);
+  const clashes = (s, e, slots) =>
+    slots.some((b) => s < b.e + BUF && e + BUF > b.s);
   function freeStarts(slots, len, nowMin) {
     const from = Math.max(OPEN, nowMin == null ? 0 : ceil5(nowMin));
     const out = [];
-    for (let s = from; s + len <= CLOSE; s += STEP) if (!clashes(s, s + len, slots)) out.push(s);
+    for (let s = from; s + len <= CLOSE; s += STEP)
+      if (!clashes(s, s + len, slots)) out.push(s);
     return out;
   }
   function freeWindows(slots, nowMin) {
@@ -63,7 +77,10 @@
     if (CLOSE - cur >= MIN_LEN) out.push({ s: cur, e: CLOSE });
     return out;
   }
-  const longestFree = (slots, nowMin) => longestFit(Math.max(0, ...freeWindows(slots, nowMin).map((w) => w.e - w.s)));
+  const longestFree = (slots, nowMin) =>
+    longestFit(
+      Math.max(0, ...freeWindows(slots, nowMin).map((w) => w.e - w.s)),
+    );
   function machineNow(slots, nowMin) {
     if (nowMin < OPEN || nowMin >= CLOSE) return { kind: "closed" };
     const sorted = [...slots].sort((a, b) => a.s - b.s);
@@ -76,7 +93,9 @@
     const starts = freeStarts(slots, want, nowMin);
     if (starts.length) return { len: want, starts };
     const longest = longestFree(slots, nowMin);
-    return longest == null ? { len: want, starts } : { len: longest, starts: freeStarts(slots, longest, nowMin) };
+    return longest == null
+      ? { len: want, starts }
+      : { len: longest, starts: freeStarts(slots, longest, nowMin) };
   }
 
   // ---------- demo days and clock ----------
@@ -88,33 +107,43 @@
   const dayHeading = (date) => cap(App.dayLong(date));
   /** "Сьогодні" / "Завтра" / "Пн, 2 листопада" */
   function dayName(date) {
-    const i = dayIdx(date), d = EH.DAYS[i];
+    const i = dayIdx(date),
+      d = EH.DAYS[i];
     if (!d) return date;
     if (i === 0) return "Сьогодні";
     if (i === 1) return "Завтра";
     return `${d.wd}, ${d.long.split(", ")[1]}`;
   }
-  /** "через 4 год 20 хв", "через 5 хв", "зараз" */
-  function countdown(date, m) {
-    const mins = dayIdx(date) * 1440 + m - now();
-    if (mins <= 0) return "зараз";
-    if (mins < 60) return `через ${mins} хв`;
-    const h = Math.floor(mins / 60), r = mins % 60;
-    if (h >= 24) { const d = Math.floor(h / 24); return `через ${d} ${d === 1 ? "день" : d < 5 ? "дні" : "днів"}`; }
-    return r ? `через ${h} год ${r} хв` : `через ${h} год`;
-  }
+  /** "через 4 год 20 хв", "через 5 хв", "через 1 день", "зараз" */
+  const countdown = App.countdown;
 
   // ---------- store reads ----------
   const machine = (id) => S.machines.find((m) => m.id === id);
-  const slotsOn = (mId, date) => S.bookings.filter((b) => b.status === "active" && b.machine === mId && b.date === date).sort((a, b) => a.s - b.s);
-  const ended = (b) => dayIdx(b.date) < 0 || (b.date === EH.TODAY && b.e <= now());
+  const slotsOn = (mId, date) =>
+    S.bookings
+      .filter(
+        (b) => b.status === "active" && b.machine === mId && b.date === date,
+      )
+      .sort((a, b) => a.s - b.s);
+  const ended = (b) =>
+    dayIdx(b.date) < 0 || (b.date === EH.TODAY && b.e <= now());
   const running = (b) => !ended(b) && b.date === EH.TODAY && b.s <= now();
   const upcoming = (pid) =>
-    S.bookings.filter((b) => b.person === pid && b.status === "active" && !ended(b))
+    S.bookings
+      .filter((b) => b.person === pid && b.status === "active" && !ended(b))
       .sort((a, b) => dayIdx(a.date) - dayIdx(b.date) || a.s - b.s);
-  const isCouncil = (p) => EH.has(p, "council"); // lib/permissions.ts: the council may cancel anyone's booking
-  const roomLabel = (room) => (!room ? "кімната —" : /^\d+[а-яіїєґa-z]?$/i.test(room) ? `кімната ${room}` : room);
-  const q = (path, params) => `${path}?${Object.entries(params).filter(([, v]) => v != null && v !== "").map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join("&")}`;
+  const isCouncil = (p) => EH.can.cancelAnyBooking(p); // lib/permissions.ts: the council may cancel anyone's booking
+  const roomLabel = (room) =>
+    !room
+      ? "кімната —"
+      : /^\d+[а-яіїєґa-z]?$/i.test(room)
+        ? `кімната ${room}`
+        : room;
+  const q = (path, params) =>
+    `${path}?${Object.entries(params)
+      .filter(([, v]) => v != null && v !== "")
+      .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
+      .join("&")}`;
   const credit = `<p class="credit">Зроблено командою Софії Полупан — кандидатки на посаду голови студради.</p>`;
 
   /** Server-side checks of the booking action, then the insert. */
@@ -125,112 +154,97 @@
     if (!Number.isInteger(start) || start % STEP) return { error: "grid" };
     if (start < OPEN || start + len > CLOSE) return { error: "hours" };
     if (date === EH.TODAY && start < now() - GRACE) return { error: "past" };
-    if (clashes(start, start + len, slotsOn(mId, date))) return { error: "taken" };
+    if (clashes(start, start + len, slotsOn(mId, date)))
+      return { error: "taken" };
     return { booking: EH.actions.book(me.id, mId, date, start, len) };
   }
 
   // ---------- shared pieces ----------
   const pct = (m) => `${(((m - OPEN) / (CLOSE - OPEN)) * 100).toFixed(3)}%`;
   const wid = (a, z) => `${(((z - a) / (CLOSE - OPEN)) * 100).toFixed(3)}%`;
-  const scale = (cls = "") => `<div class="strip-scale${cls ? " " + cls : ""}" aria-hidden="true"><span>06</span><span>12</span><span>18</span><span>24</span></div>`;
+  const scale = (cls = "") =>
+    `<div class="strip-scale${cls ? " " + cls : ""}" aria-hidden="true"><span>06</span><span>12</span><span>18</span><span>24</span></div>`;
   /** components/ui.tsx DayStrip */
   function dayStrip(label, slots, meId, nowMin, { pick, mini } = {}) {
-    const aria = slots.length ? `${label}: зайнято ${slots.map((b) => `${fmt(b.s)}–${fmt(b.e)}`).join(", ")}` : `${label}: увесь день вільно`;
+    const aria = slots.length
+      ? `${label}: зайнято ${slots.map((b) => `${fmt(b.s)}–${fmt(b.e)}`).join(", ")}`
+      : `${label}: увесь день вільно`;
     let track = "";
     for (const b of slots) {
-      if (b.s - BUF >= OPEN) track += `<span class="seg-buf" style="left:${pct(b.s - BUF)};width:${wid(b.s - BUF, b.s)}"></span>`;
-      if (b.e + BUF <= CLOSE) track += `<span class="seg-buf" style="left:${pct(b.e)};width:${wid(b.e, b.e + BUF)}"></span>`;
+      if (b.s - BUF >= OPEN)
+        track += `<span class="seg-buf" style="left:${pct(b.s - BUF)};width:${wid(b.s - BUF, b.s)}"></span>`;
+      if (b.e + BUF <= CLOSE)
+        track += `<span class="seg-buf" style="left:${pct(b.e)};width:${wid(b.e, b.e + BUF)}"></span>`;
     }
-    for (const b of slots) track += `<span class="${b.person === meId ? "seg-mine" : "seg-busy"}" style="left:${pct(b.s)};width:${wid(b.s, b.e)}"></span>`;
-    if (nowMin != null && nowMin > OPEN) track += `<span class="seg-past" style="width:${wid(OPEN, Math.min(nowMin, CLOSE))}"></span>`;
-    if (pick) track += `<span class="seg-pick" data-pick-seg style="left:${pct(pick.s)};width:${wid(pick.s, pick.e)}"></span>`;
-    const nowLine = nowMin != null && nowMin >= OPEN && nowMin < CLOSE ? `<span class="strip-now" style="left:${pct(nowMin)}"></span>` : "";
+    for (const b of slots)
+      track += `<span class="${b.person === meId ? "seg-mine" : "seg-busy"}" style="left:${pct(b.s)};width:${wid(b.s, b.e)}"></span>`;
+    if (nowMin != null && nowMin > OPEN)
+      track += `<span class="seg-past" style="width:${wid(OPEN, Math.min(nowMin, CLOSE))}"></span>`;
+    if (pick)
+      track += `<span class="seg-pick" data-pick-seg style="left:${pct(pick.s)};width:${wid(pick.s, pick.e)}"></span>`;
+    const nowLine =
+      nowMin != null && nowMin >= OPEN && nowMin < CLOSE
+        ? `<span class="strip-now" style="left:${pct(nowMin)}"></span>`
+        : "";
     return `<div class="strip" role="img" aria-label="${esc(aria)}"><div class="strip-track">${track}</div>${nowLine}${mini ? "" : scale()}</div>`;
   }
   /** components/ui.tsx Ticket */
-  function ticket({ to, heading, s, e, machineName, footLeft, footRight = "", status, big, celebrate }) {
+  function ticket({
+    to,
+    heading,
+    s,
+    e,
+    machineName,
+    footLeft,
+    footRight = "",
+    status,
+    big,
+    celebrate,
+  }) {
     const body = `<svg class="porthole" aria-hidden="true"><use href="#porthole"/></svg>${celebrate ? `<span class="splash" aria-hidden="true"><i></i><i></i><i></i></span>` : ""}${status ? `<div class="ticket-top"><span class="ticket-tag"><span class="dot"></span>${esc(status)}</span></div>` : ""}<div class="ticket-when"${status ? "" : ' style="margin-top:0"'}>${esc(heading)}</div><div class="ticket-time">${fmt(s)}<span class="dash">–</span>${fmt(e)}</div><div class="ticket-machine">${esc(machineName)}</div><div class="ticket-foot"><span>${footLeft}</span>${footRight}</div>`;
     const cls = `ticket${big ? " big" : " compact"}${celebrate ? " celebrate" : ""}`;
-    return to ? `<a class="${cls}" style="display:block;text-decoration:none" href="#${esc(to)}">${body}</a>` : `<div class="${cls}">${body}</div>`;
+    return to
+      ? `<a class="${cls}" style="display:block;text-decoration:none" href="#${esc(to)}">${body}</a>`
+      : `<div class="${cls}">${body}</div>`;
   }
   const daysItems = (current, hrefFor) =>
-    EH.DAYS.map((d, i) => `<a data-pill-item="true" class="day" href="#${esc(hrefFor(d.date))}"${d.date === current ? ' aria-current="true"' : ""} aria-label="${esc(dayName(d.date))}"><small>${i === 0 ? "Сьогодні" : i === 1 ? "Завтра" : d.wd}</small><b>${d.d}</b></a>`).join("");
+    EH.DAYS.map(
+      (d, i) =>
+        `<a data-pill-item="true" class="day" href="#${esc(hrefFor(d.date))}"${d.date === current ? ' aria-current="true"' : ""} aria-label="${esc(dayName(d.date))}"><small>${i === 0 ? "Сьогодні" : i === 1 ? "Завтра" : d.wd}</small><b>${d.d}</b></a>`,
+    ).join("");
   function daysNav(current, hrefFor) {
     return `<nav class="days" aria-label="День" data-keep-scroll data-lpill><span class="pill" aria-hidden="true"></span>${daysItems(current, hrefFor)}</nav>`;
   }
-  /**
-   * components/pill-group.tsx for the days and the machines: one pill slides to
-   * the chosen item. The page is drawn anew on every tap, so the pill starts
-   * from where it stood before and glides to the new place.
-   */
-  let pillWas = {};
-  let pillPath = null;
-  function mountNavPills(root) {
-    const path = location.hash.split("?")[0];
-    if (path !== pillPath) { pillWas = {}; pillPath = path; }
-    root.querySelectorAll("nav[data-lpill]").forEach((nav) => {
-      const pill = nav.querySelector(":scope > .pill");
-      const items = [...nav.querySelectorAll(":scope > [data-pill-item]")];
-      const on = items.find((i) => i.getAttribute("aria-current") === "true");
-      if (!pill || !on) return;
-      const key = nav.getAttribute("aria-label");
-      const was = pillWas[key];
-      // the sideways list stays where it was, and the chosen item stays in view
-      if (was) nav.scrollLeft = was.scroll;
-      if (on.offsetLeft + on.offsetWidth > nav.scrollLeft + nav.clientWidth) nav.scrollLeft = on.offsetLeft + on.offsetWidth - nav.clientWidth + 16;
-      else if (on.offsetLeft < nav.scrollLeft) nav.scrollLeft = Math.max(0, on.offsetLeft - 16);
-      nav.classList.add("has-pill");
-      items.forEach((i) => i.toggleAttribute("data-pill-on", i === on));
-      const box = { w: on.offsetWidth, h: on.offsetHeight, x: on.offsetLeft, y: on.offsetTop };
-      const put = (b) => {
-        pill.style.width = `${b.w}px`;
-        pill.style.height = `${b.h}px`;
-        pill.style.transform = `translate(${b.x}px, ${b.y}px)`;
-      };
-      const track = () => (pillWas[key] = { ...box, scroll: nav.scrollLeft });
-      track();
-      nav.addEventListener("scroll", track, { passive: true });
-      if (!was || (was.x === box.x && was.w === box.w)) {
-        put(box);
-        requestAnimationFrame(() => pill.classList.add("pill-ready"));
-        return;
-      }
-      put(was);
-      requestAnimationFrame(() => { pill.classList.add("pill-ready"); requestAnimationFrame(() => put(box)); });
-    });
-  }
+  // the days and machines pills are mounted by core.js (App.mountPills) on every render
 
-  const note = (kind, text) => `<p class="${kind}-note" role="${kind === "ok" ? "status" : "alert"}">${esc(text)}</p>`;
+  const note = (kind, text) =>
+    `<p class="${kind}-note" role="${kind === "ok" ? "status" : "alert"}">${esc(text)}</p>`;
 
   // Links that only change a choice keep the scroll position, like preventScrollReset.
   let keepY = null;
-  document.addEventListener("click", (e) => { if (e.target.closest("[data-keep-scroll] a, a[data-keep-scroll]")) keepY = window.scrollY; }, true);
+  document.addEventListener(
+    "click",
+    (e) => {
+      if (e.target.closest("[data-keep-scroll] a, a[data-keep-scroll]"))
+        keepY = window.scrollY;
+    },
+    true,
+  );
   function restoreScroll() {
     if (keepY == null) return;
-    const y = keepY; keepY = null;
+    const y = keepY;
+    keepY = null;
     setTimeout(() => window.scrollTo(0, y), 0);
   }
 
-  /** Every phone draws the shared data again: the store has no event for a booking changed in place. */
-  function redrawAll() {
-    let others = false;
-    try {
-      const top = window.top;
-      for (let i = 0; i < top.frames.length; i++) {
-        try { top.frames[i].App?.rerender(); others = true; } catch (e) { /* another origin */ }
-      }
-    } catch (e) { /* standalone */ }
-    if (!others) App.rerender();
-  }
   /**
    * lib/bookings.server.ts cancelBooking for the council: anyone's booking until it ends, even one
-   * already running (someone did not come). A running one ends quietly: the store would tell the
-   * dorm group the whole booked time is free, though most of it is already past.
+   * already running (someone did not come). The store tells the dorm group only about time still
+   * ahead and lets the owner know the council cancelled it.
    */
   function councilCancel(b, me) {
     if (!b || b.status !== "active" || ended(b) || !isCouncil(me)) return false;
-    if (running(b)) { b.status = "cancelled"; redrawAll(); }
-    else EH.actions.cancelBooking(b.id, me.id);
+    EH.actions.cancelBooking(b.id, me.id);
     return true;
   }
 
@@ -241,53 +255,89 @@
   // ================= /laundry =================
   function stateText(st) {
     if (st.kind === "closed") return { text: "зачинено до 06:00", free: false };
-    if (st.kind === "busy") return { text: `зайнята до ${fmt(st.until)}`, free: false };
-    return { text: st.until == null ? "вільна до кінця дня" : `вільна до ${fmt(st.until)}`, free: true };
+    if (st.kind === "busy")
+      return { text: `зайнята до ${fmt(st.until)}`, free: false };
+    return {
+      text:
+        st.until == null ? "вільна до кінця дня" : `вільна до ${fmt(st.until)}`,
+      free: true,
+    };
   }
 
-  App.route("/laundry", (ctx) => {
-    const me = ctx.me;
-    const len = parseDuration(ctx.query.len);
-    const nowMin = now();
-    const mine = upcoming(me.id);
-    const next = mine[0];
-    const more = Math.max(0, mine.length - 1);
-    const canBookNow = mine.length < MAX_ACTIVE;
+  App.route(
+    "/laundry",
+    (ctx) => {
+      const me = ctx.me;
+      const len = parseDuration(ctx.query.len);
+      const nowMin = now();
+      const mine = upcoming(me.id);
+      const next = mine[0];
+      const more = Math.max(0, mine.length - 1);
+      const canBookNow = mine.length < MAX_ACTIVE;
 
-    const firstPer = (date, nm) => S.machines
-      .map((m) => ({ m, date, s: freeStarts(slotsOn(m.id, date), len, nm)[0] }))
-      .filter((x) => x.s !== undefined).sort((a, b) => a.s - b.s);
-    let options = firstPer(EH.TODAY, nowMin);
-    if (!options.length) options = firstPer(EH.DAYS[1].date, null);
-    const best = options[0];
-    const others = options.slice(1);
-    const when = best ? dayName(best.date).toLowerCase() : "";
+      // the same nearest-free search as Головна (core.js)
+      const options = App.nearestFree(len);
+      const best = options[0];
+      const others = options.slice(1);
+      const when = best ? dayName(best.date).toLowerCase() : "";
 
-    let notes = "";
-    if (ctx.query.cancelled) notes += note("ok", ctx.query.freed ? "Запис скасовано. Групу гуртожитку повідомили, що пралка звільнилась." : "Запис скасовано.");
-    if (ctx.query.released) notes += note("ok", "Пралку звільнено. Решта часу тепер вільна для інших.");
+      let notes = "";
+      if (ctx.query.cancelled)
+        notes += note(
+          "ok",
+          ctx.query.freed
+            ? "Запис скасовано. Групу гуртожитку повідомили, що пралка звільнилась."
+            : "Запис скасовано.",
+        );
+      if (ctx.query.released)
+        notes += note(
+          "ok",
+          ctx.query.freed
+            ? "Пралку звільнено. Групу гуртожитку повідомили, що решта часу вільна."
+            : "Пралку звільнено. Решта часу тепер вільна для інших.",
+        );
 
-    const ticketArea = next
-      ? ticket({
-          to: `/laundry/booking/${next.id}`, heading: dayHeading(next.date), s: next.s, e: next.e, machineName: machine(next.machine).name,
-          footLeft: running(next) ? "<b>Зараз ваш час</b>" : `Почнеться <b>${esc(countdown(next.date, next.s))}</b>`,
-          footRight: `<span class="ticket-cta">Деталі</span>`,
+      const ticketArea = next
+        ? ticket({
+            to: `/laundry/booking/${next.id}`,
+            heading: dayHeading(next.date),
+            s: next.s,
+            e: next.e,
+            machineName: machine(next.machine).name,
+            footLeft: running(next)
+              ? "<b>Зараз ваш час</b>"
+              : `Почнеться <b>${esc(countdown(next.date, next.s))}</b>`,
+            footRight: `<span class="ticket-cta">Деталі</span>`,
+          })
+        : `<div class="glass empty"><b>Записів поки немає</b>Оберіть пралку й час — це два натискання.</div>`;
+      const moreLink =
+        more > 0
+          ? `<p style="margin:8px 4px 0;font-size:13.5px"><a class="link" href="#/laundry/bookings" style="min-height:0">Ще ${more} ${more === 1 ? "запис" : "записи"}</a></p>`
+          : "";
+
+      const rows = S.machines
+        .map((m) => {
+          const slots = slotsOn(m.id, EH.TODAY);
+          const st = stateText(machineNow(slots, nowMin));
+          return `<a class="now-row" href="#/laundry/machine/${esc(m.id)}"><span class="port ${st.free ? "free" : "busy"}" aria-hidden="true"></span><span class="now-name"><b>${esc(m.short)}</b><small${st.free ? ' class="ok"' : ""}>${esc(st.text)}</small></span>${dayStrip(m.short, slots, me.id, nowMin, { mini: true })}</a>`;
         })
-      : `<div class="glass empty"><b>Записів поки немає</b>Оберіть пралку й час — це два натискання.</div>`;
-    const moreLink = more > 0 ? `<p style="margin:8px 4px 0;font-size:13.5px"><a class="link" href="#/laundry/bookings" style="min-height:0">Ще ${more} ${more === 1 ? "запис" : "записи"}</a></p>` : "";
+        .join("");
 
-    const rows = S.machines.map((m) => {
-      const slots = slotsOn(m.id, EH.TODAY);
-      const st = stateText(machineNow(slots, nowMin));
-      return `<a class="now-row" href="#/laundry/machine/${esc(m.id)}"><span class="port ${st.free ? "free" : "busy"}" aria-hidden="true"></span><span class="now-name"><b>${esc(m.short)}</b><small${st.free ? ' class="ok"' : ""}>${esc(st.text)}</small></span>${dayStrip(m.short, slots, me.id, nowMin, { mini: true })}</a>`;
-    }).join("");
+      const lenSeg = App.seg(
+        QUICK.map((d) => ({
+          href: `/laundry?len=${d}`,
+          label: durationLabel(d),
+          on: d === len,
+        })),
+        "Тривалість",
+        "data-keep-scroll",
+      );
 
-    const lenSeg = App.seg(QUICK.map((d) => ({ href: `/laundry?len=${d}`, label: durationLabel(d), on: d === len })), "Тривалість", "data-keep-scroll");
-
-    let nearest;
-    if (best) {
-      const bookHref = (o) => q("/laundry/book", { len, d: o.date, m: o.m.id, s: o.s });
-      nearest = `<div class="glass nearest">
+      let nearest;
+      if (best) {
+        const bookHref = (o) =>
+          q("/laundry/book", { len, d: o.date, m: o.m.id, s: o.s });
+        nearest = `<div class="glass nearest">
         <div class="nearest-top"><span class="state free">Вільно</span><span class="nearest-when">${esc(when)}, ${esc(countdown(best.date, best.s))}</span></div>
         <div class="nearest-time">${fmt(best.s)}<span class="dash">–</span>${fmt(best.s + len)}</div>
         <div class="nearest-where">${esc(best.m.name)}</div>
@@ -300,11 +350,11 @@
         ${others.length === 0 ? `<p class="nearest-others">Інші пралки на ${esc(durationLabel(len))} ${esc(when)} зайняті.</p>` : `<p class="nearest-others">Також: ${others.map((o, i) => `<span>${i > 0 ? " · " : ""}<a href="#${esc(bookHref(o))}">${esc(o.m.short)} о ${fmt(o.s)}</a></span>`).join("")}</p>`}
         ${canBookNow ? "" : `<p class="nearest-others">Усі ${MAX_ACTIVE} записи вже зайняті.</p>`}
       </div>`;
-    } else {
-      nearest = `<p class="empty-note">На ${esc(durationLabel(len))} вільного часу немає ні сьогодні, ні завтра. Спробуйте коротший запис або інший день.</p>`;
-    }
+      } else {
+        nearest = `<p class="empty-note">На ${esc(durationLabel(len))} вільного часу немає ні сьогодні, ні завтра. Спробуйте коротший запис або інший день.</p>`;
+      }
 
-    return `${App.topbar()}
+      return `${App.topbar()}
       <h2 class="title" style="margin-bottom:16px">Пральня</h2>
       ${notes}
       <div class="home-grid">
@@ -320,13 +370,24 @@
         </section>
       </div>
       ${credit}`;
-  }, { tab: "laundry", wide: true, title: "Пральня", mount: restoreScroll });
+    },
+    { tab: "laundry", wide: true, title: "Пральня", mount: restoreScroll },
+  );
 
   App.form("laundry-quick", (data, ctx) => {
-    const len = Number(data.len), start = Number(data.start);
+    const len = Number(data.len),
+      start = Number(data.start);
     const r = tryBook(ctx.me, data.machine, data.date, start, len);
     // If the time is taken meanwhile, the error opens on the booking page with this same length, day and machine.
-    if (r.error) ctx.go(q("/laundry/book", { len, d: data.date, m: data.machine, err: r.error }));
+    if (r.error)
+      ctx.go(
+        q("/laundry/book", {
+          len,
+          d: data.date,
+          m: data.machine,
+          err: r.error,
+        }),
+      );
     else ctx.go(`/laundry/booking/${r.booking.id}?new=1`);
   });
 
@@ -335,26 +396,47 @@
   const STEP_PX = 8; // pixels per 5-minute step: an hour is 96px
   const PXM = STEP_PX / STEP;
   const STEPS = (CLOSE - OPEN) / STEP;
-  const STATUS_LABEL = { free: "Вільно", busy: "Зайнято", past: "Минуло", none: "Немає місця" };
-  const LIMIT_LABEL = { busy: "Далі зайнято", close: "Пралки працюють до 24:00", max: "Не довше 2,5 години", min: "Не коротше 30 хвилин" };
+  const STATUS_LABEL = {
+    free: "Вільно",
+    busy: "Зайнято",
+    past: "Минуло",
+    none: "Немає місця",
+  };
+  const LIMIT_LABEL = {
+    busy: "Далі зайнято",
+    close: "Пралки працюють до 24:00",
+    max: "Не довше 2,5 години",
+    min: "Не коротше 30 хвилин",
+  };
   const HINT = "Тягніть шкалу, щоб змінити час, а край рамки — тривалість";
-  const VH = "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap";
+  const VH =
+    "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap";
   /** lib/booking.ts maxLengthAt: the longest booking from this start. */
   function maxLengthAt(slots, start) {
     let limit = Math.min(MAX_LEN, CLOSE - start);
-    for (const b of slots) if (b.s >= start) limit = Math.min(limit, b.s - BUF - start);
+    for (const b of slots)
+      if (b.s >= start) limit = Math.min(limit, b.s - BUF - start);
     return Math.floor(limit / STEP) * STEP;
   }
   // The frame starts where the longest booking would sit centred, so it can grow to the right.
   const leadFor = (w) => Math.max(16, Math.round((w - MAX_LEN * PXM) / 2));
   const x5 = (m) => (m - OPEN) * PXM;
   const scrubStatus = (at, starts, nowMin) =>
-    !starts.length ? "none" : starts.includes(at) ? "free" : nowMin != null && at < ceil5(nowMin) ? "past" : "busy";
+    !starts.length
+      ? "none"
+      : starts.includes(at)
+        ? "free"
+        : nowMin != null && at < ceil5(nowMin)
+          ? "past"
+          : "busy";
   /** Beginnings of free stretches: starts not directly after another start. */
-  const windowStarts = (starts) => starts.filter((s, i) => i === 0 || s - starts[i - 1] !== STEP);
+  const windowStarts = (starts) =>
+    starts.filter((s, i) => i === 0 || s - starts[i - 1] !== STEP);
   const jumpTarget = (starts, dir, from) => {
     const ws = windowStarts(starts);
-    return dir > 0 ? ws.find((s) => s > from) : ws.filter((s) => s < from).at(-1);
+    return dir > 0
+      ? ws.find((s) => s > from)
+      : ws.filter((s) => s < from).at(-1);
   };
   let trackW = 358; // the last measured scale width, so a re-render lands where it was
 
@@ -371,14 +453,18 @@
     const anchor = start != null && starts.includes(start) ? start : null;
     const maxHere = anchor == null ? len : maxLengthAt(slots, anchor);
     let day = "";
-    for (let i = 0; i <= STEPS; i++) day += `<span class="scrub-snap" style="left:${i * STEP_PX}px"></span>`;
-    for (let h = OPEN / 60; h <= CLOSE / 60; h++) day += `<span class="scrub-hour" style="left:${x5(h * 60)}px">${String(h).padStart(2, "0")}</span>`;
+    for (let i = 0; i <= STEPS; i++)
+      day += `<span class="scrub-snap" style="left:${i * STEP_PX}px"></span>`;
+    for (let h = OPEN / 60; h <= CLOSE / 60; h++)
+      day += `<span class="scrub-hour" style="left:${x5(h * 60)}px">${String(h).padStart(2, "0")}</span>`;
     let band = "";
     for (const b of slots) {
       band += `<span>${b.s - BUF >= OPEN ? `<span class="seg-buf" style="left:${x5(b.s - BUF)}px;width:${BUF * PXM}px"></span>` : ""}${b.e + BUF <= CLOSE ? `<span class="seg-buf" style="left:${x5(b.e)}px;width:${BUF * PXM}px"></span>` : ""}<span class="${b.person === meId ? "seg-mine" : "seg-busy"}" style="left:${x5(b.s)}px;width:${(b.e - b.s) * PXM}px"></span></span>`;
     }
-    if (nowMin != null && nowMin > OPEN) band += `<span class="seg-past" style="width:${x5(Math.min(nowMin, CLOSE))}px"></span>`;
-    if (nowMin != null && nowMin >= OPEN && nowMin < CLOSE) band += `<span class="scrub-now" style="left:${x5(nowMin)}px"></span>`;
+    if (nowMin != null && nowMin > OPEN)
+      band += `<span class="seg-past" style="width:${x5(Math.min(nowMin, CLOSE))}px"></span>`;
+    if (nowMin != null && nowMin >= OPEN && nowMin < CLOSE)
+      band += `<span class="scrub-now" style="left:${x5(nowMin)}px"></span>`;
     const label = STATUS_LABEL[status];
     return `<div class="scrubber is-${status}">
       <span aria-live="polite" style="${VH}" data-scrub-said>${start != null ? `Обрано ${fmt(start)}–${fmt(start + len)}` : ""}</span>
@@ -400,63 +486,106 @@
 
   function sheetHtml(md) {
     const { left, ready, start, len } = md;
-    const text = left <= 0
-      ? `<small>Усі ${MAX_ACTIVE} записи зайняті</small><b>Скасуйте один, щоб записатися</b>`
-      : ready
-        ? `<small>${esc(md.machineName)} · ${esc(dayName(md.date).toLowerCase())}</small><b class="sheet-time">${fmt(start)}–${fmt(start + len)}</b>`
-        : `<small>${esc(durationLabel(len))}</small><b>Оберіть час</b>`;
+    const text =
+      left <= 0
+        ? `<small>Усі ${MAX_ACTIVE} записи зайняті</small><b>Скасуйте один, щоб записатися</b>`
+        : ready
+          ? `<small>${esc(md.machineName)} · ${esc(dayName(md.date).toLowerCase())}</small><b class="sheet-time">${fmt(start)}–${fmt(start + len)}</b>`
+          : `<small>${esc(durationLabel(len))}</small><b>Оберіть час</b>`;
     const disabled = left <= 0 || !md.starts.length || !ready;
     return { text, disabled };
   }
 
   /** The machine list and the days, built for a wanted length; refreshed in place when the frame is stretched. */
   function bookNavs(date, nowMin, mId, wanted) {
-    const list = S.machines.map((x) => ({ ...x, ...fitting(slotsOn(x.id, date), wanted, nowMin) }));
-    const link = (p) => q("/laundry/book", { len: wanted, d: date, m: mId, ...p });
+    const list = S.machines.map((x) => ({
+      ...x,
+      ...fitting(slotsOn(x.id, date), wanted, nowMin),
+    }));
+    const link = (p) =>
+      q("/laundry/book", { len: wanted, d: date, m: mId, ...p });
     const days = daysItems(date, (d) => link({ d }));
-    const machines = list.map((x) => `<a data-pill-item="true" href="#${esc(link({ m: x.id }))}"${x.id === mId ? ' aria-current="true"' : ""}><b>${esc(x.short)}</b><small${x.starts.length ? ' class="ok"' : ""}>${!x.starts.length ? "немає місця" : x.len < wanted ? `до ${esc(durationLabel(x.len))}` : `з ${fmt(x.starts[0])}`}</small></a>`).join("");
+    const machines = list
+      .map(
+        (x) =>
+          `<a data-pill-item="true" href="#${esc(link({ m: x.id }))}"${x.id === mId ? ' aria-current="true"' : ""}><b>${esc(x.short)}</b><small${x.starts.length ? ' class="ok"' : ""}>${!x.starts.length ? "немає місця" : x.len < wanted ? `до ${esc(durationLabel(x.len))}` : `з ${fmt(x.starts[0])}`}</small></a>`,
+      )
+      .join("");
     return { days, machines };
   }
 
-  App.route("/laundry/book", (ctx) => {
-    const me = ctx.me;
-    const date = dayIdx(ctx.query.d) >= 0 ? ctx.query.d : EH.TODAY;
-    const nowMin = nowFor(date);
-    const key = `${ctx.query.m || ""}|${date}|${ctx.query.s || ""}|${ctx.query.len || ""}`;
-    if (pick.key !== key) pick = { key, m: null, wanted: parseDuration(ctx.query.len), start: undefined };
-    const wanted = pick.wanted;
-    const list = S.machines.map((x) => {
-      const slots = slotsOn(x.id, date);
-      return { ...x, slots, ...fitting(slots, wanted, nowMin) };
-    });
-    // The machine from the link, otherwise the one that frees up first (whole length preferred).
-    const requested = list.find((x) => x.id === (pick.m || ctx.query.m));
-    const earliest = list.filter((x) => x.starts.length).sort((a, b) => Number(b.len === wanted) - Number(a.len === wanted) || a.starts[0] - b.starts[0])[0];
-    const m = requested || earliest || list[0];
-    pick.m = m.id; // stays put while other people's bookings change the day
-    const len = m.len;
-    if (pick.start === undefined || pick.start === null) {
-      const s = Number(ctx.query.s);
-      // Today: the nearest free start. Later days: from 10:00, so nobody books 06:00 by accident.
-      const preferred = nowMin == null ? (m.starts.find((x) => x >= 600) ?? m.starts[0]) : m.starts[0];
-      pick.start = m.starts.includes(s) ? s : preferred ?? null;
-    }
-    const start = pick.start;
-    const ready = start != null && m.starts.includes(start);
-    const active = upcoming(me.id).length;
-    const left = MAX_ACTIVE - active;
-    const shortened = len < wanted;
-    const scrubNote = shortened ? `Цього дня найдовше вільне вікно — ${durationLabel(len)}` : "";
-    const navs = bookNavs(date, nowMin, m.id, wanted);
-    model = { date, nowMin, mId: m.id, machineName: m.name, slots: m.slots, starts: m.starts, wanted, len, start, ready, left, note: scrubNote, meId: me.id };
+  App.route(
+    "/laundry/book",
+    (ctx) => {
+      const me = ctx.me;
+      const date = dayIdx(ctx.query.d) >= 0 ? ctx.query.d : EH.TODAY;
+      const nowMin = nowFor(date);
+      const key = `${ctx.query.m || ""}|${date}|${ctx.query.s || ""}|${ctx.query.len || ""}`;
+      if (pick.key !== key)
+        pick = {
+          key,
+          m: null,
+          wanted: parseDuration(ctx.query.len),
+          start: undefined,
+        };
+      const wanted = pick.wanted;
+      const list = S.machines.map((x) => {
+        const slots = slotsOn(x.id, date);
+        return { ...x, slots, ...fitting(slots, wanted, nowMin) };
+      });
+      // The machine from the link, otherwise the one that frees up first (whole length preferred).
+      const requested = list.find((x) => x.id === (pick.m || ctx.query.m));
+      const earliest = list
+        .filter((x) => x.starts.length)
+        .sort(
+          (a, b) =>
+            Number(b.len === wanted) - Number(a.len === wanted) ||
+            a.starts[0] - b.starts[0],
+        )[0];
+      const m = requested || earliest || list[0];
+      pick.m = m.id; // stays put while other people's bookings change the day
+      const len = m.len;
+      if (pick.start === undefined || pick.start === null) {
+        const s = Number(ctx.query.s);
+        // Today: the nearest free start. Later days: from 10:00, so nobody books 06:00 by accident.
+        const preferred =
+          nowMin == null
+            ? (m.starts.find((x) => x >= 600) ?? m.starts[0])
+            : m.starts[0];
+        pick.start = m.starts.includes(s) ? s : (preferred ?? null);
+      }
+      const start = pick.start;
+      const ready = start != null && m.starts.includes(start);
+      const active = upcoming(me.id).length;
+      const left = MAX_ACTIVE - active;
+      const shortened = len < wanted;
+      const scrubNote = shortened
+        ? `Цього дня найдовше вільне вікно — ${durationLabel(len)}`
+        : "";
+      const navs = bookNavs(date, nowMin, m.id, wanted);
+      model = {
+        date,
+        nowMin,
+        mId: m.id,
+        machineName: m.name,
+        slots: m.slots,
+        starts: m.starts,
+        wanted,
+        len,
+        start,
+        ready,
+        left,
+        note: scrubNote,
+        meId: me.id,
+      };
 
-    const card = !m.starts.length
-      ? `<div class="empty-note" style="margin-top:0">${icon("info", true)}<span>${date === EH.TODAY ? "Сьогодні" : "Цього дня"} на цій пралці немає навіть ${durationLabel(MIN_LEN)}. Оберіть іншу пралку чи день.</span></div>`
-      : scrubberHtml(m.slots, m.starts, len, start, nowMin, me.id, scrubNote);
+      const card = !m.starts.length
+        ? `<div class="empty-note" style="margin-top:0">${icon("info", true)}<span>${date === EH.TODAY ? "Сьогодні" : "Цього дня"} на цій пралці немає навіть ${durationLabel(MIN_LEN)}. Оберіть іншу пралку чи день.</span></div>`
+        : scrubberHtml(m.slots, m.starts, len, start, nowMin, me.id, scrubNote);
 
-    const quota = `<div class="quota"><span class="quota-dots" aria-hidden="true">${[0, 1, 2].map((i) => `<i${i < active ? ' class="on"' : ""}></i>`).join("")}</span>${left > 0 ? `Ще можна мати ${left} ${left === 1 ? "запис" : "записи"} із ${MAX_ACTIVE}` : `Усі ${MAX_ACTIVE} записи зайняті`}</div>`;
+      const quota = `<div class="quota"><span class="quota-dots" aria-hidden="true">${[0, 1, 2].map((i) => `<i${i < active ? ' class="on"' : ""}></i>`).join("")}</span>${left > 0 ? `Ще можна мати ${left} ${left === 1 ? "запис" : "записи"} із ${MAX_ACTIVE}` : `Усі ${MAX_ACTIVE} записи зайняті`}</div>`;
 
-    const html = `<form id="lbook" data-form="laundry-book">
+      const html = `<form id="lbook" data-form="laundry-book">
       ${App.topbar({ back: "/laundry" })}
       <h2 class="title">Записатися</h2>
       <p class="lede">Оберіть день і пралку, а на шкалі — час і тривалість.</p>
@@ -471,17 +600,19 @@
       <input type="hidden" name="len" value="${len}"><input type="hidden" name="start" value="${ready ? start : ""}">
     </form>`;
 
-    const sh = sheetHtml(model);
-    const sheet = `<div class="sheet"><div class="sheet-text">${sh.text}</div><button class="btn btn-primary" type="submit" form="lbook"${sh.disabled ? " disabled" : ""}>Записатися</button></div>`;
-    return { html, sheet };
-  }, {
-    tab: "laundry", title: "Записатися",
-    mount(root) {
-      restoreScroll();
-      mountNavPills(root);
-      mountScrubber(root);
+      const sh = sheetHtml(model);
+      const sheet = `<div class="sheet"><div class="sheet-text">${sh.text}</div><button class="btn btn-primary" type="submit" form="lbook"${sh.disabled ? " disabled" : ""}>Записатися</button></div>`;
+      return { html, sheet };
     },
-  });
+    {
+      tab: "laundry",
+      title: "Записатися",
+      mount(root) {
+        restoreScroll();
+        mountScrubber(root);
+      },
+    },
+  );
 
   /** The scrubber's behaviour, ported from components/time-scrubber.tsx. */
   function mountScrubber(root) {
@@ -514,14 +645,32 @@
     let width = track.clientWidth || trackW;
     let lead = leadFor(width);
     let live = md.start ?? starts[0] ?? OPEN;
-    let programmatic = false, progTimer = 0, settleTimer = 0;
-    let holding = false, movedWhileHolding = false;
-    let limit = null, limitTimer = 0, resizing = null;
+    let programmatic = false,
+      progTimer = 0,
+      settleTimer = 0;
+    let holding = false,
+      movedWhileHolding = false;
+    let limit = null,
+      limitTimer = 0,
+      resizing = null;
     const flags = { moving: false };
 
-    const startAt = (left) => Math.min(CLOSE - len, Math.max(OPEN, OPEN + Math.round(left / STEP_PX) * STEP));
-    const nearestValid = (s) => (valid.has(s) ? s : starts.length ? starts.reduce((best, x) => (Math.abs(x - s) < Math.abs(best - s) ? x : best), starts[0]) : null);
-    const anchor = () => (md.start != null && valid.has(md.start) ? md.start : null);
+    const startAt = (left) =>
+      Math.min(
+        CLOSE - len,
+        Math.max(OPEN, OPEN + Math.round(left / STEP_PX) * STEP),
+      );
+    const nearestValid = (s) =>
+      valid.has(s)
+        ? s
+        : starts.length
+          ? starts.reduce(
+              (best, x) => (Math.abs(x - s) < Math.abs(best - s) ? x : best),
+              starts[0],
+            )
+          : null;
+    const anchor = () =>
+      md.start != null && valid.has(md.start) ? md.start : null;
 
     function geometry() {
       width = track.clientWidth || width;
@@ -546,7 +695,10 @@
       statusEl.textContent = label;
       track.setAttribute("aria-valuenow", live);
       track.setAttribute("aria-valuemax", CLOSE - len);
-      track.setAttribute("aria-valuetext", `${fmt(live)}–${fmt(live + len)}, ${label.toLowerCase()}`);
+      track.setAttribute(
+        "aria-valuetext",
+        `${fmt(live)}–${fmt(live + len)}, ${label.toLowerCase()}`,
+      );
       prevBtn.disabled = jumpTarget(starts, -1, live) === undefined;
       nextBtn.disabled = jumpTarget(starts, 1, live) === undefined;
     }
@@ -559,7 +711,10 @@
       lenEl.textContent = durationLabel(len);
       handle.setAttribute("aria-valuenow", len);
       handle.setAttribute("aria-valuetext", durationLabel(len));
-      handle.setAttribute("aria-valuemax", a == null ? len : maxLengthAt(md.slots, a));
+      handle.setAttribute(
+        "aria-valuemax",
+        a == null ? len : maxLengthAt(md.slots, a),
+      );
       handle.tabIndex = a == null ? -1 : 0;
       handle.toggleAttribute("aria-disabled", a == null);
     }
@@ -590,14 +745,29 @@
       const s = startAt(track.scrollLeft);
       const target = nearestValid(s);
       flags.moving = false;
-      if (target === null) { classes(); chosen(null); return; }
-      if (target !== s) { nudge(); scrollToStart(target, true); }
+      if (target === null) {
+        classes();
+        chosen(null);
+        return;
+      }
+      if (target !== s) {
+        nudge();
+        scrollToStart(target, true);
+      }
       live = target;
       readout();
       chosen(target);
     }
-    const queueSettle = () => { clearTimeout(settleTimer); settleTimer = setTimeout(settle, 140); };
-    function choose(s) { scrollToStart(s, true); live = s; readout(); chosen(s); }
+    const queueSettle = () => {
+      clearTimeout(settleTimer);
+      settleTimer = setTimeout(settle, 140);
+    };
+    function choose(s) {
+      scrollToStart(s, true);
+      live = s;
+      readout();
+      chosen(s);
+    }
 
     geometry();
     scrollToStart(live, false);
@@ -605,49 +775,85 @@
     hint();
 
     const ro = new ResizeObserver(() => {
-      if (!track.isConnected) { ro.disconnect(); return; }
+      if (!track.isConnected) {
+        ro.disconnect();
+        return;
+      }
       if (track.clientWidth === width) return;
       geometry();
       scrollToStart(live, false);
     });
     ro.observe(track);
 
-    track.addEventListener("scroll", () => {
-      live = startAt(track.scrollLeft);
-      if (programmatic) { readout(); return; }
-      flags.moving = true;
-      readout();
-      if (holding) { movedWhileHolding = true; clearTimeout(settleTimer); return; }
-      queueSettle();
-    }, { passive: true });
-    track.addEventListener("touchstart", () => { holding = true; movedWhileHolding = false; clearTimeout(settleTimer); }, { passive: true });
-    const touchEnd = () => { holding = false; if (movedWhileHolding) queueSettle(); };
+    track.addEventListener(
+      "scroll",
+      () => {
+        live = startAt(track.scrollLeft);
+        if (programmatic) {
+          readout();
+          return;
+        }
+        flags.moving = true;
+        readout();
+        if (holding) {
+          movedWhileHolding = true;
+          clearTimeout(settleTimer);
+          return;
+        }
+        queueSettle();
+      },
+      { passive: true },
+    );
+    track.addEventListener(
+      "touchstart",
+      () => {
+        holding = true;
+        movedWhileHolding = false;
+        clearTimeout(settleTimer);
+      },
+      { passive: true },
+    );
+    const touchEnd = () => {
+      holding = false;
+      if (movedWhileHolding) queueSettle();
+    };
     track.addEventListener("touchend", touchEnd, { passive: true });
     track.addEventListener("touchcancel", touchEnd, { passive: true });
 
     // A mouse wheel moves the day one 5-minute step per notch; trackpads keep their own sideways scroll.
-    let acc = 0, wheelTarget = null, wheelIdle = 0;
-    track.addEventListener("wheel", (e) => {
-      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
-      e.preventDefault();
-      acc += e.deltaY * (e.deltaMode === 1 ? 100 / 3 : e.deltaMode === 2 ? 100 : 1);
-      const steps = Math.trunc(acc / 100);
-      if (!steps) return;
-      acc -= steps * 100;
-      const max = track.scrollWidth - track.clientWidth;
-      const from = wheelTarget ?? Math.round(track.scrollLeft / STEP_PX) * STEP_PX;
-      wheelTarget = Math.min(max, Math.max(0, from + steps * STEP_PX));
-      track.scrollTo({ left: wheelTarget, behavior: "smooth" });
-      clearTimeout(wheelIdle);
-      wheelIdle = setTimeout(() => (wheelTarget = null), 400);
-    }, { passive: false });
+    let acc = 0,
+      wheelTarget = null,
+      wheelIdle = 0;
+    track.addEventListener(
+      "wheel",
+      (e) => {
+        if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+        e.preventDefault();
+        acc +=
+          e.deltaY *
+          (e.deltaMode === 1 ? 100 / 3 : e.deltaMode === 2 ? 100 : 1);
+        const steps = Math.trunc(acc / 100);
+        if (!steps) return;
+        acc -= steps * 100;
+        const max = track.scrollWidth - track.clientWidth;
+        const from =
+          wheelTarget ?? Math.round(track.scrollLeft / STEP_PX) * STEP_PX;
+        wheelTarget = Math.min(max, Math.max(0, from + steps * STEP_PX));
+        track.scrollTo({ left: wheelTarget, behavior: "smooth" });
+        clearTimeout(wheelIdle);
+        wheelIdle = setTimeout(() => (wheelTarget = null), 400);
+      },
+      { passive: false },
+    );
 
     // Mouse: grab and drag the day like on a phone.
-    let drag = null, suppressClick = false;
+    let drag = null,
+      suppressClick = false;
     track.addEventListener("pointerdown", (e) => {
       if (e.pointerType !== "mouse" || e.button !== 0) return;
       drag = { x: e.clientX, left: track.scrollLeft, moved: false };
-      holding = true; movedWhileHolding = false;
+      holding = true;
+      movedWhileHolding = false;
       clearTimeout(settleTimer);
       track.style.scrollSnapType = "none";
       track.setPointerCapture(e.pointerId);
@@ -661,12 +867,17 @@
     const dragEnd = (e) => {
       const d = drag;
       if (!d) return;
-      drag = null; holding = false;
-      if (track.hasPointerCapture(e.pointerId)) track.releasePointerCapture(e.pointerId);
+      drag = null;
+      holding = false;
+      if (track.hasPointerCapture(e.pointerId))
+        track.releasePointerCapture(e.pointerId);
       suppressClick = d.moved;
       track.style.scrollSnapType = "";
       if (!d.moved) return;
-      track.scrollTo({ left: Math.round(track.scrollLeft / STEP_PX) * STEP_PX, behavior: "smooth" });
+      track.scrollTo({
+        left: Math.round(track.scrollLeft / STEP_PX) * STEP_PX,
+        behavior: "smooth",
+      });
       queueSettle();
     };
     track.addEventListener("pointerup", dragEnd);
@@ -674,11 +885,17 @@
 
     // A click or tap on the day centres the booking there (or on the nearest free start).
     track.addEventListener("click", (e) => {
-      if (suppressClick) { suppressClick = false; return; }
+      if (suppressClick) {
+        suppressClick = false;
+        return;
+      }
       const rect = track.getBoundingClientRect();
-      const minute = OPEN + (e.clientX - rect.left + track.scrollLeft - lead) / PXM;
+      const minute =
+        OPEN + (e.clientX - rect.left + track.scrollLeft - lead) / PXM;
       const wanted = Math.round((minute - len / 2) / STEP) * STEP;
-      const target = nearestValid(Math.min(CLOSE - len, Math.max(OPEN, wanted)));
+      const target = nearestValid(
+        Math.min(CLOSE - len, Math.max(OPEN, wanted)),
+      );
       if (target === null) return;
       if (target !== wanted) nudge();
       choose(target);
@@ -692,7 +909,12 @@
         if (edge !== undefined) choose(edge);
         return;
       }
-      const dir = e.key === "ArrowRight" || e.key === "ArrowUp" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowDown" ? -1 : 0;
+      const dir =
+        e.key === "ArrowRight" || e.key === "ArrowUp"
+          ? 1
+          : e.key === "ArrowLeft" || e.key === "ArrowDown"
+            ? -1
+            : 0;
       if (!dir) return;
       e.preventDefault();
       const from = programmatic && md.start != null ? md.start : live;
@@ -700,35 +922,58 @@
       const next = dir > 0 ? side[0] : side.at(-1);
       if (next !== undefined) choose(next);
     });
-    sc.querySelectorAll("[data-scrub-jump]").forEach((btn) => btn.addEventListener("click", () => {
-      const from = programmatic && md.start != null ? md.start : live;
-      const next = jumpTarget(starts, Number(btn.dataset.scrubJump), from);
-      if (next !== undefined) choose(next);
-    }));
+    sc.querySelectorAll("[data-scrub-jump]").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const from = programmatic && md.start != null ? md.start : live;
+        const next = jumpTarget(starts, Number(btn.dataset.scrubJump), from);
+        if (next !== undefined) choose(next);
+      }),
+    );
 
     // Stretching the frame: its left edge (the start) stays, the right edge stops at the first thing in the way.
-    const limitAt = (s, max) => (max >= MAX_LEN ? "max" : s + max >= CLOSE ? "close" : "busy");
+    const limitAt = (s, max) =>
+      max >= MAX_LEN ? "max" : s + max >= CLOSE ? "close" : "busy";
     function showLimit(next) {
       clearTimeout(limitTimer);
       limit = next;
-      classes(); hint();
-      if (next && !resizing) limitTimer = setTimeout(() => { limit = null; classes(); hint(); }, 1600);
+      classes();
+      hint();
+      if (next && !resizing)
+        limitTimer = setTimeout(() => {
+          limit = null;
+          classes();
+          hint();
+        }, 1600);
     }
     function setLength(raw, max) {
       const a = anchor();
       if (a == null) return;
-      const next = Math.min(max, Math.max(MIN_LEN, Math.round(raw / STEP) * STEP));
-      showLimit(raw > max + STEP / 2 ? limitAt(a, max) : raw < MIN_LEN - STEP / 2 ? "min" : null);
+      const next = Math.min(
+        max,
+        Math.max(MIN_LEN, Math.round(raw / STEP) * STEP),
+      );
+      showLimit(
+        raw > max + STEP / 2
+          ? limitAt(a, max)
+          : raw < MIN_LEN - STEP / 2
+            ? "min"
+            : null,
+      );
       if (next === len) return;
       len = next;
       // The wish follows the frame; the day's free starts are counted for the new length.
-      md.len = len; md.wanted = len; md.note = ""; pick.wanted = len;
+      md.len = len;
+      md.wanted = len;
+      md.note = "";
+      pick.wanted = len;
       ({ starts } = fitting(md.slots, len, md.nowMin));
       md.starts = starts;
       valid = new Set(starts);
       geometry();
       live = a;
-      lengthUi(); readout(); hint();
+      lengthUi();
+      readout();
+      hint();
       chosen(a);
       refreshNavs();
     }
@@ -736,7 +981,10 @@
     function refreshNavs() {
       const tpl = document.createElement("div");
       const navs = bookNavs(md.date, md.nowMin, md.mId, len);
-      for (const [sel, html] of [["nav.days[data-lpill]", navs.days], ["nav.machine-pick[data-lpill]", navs.machines]]) {
+      for (const [sel, html] of [
+        ["nav.days[data-lpill]", navs.days],
+        ["nav.machine-pick[data-lpill]", navs.machines],
+      ]) {
         const nav = root.querySelector(sel);
         if (!nav) continue;
         tpl.innerHTML = html;
@@ -744,8 +992,10 @@
         nav.querySelectorAll(":scope > [data-pill-item]").forEach((a, i) => {
           if (!fresh[i]) return;
           a.setAttribute("href", fresh[i].getAttribute("href"));
-          const small = a.querySelector("small"), next = fresh[i].querySelector("small");
-          if (small && next && sel.includes("machine")) small.outerHTML = next.outerHTML;
+          const small = a.querySelector("small"),
+            next = fresh[i].querySelector("small");
+          if (small && next && sel.includes("machine"))
+            small.outerHTML = next.outerHTML;
         });
       }
     }
@@ -764,7 +1014,8 @@
     const handleUp = (e) => {
       if (!resizing) return;
       resizing = null;
-      if (handle.hasPointerCapture(e.pointerId)) handle.releasePointerCapture(e.pointerId);
+      if (handle.hasPointerCapture(e.pointerId))
+        handle.releasePointerCapture(e.pointerId);
       classes();
       if (limit) showLimit(limit);
     };
@@ -772,7 +1023,16 @@
     handle.addEventListener("pointercancel", handleUp);
     handle.addEventListener("click", (e) => e.stopPropagation());
     handle.addEventListener("keydown", (e) => {
-      const step = e.key === "ArrowRight" || e.key === "ArrowUp" ? STEP : e.key === "ArrowLeft" || e.key === "ArrowDown" ? -STEP : e.key === "Home" ? -MAX_LEN : e.key === "End" ? MAX_LEN : 0;
+      const step =
+        e.key === "ArrowRight" || e.key === "ArrowUp"
+          ? STEP
+          : e.key === "ArrowLeft" || e.key === "ArrowDown"
+            ? -STEP
+            : e.key === "Home"
+              ? -MAX_LEN
+              : e.key === "End"
+                ? MAX_LEN
+                : 0;
       if (!step) return;
       e.preventDefault();
       const a = anchor();
@@ -781,68 +1041,101 @@
   }
 
   App.form("laundry-book", (data, ctx) => {
-    const len = Number(data.len), start = Number(data.start);
+    const len = Number(data.len),
+      start = Number(data.start);
     if (!data.start) return;
     const r = tryBook(ctx.me, data.machine, data.date, start, len);
-    if (r.error) ctx.go(q("/laundry/book", { len, d: data.date, m: data.machine, err: r.error }), { replace: true });
-    else { pick = { key: null }; ctx.go(`/laundry/booking/${r.booking.id}?new=1`); }
+    if (r.error)
+      ctx.go(
+        q("/laundry/book", {
+          len,
+          d: data.date,
+          m: data.machine,
+          err: r.error,
+        }),
+        { replace: true },
+      );
+    else {
+      pick = { key: null };
+      ctx.go(`/laundry/booking/${r.booking.id}?new=1`);
+    }
   });
 
   // ================= /laundry/machine/:id =================
   const PX = 2;
   let armed = null; // a council member's «Скасувати» waiting for the second tap
 
-  App.route("/laundry/machine/:id", (ctx) => {
-    const me = ctx.me;
-    const m = machine(ctx.params.id);
-    if (!m) return `${App.topbar({ back: "/laundry" })}<div class="glass empty"><b>Такої пралки немає</b>Поверніться до пральні й оберіть іншу.</div>`;
-    const date = dayIdx(ctx.query.d) >= 0 ? ctx.query.d : EH.TODAY;
-    const isToday = date === EH.TODAY;
-    const nowMin = nowFor(date);
-    const slots = slotsOn(m.id, date);
-    const council = isCouncil(me);
-    const fromMin = isToday ? Math.max(OPEN, Math.min(Math.floor(nowMin / 60) * 60, CLOSE - 60)) : OPEN;
-    const y = (x) => (x - fromMin) * PX;
-    const visible = slots.filter((b) => b.e > fromMin);
+  App.route(
+    "/laundry/machine/:id",
+    (ctx) => {
+      const me = ctx.me;
+      const m = machine(ctx.params.id);
+      if (!m)
+        return `${App.topbar({ back: "/laundry" })}<div class="glass empty"><b>Такої пралки немає</b>Поверніться до пральні й оберіть іншу.</div>`;
+      const date = dayIdx(ctx.query.d) >= 0 ? ctx.query.d : EH.TODAY;
+      const isToday = date === EH.TODAY;
+      const nowMin = nowFor(date);
+      const slots = slotsOn(m.id, date);
+      const council = isCouncil(me);
+      const fromMin = isToday
+        ? Math.max(OPEN, Math.min(Math.floor(nowMin / 60) * 60, CLOSE - 60))
+        : OPEN;
+      const y = (x) => (x - fromMin) * PX;
+      const visible = slots.filter((b) => b.e > fromMin);
 
-    let pill = { text: dayName(date), cls: "neutral" };
-    if (isToday) {
-      const st = machineNow(slots, nowMin);
-      if (st.kind === "busy") pill = { text: `Зайнята до ${fmt(st.until)}`, cls: "busy" };
-      else if (st.kind === "free") pill = { text: st.until == null ? "Вільна до кінця дня" : `Вільна до ${fmt(st.until)}`, cls: "free" };
-      else pill = { text: "Зачинено до 06:00", cls: "busy" };
-    }
-
-    let grid = "";
-    for (let h = Math.ceil(fromMin / 60); h <= 24; h++) grid += `<div class="tl-hour" style="top:${y(h * 60)}px"><span>${String(h).padStart(2, "0")}:00</span></div>`;
-    for (const b of visible) {
-      if (b.s - BUF >= fromMin) grid += `<div class="tl-buf" style="top:${y(b.s - BUF)}px;height:${BUF * PX}px"></div>`;
-      if (b.e + BUF <= CLOSE) grid += `<div class="tl-buf" style="top:${y(b.e)}px;height:${BUF * PX}px"></div>`;
-    }
-    for (const b of visible) {
-      const top = y(Math.max(fromMin, b.s)) + 2;
-      const height = (b.e - Math.max(fromMin, b.s)) * PX - 4;
-      const time = `<span class="tl-time">${fmt(b.s)}<small>${fmt(b.e)}</small></span>`;
-      if (b.person === me.id) {
-        grid += `<a class="tl-block tl-mine" href="#/laundry/booking/${b.id}" style="top:${top}px;height:${height}px">${time}<span class="tl-body"><b>Ваш запис</b><span>${esc(durationLabel(b.e - b.s))}</span></span>${icon("chev", true)}</a>`;
-      } else {
-        const p = EH.person(b.person);
-        const tg = p.tg ? ` · <a href="https://t.me/${esc(p.tg)}" target="_blank" rel="noreferrer">@${esc(p.tg)}</a>` : "";
-        const cancel = council && !ended(b)
-          ? `<button class="pill-btn danger" type="button" data-act="laundry-council-cancel" data-id="${b.id}" aria-label="Скасувати запис: ${esc(p.name)}, ${fmt(b.s)}">${armed === b.id ? "Так, скасувати" : "Скасувати"}</button>`
-          : "";
-        grid += `<div class="tl-block tl-busy" style="top:${top}px;height:${height}px">${time}<span class="tl-body"><b>${esc(p.name)}</b><span>${esc(roomLabel(p.room))}${tg}</span></span>${cancel}</div>`;
+      let pill = { text: dayName(date), cls: "neutral" };
+      if (isToday) {
+        const st = machineNow(slots, nowMin);
+        if (st.kind === "busy")
+          pill = { text: `Зайнята до ${fmt(st.until)}`, cls: "busy" };
+        else if (st.kind === "free")
+          pill = {
+            text:
+              st.until == null
+                ? "Вільна до кінця дня"
+                : `Вільна до ${fmt(st.until)}`,
+            cls: "free",
+          };
+        else pill = { text: "Зачинено до 06:00", cls: "busy" };
       }
-    }
-    for (const w of freeWindows(slots, nowMin).filter((w) => w.e > fromMin)) {
-      const top = y(Math.max(fromMin, w.s)) + 2;
-      const height = (w.e - Math.max(fromMin, w.s)) * PX - 4;
-      const len = longestFit(w.e - w.s) ?? MIN_LEN;
-      grid += `<a class="tl-block tl-free" href="#${esc(q("/laundry/book", { d: date, m: m.id, s: w.s, len }))}" style="top:${top}px;height:${height}px" aria-label="Вільно ${fmt(w.s)}–${fmt(w.e)}, записатися"><span class="tl-time">${fmt(w.s)}<small>${fmt(w.e)}</small></span><span class="tl-body"><b>Вільно</b><span>можна до ${esc(durationLabel(len))}</span></span><span class="plus" aria-hidden="true">${icon("plus", true)}</span></a>`;
-    }
-    if (nowMin != null && nowMin >= fromMin && nowMin < CLOSE) grid += `<div class="tl-now" style="top:${y(nowMin)}px" data-time="${fmt(nowMin)}"></div>`;
 
-    return `${App.topbar({ back: "/laundry" })}
+      let grid = "";
+      for (let h = Math.ceil(fromMin / 60); h <= 24; h++)
+        grid += `<div class="tl-hour" style="top:${y(h * 60)}px"><span>${String(h).padStart(2, "0")}:00</span></div>`;
+      for (const b of visible) {
+        if (b.s - BUF >= fromMin)
+          grid += `<div class="tl-buf" style="top:${y(b.s - BUF)}px;height:${BUF * PX}px"></div>`;
+        if (b.e + BUF <= CLOSE)
+          grid += `<div class="tl-buf" style="top:${y(b.e)}px;height:${BUF * PX}px"></div>`;
+      }
+      for (const b of visible) {
+        const top = y(Math.max(fromMin, b.s)) + 2;
+        const height = (b.e - Math.max(fromMin, b.s)) * PX - 4;
+        const time = `<span class="tl-time">${fmt(b.s)}<small>${fmt(b.e)}</small></span>`;
+        if (b.person === me.id) {
+          grid += `<a class="tl-block tl-mine" href="#/laundry/booking/${b.id}" style="top:${top}px;height:${height}px">${time}<span class="tl-body"><b>Ваш запис</b><span>${esc(durationLabel(b.e - b.s))}</span></span>${icon("chev", true)}</a>`;
+        } else {
+          const p = EH.person(b.person);
+          const tg = p.tg
+            ? ` · <a href="https://t.me/${esc(p.tg)}" target="_blank" rel="noreferrer">@${esc(p.tg)}</a>`
+            : "";
+          const cancel =
+            council && !ended(b)
+              ? `<button class="pill-btn danger" type="button" data-act="laundry-council-cancel" data-id="${b.id}" aria-label="Скасувати запис: ${esc(p.name)}, ${fmt(b.s)}">${armed === b.id ? "Так, скасувати" : "Скасувати"}</button>`
+              : "";
+          grid += `<div class="tl-block tl-busy" style="top:${top}px;height:${height}px">${time}<span class="tl-body"><b>${esc(p.name)}</b><span>${esc(roomLabel(p.room))}${tg}</span></span>${cancel}</div>`;
+        }
+      }
+      for (const w of freeWindows(slots, nowMin).filter((w) => w.e > fromMin)) {
+        const top = y(Math.max(fromMin, w.s)) + 2;
+        const height = (w.e - Math.max(fromMin, w.s)) * PX - 4;
+        const len = longestFit(w.e - w.s) ?? MIN_LEN;
+        grid += `<a class="tl-block tl-free" href="#${esc(q("/laundry/book", { d: date, m: m.id, s: w.s, len }))}" style="top:${top}px;height:${height}px" aria-label="Вільно ${fmt(w.s)}–${fmt(w.e)}, записатися"><span class="tl-time">${fmt(w.s)}<small>${fmt(w.e)}</small></span><span class="tl-body"><b>Вільно</b><span>можна до ${esc(durationLabel(len))}</span></span><span class="plus" aria-hidden="true">${icon("plus", true)}</span></a>`;
+      }
+      if (nowMin != null && nowMin >= fromMin && nowMin < CLOSE)
+        grid += `<div class="tl-now" style="top:${y(nowMin)}px" data-time="${fmt(nowMin)}"></div>`;
+
+      return `${App.topbar({ back: "/laundry" })}
       <div class="day-head"><div><h2>${esc(m.name)}</h2><span class="state ${pill.cls}">${esc(pill.text)}</span></div></div>
       ${ctx.query.ok ? note("ok", "Запис скасовано.") : ""}
       ${daysNav(date, (d) => q(`/laundry/machine/${m.id}`, { d }))}
@@ -852,55 +1145,91 @@
       </div>
       <div class="glass rule" style="margin-top:14px">${icon("info")}<span>Між записами є ${BUF} хвилин запасу. Якщо людини немає ${NO_SHOW} хвилин від початку, пралку може взяти будь-хто.</span></div>
       ${credit}`;
-  }, { tab: "laundry", title: "Пралка", mount(root) { restoreScroll(); mountNavPills(root); } });
+    },
+    { tab: "laundry", title: "Пралка", mount: restoreScroll },
+  );
 
   App.act("laundry-council-cancel", (el, ctx) => {
     if (!isCouncil(ctx.me)) return;
     const id = Number(el.dataset.id);
-    if (armed !== id) { armed = id; keepY = window.scrollY; App.rerender(); return; }
+    if (armed !== id) {
+      armed = id;
+      keepY = window.scrollY;
+      App.rerender();
+      return;
+    }
     armed = null;
     const b = S.bookings.find((x) => x.id === id);
     keepY = window.scrollY;
-    if (!councilCancel(b, ctx.me)) { App.rerender(); return; }
-    ctx.go(q(`/laundry/machine/${b.machine}`, { d: b.date, ok: 1 }), { replace: true });
+    if (!councilCancel(b, ctx.me)) {
+      App.rerender();
+      return;
+    }
+    ctx.go(q(`/laundry/machine/${b.machine}`, { d: b.date, ok: 1 }), {
+      replace: true,
+    });
   });
 
   // ================= /laundry/booking/:id =================
-  App.route("/laundry/booking/:id", (ctx) => {
-    const me = ctx.me;
-    const b = S.bookings.find((x) => x.id === Number(ctx.params.id));
-    const back = ctx.query.from === "list" ? "/laundry/bookings" : "/laundry";
-    if (!b || (b.person !== me.id && !isCouncil(me)))
-      return `${App.topbar({ back, title: "Запис" })}<div class="glass empty"><b>Такого запису немає</b>Можливо, його вже скасували.</div>`;
-    const mine = b.person === me.id;
-    const isEnded = ended(b), isRunning = running(b);
-    const status = b.status === "cancelled" ? "Скасовано" : isEnded ? "Завершено" : isRunning ? "Триває" : "Підтверджено";
-    const owner = EH.person(b.person);
-    const m = machine(b.machine);
-    const live = b.status === "active" && !isEnded;
+  App.route(
+    "/laundry/booking/:id",
+    (ctx) => {
+      const me = ctx.me;
+      const b = S.bookings.find((x) => x.id === Number(ctx.params.id));
+      const back = ctx.query.from === "list" ? "/laundry/bookings" : "/laundry";
+      if (!b || (b.person !== me.id && !isCouncil(me)))
+        return `${App.topbar({ back, title: "Запис" })}<div class="glass empty"><b>Такого запису немає</b>Можливо, його вже скасували.</div>`;
+      const mine = b.person === me.id;
+      const isEnded = ended(b),
+        isRunning = running(b);
+      const status =
+        b.status === "cancelled"
+          ? "Скасовано"
+          : isEnded
+            ? "Завершено"
+            : isRunning
+              ? "Триває"
+              : "Підтверджено";
+      const owner = EH.person(b.person);
+      const m = machine(b.machine);
+      const live = b.status === "active" && !isEnded;
 
-    let actions = "";
-    if (live) {
-      if (confirming === b.id) {
-        actions = `<p class="lp-ask">Скасувати цей запис?</p><div class="actions"><button class="btn btn-soft" type="button" data-act="laundry-cancel-no">Ні, залишити</button><button class="btn btn-ghost-danger block" type="button" data-act="laundry-cancel" data-id="${b.id}">Так, скасувати</button></div>`;
-      } else if (isRunning && mine) {
-        actions = `<div class="actions running"><button class="btn btn-soft block" type="button" data-act="laundry-release" data-id="${b.id}">${icon("check", true)}Звільнити раніше</button></div>`;
-      } else {
-        actions = `<div class="actions"><button class="btn btn-soft" type="button" data-act="laundry-ics" data-id="${b.id}">${icon("cal", true)}У календар</button><button class="btn btn-ghost-danger block" type="button" data-act="laundry-cancel-ask" data-id="${b.id}">Скасувати</button></div>`;
+      let actions = "";
+      if (live) {
+        if (confirming === b.id) {
+          actions = `<p class="lp-ask">Скасувати цей запис?</p><div class="actions"><button class="btn btn-soft" type="button" data-act="laundry-cancel-no">Ні, залишити</button><button class="btn btn-ghost-danger block" type="button" data-act="laundry-cancel" data-id="${b.id}">Так, скасувати</button></div>`;
+        } else if (isRunning && mine) {
+          actions = `<div class="actions running"><button class="btn btn-soft block" type="button" data-act="laundry-release" data-id="${b.id}">${icon("check", true)}Звільнити раніше</button></div>`;
+        } else {
+          actions = `<div class="actions"><button class="btn btn-soft" type="button" data-act="laundry-ics" data-id="${b.id}">${icon("cal", true)}У календар</button><button class="btn btn-ghost-danger block" type="button" data-act="laundry-cancel-ask" data-id="${b.id}">Скасувати</button></div>`;
+        }
       }
-    }
-    const on = reminders.has(b.id);
-    const reminder = mine && live && !isRunning
-      ? `<div class="glass notify"><span class="notify-ico">${icon("bell")}</span><div style="flex:1 1 0%;min-width:0"><div style="display:flex;align-items:center;gap:12px"><b>Нагадати за 15 хвилин</b><button class="switch" type="button" role="switch" aria-checked="${on}" aria-label="Нагадати за 15 хвилин" data-act="laundry-remind" data-id="${b.id}"></button></div><p aria-live="polite">Нагадаємо за 15 хвилин до початку на цьому пристрої.</p></div></div>`
-      : "";
+      const on = reminders.has(b.id);
+      const reminder =
+        mine && live && !isRunning
+          ? `<div class="glass notify"><span class="notify-ico">${icon("bell")}</span><div style="flex:1 1 0%;min-width:0"><div style="display:flex;align-items:center;gap:12px"><b>Нагадати за 15 хвилин</b><button class="switch" type="button" role="switch" aria-checked="${on}" aria-label="Нагадати за 15 хвилин" data-act="laundry-remind" data-id="${b.id}"></button></div><p aria-live="polite">Нагадаємо за 15 хвилин до початку на цьому пристрої.</p></div></div>`
+          : "";
 
-    return `${App.topbar({ back, title: mine ? "Мій запис" : "Запис" })}
+      return `${App.topbar({ back, title: mine ? "Мій запис" : "Запис" })}
       ${ctx.query.new && live ? note("ok", "Записано. Нагадаємо за 15 хвилин, якщо сповіщення увімкнені.") : ""}
       ${ctx.query.err && ERRORS[ctx.query.err] ? note("error", ERRORS[ctx.query.err]) : ""}
       ${ticket({
-        big: true, celebrate: !!ctx.query.new && live, status, heading: dayHeading(b.date), s: b.s, e: b.e, machineName: m.name,
-        footLeft: esc(mine ? durationWords(b.e - b.s) : `${owner.name}, ${roomLabel(owner.room)}`),
-        footRight: live && !isRunning ? `<span>${esc(countdown(b.date, b.s))}</span>` : "",
+        big: true,
+        celebrate: !!ctx.query.new && live,
+        status,
+        heading: dayHeading(b.date),
+        s: b.s,
+        e: b.e,
+        machineName: m.name,
+        footLeft: esc(
+          mine
+            ? durationWords(b.e - b.s)
+            : `${owner.name}, ${roomLabel(owner.room)}`,
+        ),
+        footRight:
+          live && !isRunning
+            ? `<span>${esc(countdown(b.date, b.s))}</span>`
+            : "",
       })}
       ${actions}
       ${reminder}
@@ -910,48 +1239,74 @@
         <div class="rule">${icon("user")}<span>Інші бачать ваше ім’я, кімнату й ім’я користувача в Telegram, якщо ви його вказали.</span></div>
       </div>
       <p style="margin:14px 4px"><a class="link" href="#/laundry/machine/${esc(m.id)}">Розклад цієї пралки</a></p>`;
-  }, { tab: "laundry", title: "Мій запис" });
+    },
+    { tab: "laundry", title: "Мій запис" },
+  );
 
-  App.act("laundry-cancel-ask", (el) => { confirming = Number(el.dataset.id); App.rerender(); });
-  App.act("laundry-cancel-no", () => { confirming = null; App.rerender(); });
+  App.act("laundry-cancel-ask", (el) => {
+    confirming = Number(el.dataset.id);
+    App.rerender();
+  });
+  App.act("laundry-cancel-no", () => {
+    confirming = null;
+    App.rerender();
+  });
   App.act("laundry-cancel", (el, ctx) => {
     confirming = null;
     const b = S.bookings.find((x) => x.id === Number(el.dataset.id));
     const me = ctx.me;
     // re-check on the «server»: own or council, still active and not started
-    if (!b || b.status !== "active" || ended(b) || (b.person !== me.id && !isCouncil(me)) || (running(b) && b.person === me.id)) {
+    if (
+      !b ||
+      b.status !== "active" ||
+      ended(b) ||
+      (b.person !== me.id && !isCouncil(me)) ||
+      (running(b) && b.person === me.id)
+    ) {
       ctx.go(`/laundry/booking/${el.dataset.id}?err=cancel`, { replace: true });
       return;
     }
-    if (b.person !== me.id) { councilCancel(b, me); ctx.go(q(`/laundry/machine/${b.machine}`, { d: b.date, ok: 1 })); return; }
-    const before = S.bot.length;
-    EH.actions.cancelBooking(b.id, me.id);
-    ctx.go(S.bot.length > before ? "/laundry?cancelled=1&freed=1" : "/laundry?cancelled=1");
+    if (b.person !== me.id) {
+      councilCancel(b, me);
+      ctx.go(q(`/laundry/machine/${b.machine}`, { d: b.date, ok: 1 }));
+      return;
+    }
+    const { freed } = EH.actions.cancelBooking(b.id, me.id);
+    ctx.go(freed ? "/laundry?cancelled=1&freed=1" : "/laundry?cancelled=1");
   });
   App.act("laundry-release", (el, ctx) => {
     const b = S.bookings.find((x) => x.id === Number(el.dataset.id));
     if (!b || b.person !== ctx.me.id || !running(b)) return;
-    if (EH.actions.releaseBooking) EH.actions.releaseBooking(b.id, ctx.me.id);
-    else {
-      // lib/bookings.server.ts releaseBooking: the end moves to the next 5-minute mark
-      const end = Math.min(ceil5(now()), b.e);
-      if (end <= b.s) EH.actions.cancelBooking(b.id, ctx.me.id);
-      else { b.e = end; redrawAll(); }
-    }
-    ctx.go("/laundry?released=1");
+    // lib/bookings.server.ts releaseBooking: the end moves to the next 5-minute mark
+    const { freed } = EH.actions.releaseBooking(b.id, ctx.me.id);
+    ctx.go(freed ? "/laundry?released=1&freed=1" : "/laundry?released=1");
   });
   App.act("laundry-remind", (el) => {
     const id = Number(el.dataset.id);
-    if (reminders.has(id)) reminders.delete(id); else reminders.add(id);
+    if (reminders.has(id)) reminders.delete(id);
+    else reminders.add(id);
     el.setAttribute("aria-checked", String(reminders.has(id)));
   });
   App.act("laundry-ics", (el) => {
     const b = S.bookings.find((x) => x.id === Number(el.dataset.id));
     if (!b) return;
     const m = machine(b.machine);
-    const stamp = (date, min) => `${date.replace(/-/g, "")}T${String(Math.floor(min / 60) % 24).padStart(2, "0")}${String(min % 60).padStart(2, "0")}00`;
-    const endDate = b.e >= CLOSE ? EH.DAYS[dayIdx(b.date) + 1]?.date || b.date : b.date;
-    const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ehurtozhytok//UK", "BEGIN:VEVENT", `UID:booking-${b.id}@ehurtozhytok`, `DTSTART;TZID=Europe/Kyiv:${stamp(b.date, b.s)}`, `DTEND;TZID=Europe/Kyiv:${stamp(endDate, b.e)}`, `SUMMARY:Прання: ${m.name}`, "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+    const stamp = (date, min) =>
+      `${date.replace(/-/g, "")}T${String(Math.floor(min / 60) % 24).padStart(2, "0")}${String(min % 60).padStart(2, "0")}00`;
+    const endDate =
+      b.e >= CLOSE ? EH.DAYS[dayIdx(b.date) + 1]?.date || b.date : b.date;
+    const ics = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//ehurtozhytok//UK",
+      "BEGIN:VEVENT",
+      `UID:booking-${b.id}@ehurtozhytok`,
+      `DTSTART;TZID=Europe/Kyiv:${stamp(b.date, b.s)}`,
+      `DTEND;TZID=Europe/Kyiv:${stamp(endDate, b.e)}`,
+      `SUMMARY:Прання: ${m.name}`,
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ].join("\r\n");
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
     a.download = `zapys-${b.id}.ics`;
@@ -960,18 +1315,24 @@
   });
 
   // ================= /laundry/bookings =================
-  App.route("/laundry/bookings", (ctx) => {
-    const list = upcoming(ctx.me.id);
-    const rows = list.length
-      ? `<div class="glass" style="padding:4px 0">${list.map((b) => {
-          const run = running(b);
-          return `<a class="list-row" href="#/laundry/booking/${b.id}?from=list"><span class="who-av" style="${run ? "background:var(--mine);color:#fff" : "background:var(--mine-soft);color:var(--mine)"}">${icon("clock", true)}</span><span style="flex:1"><b>${esc(dayName(b.date))} · ${fmt(b.s)}–${fmt(b.e)}</b><span class="sub">${esc(machine(b.machine).name)} · ${run ? "зараз ваш час" : esc(durationLabel(b.e - b.s))}</span></span>${icon("chev", true)}</a>`;
-        }).join("")}</div>`
-      : `<div class="glass empty"><b>Записів немає</b>Тут будуть ваші записи, поки вони не закінчаться.</div>`;
-    return `${App.topbar({ back: "/laundry", title: "Мої записи" })}
+  App.route(
+    "/laundry/bookings",
+    (ctx) => {
+      const list = upcoming(ctx.me.id);
+      const rows = list.length
+        ? `<div class="glass" style="padding:4px 0">${list
+            .map((b) => {
+              const run = running(b);
+              return `<a class="list-row" href="#/laundry/booking/${b.id}?from=list"><span class="who-av" style="${run ? "background:var(--mine);color:#fff" : "background:var(--mine-soft);color:var(--mine)"}">${icon("clock", true)}</span><span style="flex:1"><b>${esc(dayName(b.date))} · ${fmt(b.s)}–${fmt(b.e)}</b><span class="sub">${esc(machine(b.machine).name)} · ${run ? "зараз ваш час" : esc(durationLabel(b.e - b.s))}</span></span>${icon("chev", true)}</a>`;
+            })
+            .join("")}</div>`
+        : `<div class="glass empty"><b>Записів немає</b>Тут будуть ваші записи, поки вони не закінчаться.</div>`;
+      return `${App.topbar({ back: "/laundry", title: "Мої записи" })}
       ${rows}
       <p class="muted" style="margin:14px 4px;font-size:13.5px">Одночасно можна мати до ${MAX_ACTIVE} записів.</p>
       <a class="btn btn-primary block" href="#/laundry/book">${icon("plus")}Записатися</a>
       ${credit}`;
-  }, { tab: "laundry", title: "Мої записи" });
+    },
+    { tab: "laundry", title: "Мої записи" },
+  );
 })();

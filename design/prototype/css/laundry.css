@@ -2,11 +2,22 @@
 
 /* «Вільно» pills: the teal text reaches 4.5:1 on its soft teal ground */
 .state.free,
-.scrubber.is-free .scrub-status { color: #075a50; }
+.scrubber.is-free .scrub-status {
+  color: #075a50;
+}
 
 /* booking detail: the second tap before cancelling */
-.lp-ask { margin: 14px 4px 0; font-size: 14.5px; font-weight: 600; color: var(--ink-2); }
-.lp-ask + .actions { margin-top: 8px; }
+.lp-ask {
+  margin: 14px 4px 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.lp-ask + .actions {
+  margin-top: 8px;
+}
 
 /* a council member's cancel inside a busy timeline block */
-.timeline .tl-busy .pill-btn { align-self: center; }
+.timeline .tl-busy .pill-btn {
+  align-self: center;
+}

@@ -293,7 +293,7 @@ Tactile capsules that compress slightly when pressed.
 
 ### Statuses and Progress (v2 mockup)
 
-- **Status pill:** one capsule shape, five states. «Нове / Надіслано» on ink 7%; «Розглядаємо» as an amber ring with a hollow dot; «В роботі» amber on amber 16%; «Готово / Вирішено» slate with a white check; «Відхилено» a neutral outline, never red.
+- **Status pill:** one capsule shape, five states. «Нове / Надіслано» on ink 7%; «На розгляді» as an amber ring with a hollow dot; «В роботі» amber on amber 16%; «Готово / Вирішено» slate with a white check; «Відхилено» a neutral outline, never red.
 - **Progress track:** steps joined by a 2px line; done steps slate with a check, the current step an amber dot whose ring breathes (stops under reduced motion), later steps hollow. The same track sits on a public task and inside the resident's own complaint card.
 - **Complaint card:** the resident's own complaint uses the ticket's ultramarine document card (porthole included), because it is theirs; the track inside it turns white and amber.
 - **Anonymous plate:** the one graphite tile in the product, used only where the resident is absent (anonymous complaint form).

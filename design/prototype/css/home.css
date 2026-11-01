@@ -1,0 +1,188 @@
+/* Головна. Everything here is scoped with a home- prefix. */
+
+/* the important announcement: a glass card, its time in Display numerals */
+.home-ann {
+  display: block;
+  padding: 16px 16px 14px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.3s var(--ease);
+}
+.home-ann:active {
+  transform: scale(0.985);
+}
+.home-ann-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.home-ann-flag .ico {
+  width: 16px;
+  height: 16px;
+}
+.home-ann-title {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+.home-ann-when {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.home-ann-when .t {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-feature-settings: "tnum";
+}
+.home-ann-when .d b {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.home-ann-when .d span {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* no booking yet: the nearest free time, compact */
+.home-book {
+  margin-top: 0;
+}
+.home-book .nearest-time {
+  font-size: 36px;
+}
+.home-book-go {
+  width: 100%;
+  margin-top: 16px;
+  text-decoration: none;
+}
+
+/* own complaints with news */
+.home-c-msg {
+  margin: 8px 0 0;
+  font-size: 14.5px;
+  line-height: 1.42;
+  color: var(--ink-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.home-c-msg b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.card-top h4.unread-dot {
+  flex: 1;
+  min-width: 0;
+}
+.home-c-msg + .meta {
+  margin-top: 8px;
+}
+.anon-tag .ico {
+  width: 15px;
+  height: 15px;
+}
+
+/* rows inside one glass tile */
+.home-list {
+  overflow: hidden;
+}
+.home-row {
+  transition: background 0.25s var(--ease);
+}
+.home-row:active {
+  background: rgb(16 18 23 / 0.04);
+}
+.home-row .grow b {
+  line-height: 1.3;
+}
+.home-row .sub.overdue {
+  color: var(--work);
+  font-weight: 600;
+  margin-top: 2px;
+}
+.home-row .count-pill {
+  flex: none;
+}
+.home-for {
+  display: inline-flex;
+  margin-top: 4px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgb(16 18 23 / 0.06);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+/* a calendar leaf: weekday over the date */
+.home-leaf {
+  width: 44px;
+  flex: none;
+  border-radius: 12px;
+  overflow: hidden;
+  text-align: center;
+  background: #fff;
+  box-shadow: var(--shadow-gloss);
+}
+.home-leaf small {
+  display: block;
+  padding: 2px 0 1px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--ink-2);
+}
+.home-leaf b {
+  display: block;
+  padding: 2px 0 4px;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  font-feature-settings: "tnum";
+}
+
+/* the quiet way to write a complaint */
+.home-quiet-wrap {
+  margin-top: 26px;
+}
+.home-quiet .hub-ico {
+  background: rgb(16 18 23 / 0.05);
+}
+.home-quiet .grow b {
+  font-weight: 600;
+}
+.home-quiet .grow .sub {
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-ann,
+  .home-row {
+    transition: none;
+  }
+}
+
+/* an important announcement only the squad sees */
+.home-ann-for {
+  margin: -4px 0 12px;
+}
