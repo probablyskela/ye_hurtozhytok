@@ -1,3 +1,4 @@
+import { useContext } from "react";
 import {
   isRouteErrorResponse,
   Link,
@@ -10,6 +11,7 @@ import {
 
 import type { Route } from "./+types/root";
 import { Field, IconSprite } from "./components/ui";
+import { NonceContext } from "./lib/csp";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -27,6 +29,8 @@ export const meta: Route.MetaFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  // Only the server knows it; browsers hide it from the page afterwards.
+  const nonce = useContext(NonceContext);
   return (
     <html lang="uk" suppressHydrationWarning>
       <head>
@@ -45,6 +49,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <ScrollRestoration />
         <Scripts />
         <script
+          nonce={nonce}
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `setTimeout(()=>document.documentElement.classList.add("booted"),1500);if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));`,
           }}
@@ -64,6 +70,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   if (isRouteErrorResponse(error)) {
     if (error.status === 404) title = "Такої сторінки немає";
     if (error.status === 403) title = "Немає доступу";
+    if (error.status === 429) title = "Забагато дій";
     if (typeof error.data === "string" && error.data) details = error.data;
   } else if (import.meta.env.DEV && error instanceof Error) {
     details = error.message;

@@ -38,9 +38,9 @@ describe("parseName", () => {
     expect(parseName({ name: "Олена" }).lastName).toBe("");
   });
   it("falls back to the email address", () => {
-    expect(parseName({ email: "anton.mykhalchuk.shi.2024@lpnu.ua" })).toEqual({
-      firstName: "Anton",
-      lastName: "Mykhalchuk",
+    expect(parseName({ email: "taras.melnyk.shi.2024@lpnu.ua" })).toEqual({
+      firstName: "Taras",
+      lastName: "Melnyk",
       patronymic: null,
     });
   });

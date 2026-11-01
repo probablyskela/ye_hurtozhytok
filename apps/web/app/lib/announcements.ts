@@ -14,6 +14,8 @@ export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 export const FRESH_DAYS = 14;
 /** Proposals one resident may have waiting for a decision at once. */
 export const MAX_PENDING = 3;
+/** Proposals one resident may send in 24 hours, withdrawn ones included. */
+export const MAX_PROPOSALS_PER_DAY = 5;
 
 export type AnnouncementValues = {
   title: string;

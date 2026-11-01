@@ -78,6 +78,15 @@ export default function Profile({
           const form = e.currentTarget;
           if (form.dataset.done) return;
           e.preventDefault();
+          // Cached pages go first and on their own: a failed push request
+          // must not leave other residents' details on a shared phone.
+          try {
+            const reg = await navigator.serviceWorker?.getRegistration();
+            reg?.active?.postMessage("logout");
+            for (const key of await caches.keys()) await caches.delete(key);
+          } catch {
+            // The server's Clear-Site-Data header tries again.
+          }
           try {
             const reg = await navigator.serviceWorker?.getRegistration();
             const sub = await reg?.pushManager.getSubscription();
@@ -94,10 +103,8 @@ export default function Profile({
               });
               await sub.unsubscribe();
             }
-            reg?.active?.postMessage("logout");
-            for (const key of await caches.keys()) await caches.delete(key);
           } catch {
-            // Logging out must never fail because of the cache or push.
+            // Logging out must never fail because of push.
           }
           form.dataset.done = "1";
           form.requestSubmit();

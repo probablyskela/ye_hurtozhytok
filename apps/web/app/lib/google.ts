@@ -51,7 +51,7 @@ export function isUniversityEmail(email: string): boolean {
   return /^[a-z0-9._%+-]+@lpnu\.ua$/i.test(email.trim());
 }
 
-/** "anton.mykhalchuk.shi.2024@lpnu.ua" → "Anton Mykhalchuk" when the token has no name. */
+/** "taras.melnyk.shi.2024@lpnu.ua" → "Taras Melnyk" when the token has no name. */
 export function nameFromClaims(claims: GoogleClaims): PersonName {
   return parseName({
     name: claims.name,

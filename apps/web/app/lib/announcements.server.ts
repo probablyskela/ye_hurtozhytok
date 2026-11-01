@@ -1,8 +1,9 @@
-import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
 
 import {
   MAX_IMAGES,
   MAX_PENDING,
+  MAX_PROPOSALS_PER_DAY,
   MAX_IMAGE_BYTES,
   REASON_MAX,
   parseAnnouncementForm,
@@ -31,6 +32,8 @@ import { drainOutbox, enqueueBroadcast, notify } from "./push.server";
 import { kyivNow } from "./time";
 
 type Ctx = { waitUntil(promise: Promise<unknown>): void };
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const IMAGE_EXT: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -215,6 +218,10 @@ async function newImages(
       (f): f is File => typeof f === "object" && f !== null && f.size > 0,
     );
   const pictures: Picture[] = [];
+  // Counted before any file is read, so a request with dozens of pictures
+  // never fills the Worker's memory.
+  if (files.length > MAX_IMAGES)
+    return { pictures, error: `До ${MAX_IMAGES} картинок.` };
   for (const f of files) {
     if (f.size > MAX_IMAGE_BYTES)
       return {
@@ -282,16 +289,27 @@ function broadcastImportant(
 ) {
   const when = whenLabel(a.date, a.startMin, kyivNow().date);
   ctx.waitUntil(
-    enqueueBroadcast(
-      env,
-      {
-        title: "Важливе оголошення",
-        body: when ? `${a.title} — ${when}` : a.title,
-        url: `/announcements/${a.id}`,
-      },
-      actorId,
-    )
-      .then(() => drainOutbox(env))
+    // Only the first time: unticking and ticking «важливе» again, or two
+    // saves at once, must not send everyone a second push.
+    getDb(env)
+      .update(announcements)
+      .set({ broadcastAt: Date.now() })
+      .where(and(eq(announcements.id, a.id), isNull(announcements.broadcastAt)))
+      .returning({ id: announcements.id })
+      .get()
+      .then((claimed) =>
+        claimed
+          ? enqueueBroadcast(
+              env,
+              {
+                title: "Важливе оголошення",
+                body: when ? `${a.title} — ${when}` : a.title,
+                url: `/announcements/${a.id}`,
+              },
+              actorId,
+            ).then(() => drainOutbox(env))
+          : undefined,
+      )
       .catch((e) => console.error("broadcast failed", a.id, e)),
   );
 }
@@ -348,6 +366,24 @@ export async function createAnnouncement(
         ok: false,
         errors: {
           title: `Уже ${MAX_PENDING} ваші пропозиції чекають рішення. Нову можна надіслати, коли їх розглянуть.`,
+        },
+      };
+    // Withdrawn ones count too: each proposal sends the council a push.
+    const recent = await db
+      .select({ n: sql<number>`count(*)` })
+      .from(announcements)
+      .where(
+        and(
+          eq(announcements.authorId, actor.id),
+          gt(announcements.createdAt, now - DAY_MS),
+        ),
+      )
+      .get();
+    if ((recent?.n ?? 0) >= MAX_PROPOSALS_PER_DAY)
+      return {
+        ok: false,
+        errors: {
+          title: `За добу можна надіслати до ${MAX_PROPOSALS_PER_DAY} пропозицій. Спробуйте завтра.`,
         },
       };
   }

@@ -41,7 +41,7 @@ export function parseName(input: {
     };
   if (parts.length === 1)
     return { firstName: parts[0], lastName: "", patronymic: null };
-  // Last resort: «anton.mykhalchuk.shi.2024@lpnu.ua».
+  // Last resort: «taras.melnyk.shi.2024@lpnu.ua».
   const [first = "", last = ""] = (input.email ?? "").split("@")[0].split(".");
   return {
     firstName: cap(first) || "Мешканець",

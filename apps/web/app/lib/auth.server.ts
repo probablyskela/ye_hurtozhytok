@@ -16,6 +16,7 @@ import {
   type GoogleClaims,
 } from "./google";
 import { loginUrl, pagePath, safeNext } from "./next-path";
+import { limitActions } from "./rate-limit.server";
 import { rolesFor } from "./roles.server";
 
 type SessionData = { residentId: number; version: number };
@@ -97,10 +98,15 @@ export async function getCurrentResident(
   return { ...resident, roles: await rolesFor(env, resident.email) };
 }
 
-/** Signed in; blocked people still see their profile but cannot book. */
+/**
+ * Signed in; blocked people still see their profile but cannot book. Every
+ * action goes through here, so this is also where changes are rate limited.
+ */
 export async function requireResident(request: Request, env: Env): Promise<Me> {
   const resident = await getCurrentResident(request, env);
   if (!resident) throw redirect(loginUrl(safeNext(pagePath(request))));
+  if (request.method !== "GET" && request.method !== "HEAD")
+    await limitActions(env, resident.id);
   return resident;
 }
 
@@ -304,7 +310,8 @@ export async function logout(request: Request, env: Env) {
     headers: {
       "Set-Cookie": await storage.destroySession(session),
       // Shared phones: drop cached pages of the person who just left.
-      "Clear-Site-Data": '"cache"',
+      // "storage" is what clears the service worker's Cache Storage.
+      "Clear-Site-Data": '"cache", "storage"',
     },
   });
 }

@@ -59,9 +59,9 @@ describe("helpers", () => {
         name: undefined,
         given_name: undefined,
         family_name: undefined,
-        email: "anton.mykhalchuk.shi.2024@lpnu.ua",
+        email: "taras.melnyk.shi.2024@lpnu.ua",
       }).lastName,
-    ).toBe("Mykhalchuk");
+    ).toBe("Melnyk");
   });
   it("asks Google for the lpnu.ua domain with PKCE", () => {
     const url = new URL(

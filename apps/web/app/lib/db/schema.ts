@@ -153,6 +153,8 @@ export const announcements = sqliteTable(
     decidedBy: integer("decided_by").references(() => residents.id),
     decidedAt: integer("decided_at"),
     publishedAt: integer("published_at"),
+    // When everyone got the push for an important one; it is sent only once.
+    broadcastAt: integer("broadcast_at"),
     createdAt: integer("created_at").notNull(),
     updatedAt: integer("updated_at").notNull(),
     deletedAt: integer("deleted_at"),
@@ -160,6 +162,7 @@ export const announcements = sqliteTable(
   (t) => [
     index("announcements_status_date_idx").on(t.status, t.date),
     index("announcements_status_published_idx").on(t.status, t.publishedAt),
+    index("announcements_author_idx").on(t.authorId, t.createdAt),
   ],
 );
 
@@ -215,7 +218,11 @@ export const activityLog = sqliteTable(
     details: text("details"),
     createdAt: integer("created_at").notNull(),
   },
-  (t) => [index("activity_created_idx").on(t.createdAt)],
+  (t) => [
+    index("activity_created_idx").on(t.createdAt),
+    // The daily limit on actions counts one person's recent entries.
+    index("activity_actor_idx").on(t.actorId, t.createdAt),
+  ],
 );
 
 export type Resident = typeof residents.$inferSelect;
