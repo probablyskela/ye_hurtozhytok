@@ -122,7 +122,6 @@ export default function Laundry({ loaderData }: Route.ComponentProps) {
         <section className="area-ticket">
           {next ? (
             <Ticket
-              vtName={`ticket-${next.id}`}
               to={`/bookings/${next.id}`}
               heading={next.heading}
               startMin={next.startMin}

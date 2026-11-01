@@ -2918,35 +2918,46 @@ input[type="search"]::-webkit-search-decoration {
 /* Page changes slide sideways like a pager: between menu sections in menu
    order, deeper into a section to the left, «Назад» to the right (the
    direction comes from lib/nav-direction.ts as html[data-nav]). Only the
-   page moves: the background field and the tab bar stay put, and the
-   section pill glides to its new tab. No blur: blurring a whole-screen
-   snapshot flickers on phones. */
+   page content (main) moves, as its own layer; everything else, the
+   background field included, stays in the root and does not animate, so
+   the gradient never disappears. The tab bar stays put and the section pill
+   glides to its new tab. No blur: blurring a snapshot flickers on phones. */
 .tabbar {
   view-transition-name: tabbar;
 }
-.field {
-  view-transition-name: field;
+main.page {
+  view-transition-name: page;
 }
 ::view-transition-old(root) {
-  animation: vt-out 0.16s ease-out both;
+  display: none;
 }
 ::view-transition-new(root) {
+  animation: none;
+}
+/* The content swaps in place: no resizing or vertical travel of the layer. */
+::view-transition-group(page) {
+  animation: none;
+}
+::view-transition-old(page) {
+  animation: vt-out 0.16s ease-out both;
+}
+::view-transition-new(page) {
   animation: vt-in 0.3s var(--ease-out) both;
 }
-html[data-nav="right"]::view-transition-old(root),
-html[data-nav="forward"]::view-transition-old(root) {
+html[data-nav="right"]::view-transition-old(page),
+html[data-nav="forward"]::view-transition-old(page) {
   animation: vt-to-left 0.34s var(--ease) both;
 }
-html[data-nav="right"]::view-transition-new(root),
-html[data-nav="forward"]::view-transition-new(root) {
+html[data-nav="right"]::view-transition-new(page),
+html[data-nav="forward"]::view-transition-new(page) {
   animation: vt-from-right 0.34s var(--ease) both;
 }
-html[data-nav="left"]::view-transition-old(root),
-html[data-nav="back"]::view-transition-old(root) {
+html[data-nav="left"]::view-transition-old(page),
+html[data-nav="back"]::view-transition-old(page) {
   animation: vt-to-right 0.34s var(--ease) both;
 }
-html[data-nav="left"]::view-transition-new(root),
-html[data-nav="back"]::view-transition-new(root) {
+html[data-nav="left"]::view-transition-new(page),
+html[data-nav="back"]::view-transition-new(page) {
   animation: vt-from-left 0.34s var(--ease) both;
 }
 ::view-transition-group(tab-pill) {
@@ -2992,7 +3003,7 @@ html[data-nav="back"]::view-transition-new(root) {
   animation-duration: 0.38s;
   animation-timing-function: var(--ease);
 }
-/* The ticket morphs between home and its detail without a double fade. */
+/* A layer on only one side (the tab bar leaving the booking sheet) fades quickly. */
 ::view-transition-old(*):only-child,
 ::view-transition-new(*):only-child {
   animation-duration: 0.2s;

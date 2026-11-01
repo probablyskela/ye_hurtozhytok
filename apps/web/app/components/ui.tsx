@@ -337,10 +337,8 @@ export function Ticket({
   footRight,
   status,
   big,
-  vtName,
   celebrate,
 }: {
-  vtName?: string;
   celebrate?: boolean;
   to?: string;
   heading: string;
@@ -391,20 +389,17 @@ export function Ticket({
     </>
   );
   const cls = `ticket${big ? " big" : " compact"}${celebrate ? " celebrate" : ""}`;
-  const vt = vtName ? { viewTransitionName: vtName } : undefined;
   return to ? (
     <Link
       className={cls}
       to={to}
       viewTransition
-      style={{ display: "block", textDecoration: "none", ...vt }}
+      style={{ display: "block", textDecoration: "none" }}
     >
       {body}
     </Link>
   ) : (
-    <div className={cls} style={vt}>
-      {body}
-    </div>
+    <div className={cls}>{body}</div>
   );
 }
 

@@ -16,7 +16,7 @@ import { notifyCancelledByCouncil } from "~/lib/scheduled.server";
 import { dayHeading, kyivMinuteToUtc, kyivNow } from "~/lib/time";
 import type { Route } from "./+types/booking";
 
-export const handle = { tab: "me" };
+export const handle = { tab: "laundry" };
 export const meta: Route.MetaFunction = () => [
   { title: "Мій запис · єГуртожиток" },
 ];
@@ -70,7 +70,7 @@ export async function action({ request, params, context }: Route.ActionArgs) {
       context.cloudflare.ctx.waitUntil(notifyCancelledByCouncil(env, id));
       throw redirect(`/machines/${before.machineSlug}?d=${before.date}`);
     }
-    if (ok) throw redirect("/me");
+    if (ok) throw redirect("/laundry");
     return data(
       {
         error:
@@ -106,7 +106,7 @@ export default function BookingPage({
           : "Підтверджено";
   return (
     <>
-      <TopBar back="/me" title={b.mine ? "Мій запис" : "Запис"} />
+      <TopBar back="/laundry" title={b.mine ? "Мій запис" : "Запис"} />
       {isNew && (
         <p className="ok-note" role="status">
           Записано. Нагадаємо за 15 хвилин, якщо сповіщення увімкнені.
@@ -120,7 +120,6 @@ export default function BookingPage({
 
       <Ticket
         big
-        vtName={`ticket-${b.id}`}
         celebrate={isNew}
         status={status}
         heading={b.heading}
