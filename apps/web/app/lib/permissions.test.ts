@@ -69,6 +69,18 @@ describe("permissions", () => {
     expect(canBlock(manager, { id: 8, roles: ["site_manager"] })).toBe(false);
     expect(canBlock(council, manager)).toBe(false);
   });
+  it("takes every role's rights away while someone is blocked", () => {
+    const blockedCouncil = { ...council, blocked: true };
+    const blockedSquad = { ...squad, blocked: true };
+    const blockedManager = { ...manager, blocked: true };
+    expect(isCouncil(blockedCouncil)).toBe(false);
+    expect(canCancel(blockedCouncil, { residentId: 1 })).toBe(false);
+    expect(canCancel(blockedCouncil, { residentId: 3 })).toBe(true);
+    expect(isSquad(blockedSquad)).toBe(false);
+    expect(isCouncil(blockedManager)).toBe(false);
+    expect(canManageRoles(blockedManager)).toBe(false);
+    expect(canBlock(blockedManager, other)).toBe(false);
+  });
   it("leaves roles to the site manager", () => {
     expect(canManageRoles(manager)).toBe(true);
     expect(canManageRoles(head)).toBe(false);
@@ -114,6 +126,9 @@ describe("permissions", () => {
       expect(canPublishAnnouncements(manager)).toBe(true);
       expect(canPublishAnnouncements(squad)).toBe(false);
       expect(canPublishAnnouncements(resident)).toBe(false);
+      expect(canPublishAnnouncements({ ...council, blocked: true })).toBe(
+        false,
+      );
     });
     it("shows a proposal only to its author and the deciders", () => {
       expect(canSeeAnnouncement(resident, pending)).toBe(true);

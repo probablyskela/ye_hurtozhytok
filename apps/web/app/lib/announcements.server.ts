@@ -2,14 +2,15 @@ import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import {
   MAX_IMAGES,
+  MAX_PENDING,
   MAX_IMAGE_BYTES,
   REASON_MAX,
-  isImageType,
   parseAnnouncementForm,
   whenLabel,
   type AnnouncementErrors,
 } from "./announcements";
 import { activity, getDb } from "./db";
+import { detectImageType, stripMetadata, type ImageType } from "./images";
 import {
   announcementImages,
   announcements,
@@ -197,44 +198,63 @@ export async function getAnnouncement(env: Env, actor: Actor, id: number) {
   };
 }
 
-/** Pictures to add from the form: real files only, checked for type and size. */
-function newImages(form: FormData): { files: File[]; error?: string } {
+type Picture = { bytes: Uint8Array; type: ImageType };
+
+/**
+ * Pictures to add from the form. The format is taken from the file's bytes,
+ * not from what the browser says, and metadata (EXIF with GPS, XMP, text) is
+ * removed before anything is stored.
+ */
+async function newImages(
+  form: FormData,
+): Promise<{ pictures: Picture[]; error?: string }> {
   const files = form
     .getAll("images")
     .filter(
       (f): f is File => typeof f === "object" && f !== null && f.size > 0,
     );
+  const pictures: Picture[] = [];
   for (const f of files) {
-    if (!isImageType(f.type))
-      return { files, error: "Картинки — у форматі JPEG, PNG або WebP." };
     if (f.size > MAX_IMAGE_BYTES)
       return {
-        files,
+        pictures,
         error: `Картинка «${f.name}» завелика: до ${MAX_IMAGE_BYTES / 1024 / 1024} МБ.`,
       };
+    const raw = new Uint8Array(await f.arrayBuffer());
+    const type = detectImageType(raw);
+    if (!type)
+      return { pictures, error: "Картинки — у форматі JPEG, PNG або WebP." };
+    try {
+      pictures.push({ bytes: stripMetadata(raw, type), type });
+    } catch {
+      return {
+        pictures,
+        error: `Картинку «${f.name}» не вдалося прочитати. Спробуйте інше фото.`,
+      };
+    }
   }
-  return { files };
+  return { pictures };
 }
 
 async function storeImages(
   env: Env,
   announcementId: number,
-  files: File[],
+  pictures: Picture[],
   firstPosition: number,
 ) {
   const db = getDb(env);
   let position = firstPosition;
-  for (const f of files) {
-    const key = `a/${announcementId}/${crypto.randomUUID()}.${IMAGE_EXT[f.type]}`;
-    await env.MEDIA.put(key, f.stream(), {
-      httpMetadata: { contentType: f.type },
+  for (const p of pictures) {
+    const key = `a/${announcementId}/${crypto.randomUUID()}.${IMAGE_EXT[p.type]}`;
+    await env.MEDIA.put(key, p.bytes, {
+      httpMetadata: { contentType: p.type },
     });
     await db.insert(announcementImages).values({
       announcementId,
       key,
       position: position++,
-      contentType: f.type,
-      size: f.size,
+      contentType: p.type,
+      size: p.bytes.length,
       createdAt: Date.now(),
     });
   }
@@ -293,15 +313,15 @@ export async function createAnnouncement(
     return { ok: false, errors: { title: "Ваш акаунт заблоковано." } };
   const today = kyivNow().date;
   const parsed = parseAnnouncementForm(form, today);
-  const images = newImages(form);
-  if (!parsed.ok || images.error || images.files.length > MAX_IMAGES)
+  const images = await newImages(form);
+  if (!parsed.ok || images.error || images.pictures.length > MAX_IMAGES)
     return {
       ok: false,
       errors: {
         ...(parsed.ok ? {} : parsed.errors),
         ...(images.error
           ? { images: images.error }
-          : images.files.length > MAX_IMAGES
+          : images.pictures.length > MAX_IMAGES
             ? { images: `До ${MAX_IMAGES} картинок.` }
             : {}),
       },
@@ -310,6 +330,26 @@ export async function createAnnouncement(
   const publish = canPublishAnnouncements(actor);
   const now = Date.now();
   const db = getDb(env);
+  if (!publish) {
+    const waiting = await db
+      .select({ n: sql<number>`count(*)` })
+      .from(announcements)
+      .where(
+        and(
+          eq(announcements.authorId, actor.id),
+          eq(announcements.status, "pending"),
+          isNull(announcements.deletedAt),
+        ),
+      )
+      .get();
+    if ((waiting?.n ?? 0) >= MAX_PENDING)
+      return {
+        ok: false,
+        errors: {
+          title: `Уже ${MAX_PENDING} ваші пропозиції чекають рішення. Нову можна надіслати, коли їх розглянуть.`,
+        },
+      };
+  }
   const a = await db
     .insert(announcements)
     .values({
@@ -325,7 +365,7 @@ export async function createAnnouncement(
     })
     .returning()
     .get();
-  await storeImages(env, a.id, images.files, 0);
+  await storeImages(env, a.id, images.pictures, 0);
   await activity(db, {
     actorId: actor.id,
     action: publish ? "announcement.published" : "announcement.proposed",
@@ -387,8 +427,8 @@ export async function updateAnnouncement(
     .orderBy(asc(announcementImages.position))
     .all();
   const kept = existing.filter((img) => !removeIds.includes(img.id));
-  const images = newImages(form);
-  const total = kept.length + images.files.length;
+  const images = await newImages(form);
+  const total = kept.length + images.pictures.length;
   if (!parsed.ok || images.error || total > MAX_IMAGES)
     return {
       ok: false,
@@ -428,7 +468,7 @@ export async function updateAnnouncement(
         .update(announcementImages)
         .set({ position: i })
         .where(eq(announcementImages.id, img.id));
-  await storeImages(env, id, images.files, kept.length);
+  await storeImages(env, id, images.pictures, kept.length);
 
   await activity(db, {
     actorId: actor.id,
@@ -438,7 +478,7 @@ export async function updateAnnouncement(
     details: {
       title: updated.title,
       important,
-      imagesAdded: images.files.length,
+      imagesAdded: images.pictures.length,
       imagesRemoved: gone.length,
     },
   });

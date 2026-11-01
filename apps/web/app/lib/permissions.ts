@@ -2,13 +2,19 @@ import type { Role } from "./db/schema";
 
 export type Actor = { id: number; roles: readonly Role[]; blocked?: boolean };
 
-/** The site manager can do everything every role can, plus manage roles. */
-export function isSiteManager(actor: { roles: readonly Role[] }): boolean {
-  return actor.roles.includes("site_manager");
+type WithRoles = { roles: readonly Role[]; blocked?: boolean };
+
+/**
+ * The site manager can do everything every role can, plus manage roles.
+ * A blocked person holds no role's rights until unblocked.
+ */
+export function isSiteManager(actor: WithRoles): boolean {
+  return !actor.blocked && actor.roles.includes("site_manager");
 }
 
 /** Has the student council's rights: members, the head, the site manager. */
-export function isCouncil(actor: { roles: readonly Role[] }): boolean {
+export function isCouncil(actor: WithRoles): boolean {
+  if (actor.blocked) return false;
   return (
     actor.roles.includes("council") ||
     actor.roles.includes("council_head") ||
@@ -17,7 +23,8 @@ export function isCouncil(actor: { roles: readonly Role[] }): boolean {
 }
 
 /** Has the squad's rights: members, the head, the site manager. */
-export function isSquad(actor: { roles: readonly Role[] }): boolean {
+export function isSquad(actor: WithRoles): boolean {
+  if (actor.blocked) return false;
   return (
     actor.roles.includes("squad") ||
     actor.roles.includes("squad_head") ||

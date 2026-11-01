@@ -12,6 +12,8 @@ export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 /** Undated news stays «Нове» on the home page this long, then goes to history. */
 export const FRESH_DAYS = 14;
+/** Proposals one resident may have waiting for a decision at once. */
+export const MAX_PENDING = 3;
 
 export type AnnouncementValues = {
   title: string;
