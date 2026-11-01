@@ -75,3 +75,37 @@ export function canRevokeRole(
     grant.email.toLowerCase() === actor.email.toLowerCase()
   );
 }
+
+type AnnouncementRef = {
+  authorId: number;
+  status: "pending" | "published" | "rejected";
+  audience: "all" | "squad";
+  deletedAt: number | null;
+};
+
+/** Any resident who is not blocked may propose an announcement. */
+export function canProposeAnnouncement(actor: Actor): boolean {
+  return !actor.blocked;
+}
+
+/** The council and the site manager publish without review and decide on proposals. */
+export function canPublishAnnouncements(actor: Actor): boolean {
+  return !actor.blocked && isCouncil(actor);
+}
+
+/**
+ * Published ones are for everyone (squad-only ones for the squad); a proposal
+ * is seen only by its author and by those who decide on it.
+ */
+export function canSeeAnnouncement(actor: Actor, a: AnnouncementRef): boolean {
+  if (a.deletedAt !== null) return false;
+  if (a.status === "published") return a.audience === "all" || isSquad(actor);
+  return a.authorId === actor.id || canPublishAnnouncements(actor);
+}
+
+/** Deciders edit and remove any; the author only their own proposal still under review. */
+export function canEditAnnouncement(actor: Actor, a: AnnouncementRef): boolean {
+  if (a.deletedAt !== null) return false;
+  if (canPublishAnnouncements(actor)) return true;
+  return !actor.blocked && a.authorId === actor.id && a.status === "pending";
+}

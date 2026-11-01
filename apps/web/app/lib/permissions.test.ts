@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   canBlock,
+  canEditAnnouncement,
+  canProposeAnnouncement,
+  canPublishAnnouncements,
+  canSeeAnnouncement,
   canBook,
   canCancel,
   canManageRoles,
@@ -89,5 +93,48 @@ describe("permissions", () => {
         { email: "x@lpnu.ua", role: "council" },
       ),
     ).toBe(false);
+  });
+  describe("announcements", () => {
+    const pending = {
+      authorId: 1,
+      status: "pending" as const,
+      audience: "all" as const,
+      deletedAt: null,
+    };
+    const published = { ...pending, status: "published" as const };
+    it("lets anyone not blocked propose", () => {
+      expect(canProposeAnnouncement(resident)).toBe(true);
+      expect(canProposeAnnouncement({ ...resident, blocked: true })).toBe(
+        false,
+      );
+    });
+    it("lets the council and the site manager publish", () => {
+      expect(canPublishAnnouncements(council)).toBe(true);
+      expect(canPublishAnnouncements(head)).toBe(true);
+      expect(canPublishAnnouncements(manager)).toBe(true);
+      expect(canPublishAnnouncements(squad)).toBe(false);
+      expect(canPublishAnnouncements(resident)).toBe(false);
+    });
+    it("shows a proposal only to its author and the deciders", () => {
+      expect(canSeeAnnouncement(resident, pending)).toBe(true);
+      expect(canSeeAnnouncement(other, pending)).toBe(false);
+      expect(canSeeAnnouncement(council, pending)).toBe(true);
+      expect(canSeeAnnouncement(other, published)).toBe(true);
+      expect(canSeeAnnouncement(other, { ...published, deletedAt: 1 })).toBe(
+        false,
+      );
+    });
+    it("keeps squad announcements for the squad", () => {
+      const squadOnly = { ...published, audience: "squad" as const };
+      expect(canSeeAnnouncement(other, squadOnly)).toBe(false);
+      expect(canSeeAnnouncement(squad, squadOnly)).toBe(true);
+      expect(canSeeAnnouncement(manager, squadOnly)).toBe(true);
+    });
+    it("lets the author edit only while under review", () => {
+      expect(canEditAnnouncement(resident, pending)).toBe(true);
+      expect(canEditAnnouncement(resident, published)).toBe(false);
+      expect(canEditAnnouncement(other, pending)).toBe(false);
+      expect(canEditAnnouncement(council, published)).toBe(true);
+    });
   });
 });

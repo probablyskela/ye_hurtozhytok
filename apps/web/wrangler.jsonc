@@ -15,13 +15,22 @@
     "VAPID_PUBLIC_KEY": "BINn6_eWph5C_iIMcWD06U5O5b-P_92HXa7I5LlBYFfgSfl2yXQaAmKpUO7GDxzWWtikvNnMa_npyubrhRR1kyE",
     "VAPID_SUBJECT": "https://ehurtozhytok.pages.dev",
   },
-  // Every minute: sends reminders 15 minutes before a booking starts.
+  // Every minute: reminders 15 minutes before a booking starts, then the next
+  // batch of queued push messages (important announcements).
   "triggers": {
     "crons": ["* * * * *"],
   },
   // Public address is https://ehurtozhytok.pages.dev (apps/gateway forwards to this Worker).
   "workers_dev": false,
   "preview_urls": false,
+  // Pictures of announcements; served by the Worker with a permission check,
+  // never from a public bucket. Create it once: npx wrangler r2 bucket create ehurtozhytok-media
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "ehurtozhytok-media",
+    },
+  ],
   "d1_databases": [
     {
       "binding": "DB",

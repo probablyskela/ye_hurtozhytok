@@ -4,12 +4,21 @@ import { fmtMin, reminderDue } from "./booking";
 import { dueReminders } from "./bookings.server";
 import { getDb } from "./db";
 import { bookings, machines } from "./db/schema";
-import { notify, pushEnabled } from "./push.server";
+import { drainOutbox, notify, pushEnabled } from "./push.server";
 import { addDays, dateLong, kyivDateKey } from "./time";
 
-/** Runs every minute: reminds people 15 minutes before their booking starts. */
+/** Runs every minute: booking reminders, then the next batch of queued messages. */
 export async function runEveryMinute(env: Env, scheduledTime: number) {
   if (!pushEnabled(env)) return;
+  try {
+    await sendReminders(env, scheduledTime);
+  } finally {
+    await drainOutbox(env);
+  }
+}
+
+/** Reminds people 15 minutes before their booking starts. */
+async function sendReminders(env: Env, scheduledTime: number) {
   const today = kyivDateKey(scheduledTime);
   const rows = await dueReminders(env, [today, addDays(today, 1)]);
   const due = rows.filter((b) => reminderDue(b, scheduledTime));

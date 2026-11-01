@@ -18,14 +18,19 @@ export type ActivityAction =
   | "resident.blocked"
   | "resident.unblocked"
   | "role.granted"
-  | "role.revoked";
+  | "role.revoked"
+  | "announcement.proposed"
+  | "announcement.published"
+  | "announcement.rejected"
+  | "announcement.updated"
+  | "announcement.deleted";
 
 export function activity(
   db: Db,
   entry: {
     actorId: number;
     action: ActivityAction;
-    entity: "booking" | "resident" | "role_grant";
+    entity: "booking" | "resident" | "role_grant" | "announcement";
     entityId: number;
     details?: Record<string, unknown>;
   },

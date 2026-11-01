@@ -19,6 +19,15 @@ export type Role = (typeof ROLES)[number];
 
 export const MACHINE_STATUSES = ["working", "broken"] as const;
 export const BOOKING_STATUSES = ["active", "cancelled"] as const;
+// Anyone may propose; the council and the site manager publish or reject.
+export const ANNOUNCEMENT_STATUSES = [
+  "pending",
+  "published",
+  "rejected",
+] as const;
+export type AnnouncementStatus = (typeof ANNOUNCEMENT_STATUSES)[number];
+// "squad" is for the squad section that arrives with Оперета.
+export const AUDIENCES = ["all", "squad"] as const;
 
 // All *_at columns hold UTC milliseconds.
 
@@ -118,6 +127,81 @@ export const roleGrants = sqliteTable(
   (t) => [uniqueIndex("role_grants_email_role_idx").on(t.email, t.role)],
 );
 
+export const announcements = sqliteTable(
+  "announcements",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    authorId: integer("author_id")
+      .notNull()
+      .references(() => residents.id),
+    title: text("title").notNull(),
+    body: text("body"),
+    place: text("place"),
+    // Kyiv calendar date of the event, "YYYY-MM-DD"; null for news without a date.
+    date: text("date"),
+    // Minutes from Kyiv midnight; only together with a date.
+    startMin: integer("start_min"),
+    // Set only by whoever publishes; sends a push to everyone.
+    important: integer("important", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    audience: text("audience", { enum: AUDIENCES }).notNull().default("all"),
+    status: text("status", { enum: ANNOUNCEMENT_STATUSES })
+      .notNull()
+      .default("pending"),
+    rejectReason: text("reject_reason"),
+    decidedBy: integer("decided_by").references(() => residents.id),
+    decidedAt: integer("decided_at"),
+    publishedAt: integer("published_at"),
+    createdAt: integer("created_at").notNull(),
+    updatedAt: integer("updated_at").notNull(),
+    deletedAt: integer("deleted_at"),
+  },
+  (t) => [
+    index("announcements_status_date_idx").on(t.status, t.date),
+    index("announcements_status_published_idx").on(t.status, t.publishedAt),
+  ],
+);
+
+export const announcementImages = sqliteTable(
+  "announcement_images",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    announcementId: integer("announcement_id")
+      .notNull()
+      .references(() => announcements.id),
+    // Object key in the MEDIA R2 bucket.
+    key: text("key").notNull(),
+    // 0 is the cover shown in the feed.
+    position: integer("position").notNull(),
+    contentType: text("content_type").notNull(),
+    width: integer("width"),
+    height: integer("height"),
+    size: integer("size").notNull(),
+    createdAt: integer("created_at").notNull(),
+  },
+  (t) => [
+    index("announcement_images_idx").on(t.announcementId, t.position),
+    uniqueIndex("announcement_images_key_idx").on(t.key),
+  ],
+);
+
+// One row per device still to be notified; the minute cron sends them in
+// small batches so a broadcast never exceeds the Worker's subrequest limit.
+export const pushOutbox = sqliteTable(
+  "push_outbox",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    subscriptionId: integer("subscription_id").notNull(),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    url: text("url").notNull(),
+    createdAt: integer("created_at").notNull(),
+    claimedAt: integer("claimed_at"),
+  },
+  (t) => [index("push_outbox_claimed_idx").on(t.claimedAt, t.id)],
+);
+
 export const activityLog = sqliteTable(
   "activity_log",
   {
@@ -136,5 +220,7 @@ export const activityLog = sqliteTable(
 
 export type Resident = typeof residents.$inferSelect;
 export type RoleGrant = typeof roleGrants.$inferSelect;
+export type Announcement = typeof announcements.$inferSelect;
+export type AnnouncementImage = typeof announcementImages.$inferSelect;
 export type Machine = typeof machines.$inferSelect;
 export type Booking = typeof bookings.$inferSelect;
