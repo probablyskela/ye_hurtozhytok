@@ -38,7 +38,7 @@ The app is an independent student project by Антон Михальчук, a st
 
 - Ukrainian only, plain language, no English loanwords or slang («запис», not «бронь/слот»).
 - Phone first; installed-PWA use on iPhone and Android is the main case. Forms work without JavaScript; offline is read-only.
-- The author credit is one faint line at the end of the main pages and on the stickers.
+- The developer credit is one faint line at the end of the main pages: «Розробник: @serpanchyk · LinkedIn», linking to Instagram and LinkedIn. The printed stickers keep their original line.
 
 ## Brand Commitments
 

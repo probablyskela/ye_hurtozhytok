@@ -453,15 +453,25 @@ export function Port({ free }: { free: boolean }) {
 }
 
 /** Who made the app: one quiet line, never a banner. */
-export const AUTHOR_CREDIT =
-  "Зроблено Антоном Михальчуком — студентом катедри СШІ.";
+export const DEVELOPER = {
+  handle: "@serpanchyk",
+  instagram: "https://www.instagram.com/serpanchyk/",
+  linkedin: "https://www.linkedin.com/in/anton-mykhalchuk/",
+};
 
 export function Credit({ children }: { children?: ReactNode }) {
   return (
     <p className="credit">
       {children}
       {children && <br />}
-      {AUTHOR_CREDIT}
+      Розробник:{" "}
+      <a href={DEVELOPER.instagram} target="_blank" rel="noopener noreferrer">
+        {DEVELOPER.handle}
+      </a>
+      {" · "}
+      <a href={DEVELOPER.linkedin} target="_blank" rel="noopener noreferrer">
+        LinkedIn
+      </a>
     </p>
   );
 }

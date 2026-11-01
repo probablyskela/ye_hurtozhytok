@@ -287,7 +287,7 @@
         ${roleSections(EH, S, me)}
         ${events(EH, anns.filter((a) => !a.important && a.date).slice(0, 2))}
         <div class="home-quiet-wrap">${complainRow()}</div>
-        <p class="credit">Зроблено Антоном Михальчуком — студентом катедри СШІ.</p>`;
+        <p class="credit">Зроблено командою Софії Полупан — кандидатки на посаду голови студради.</p>`;
     },
     { tab: "home", title: "Головна" },
   );

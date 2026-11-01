@@ -129,7 +129,7 @@ components:
 
 A booking is a document you carry. Every screen is a calm instrument of white liquid glass floating over a soft, slowly drifting water-coloured field (mint, sky, lilac), and the resident's own booking is the one solid, saturated object on it: an ultramarine card with a porthole drawn into its corner. Everything else stays quiet so that "yours", "free" and "now" read in one glance from a hallway, one-handed.
 
-Density is phone-first and generous: 16px screen margins, 44px minimum targets, one idea per glass tile. Language is clarity and craft in the spirit of Ukrainian state-services apps, without borrowing any of their identity: no state symbols, no Дія name or marks, nothing that suggests a government or university service. The UI is light only, Ukrainian only, with plain words and no loanwords («сповіщення», not «пуші»; «ім’я користувача в Telegram», not «нік»; «запис», not «бронь»). The author credit is a single modest, honest line in faint small text, never a banner: «Зроблено Антоном Михальчуком — студентом катедри СШІ.» It closes the home, machine, my-bookings, profile and sign-in pages (the `Credit` component) and every printed sticker.
+Density is phone-first and generous: 16px screen margins, 44px minimum targets, one idea per glass tile. Language is clarity and craft in the spirit of Ukrainian state-services apps, without borrowing any of their identity: no state symbols, no Дія name or marks, nothing that suggests a government or university service. The UI is light only, Ukrainian only, with plain words and no loanwords («сповіщення», not «пуші»; «ім’я користувача в Telegram», not «нік»; «запис», not «бронь»). The developer credit is a single modest line in faint small text, never a banner: «Розробник: @serpanchyk · LinkedIn», the handle linking to Instagram and «LinkedIn» to the LinkedIn profile (ink-2 links with a soft underline). It closes the main pages and the sign-in page (the `Credit` component); the printed stickers keep their original line.
 
 The direction rejected the grey admin calendar grid and the paper-notebook costume; time is shown as capsule ribbons and soft blocks, not ruled cells.
 
@@ -325,7 +325,7 @@ Hours down the left in faint tabular labels with dashed 8% hairlines. Other peop
 - **Do** make every interactive target at least 44px, and primary actions 52px black capsules.
 - **Do** use hatching for the 5-minute buffer flanks.
 - **Do** carry the porthole motif in the ticket rings and machine state dots, and use the facade mark (the one ultramarine window is the only colour in it).
-- **Do** write plain Ukrainian with no loanwords, and keep the author credit to one modest, honest line in faint text.
+- **Do** write plain Ukrainian with no loanwords, and keep the developer credit to one modest line in faint text.
 
 ### Don't:
 

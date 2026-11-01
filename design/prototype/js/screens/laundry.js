@@ -144,7 +144,7 @@
       .filter(([, v]) => v != null && v !== "")
       .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
       .join("&")}`;
-  const credit = `<p class="credit">Зроблено Антоном Михальчуком — студентом катедри СШІ.</p>`;
+  const credit = `<p class="credit">Зроблено командою Софії Полупан — кандидатки на посаду голови студради.</p>`;
 
   /** Server-side checks of the booking action, then the insert. */
   function tryBook(me, mId, date, start, len) {
