@@ -77,6 +77,14 @@ cd ../gateway && npm run deploy           # лише коли змінився �
 `npm run role:grant -- --email імʼя@lpnu.ua --role site_manager --remote`
 (з кореня).
 
+Картинки оголошень лежать у R2. Кошик створюють один раз (R2 треба ввімкнути
+в акаунті Cloudflare); без нього деплой зупиниться з помилкою прив’язки
+`MEDIA`. Локально R2 імітує `wrangler`, нічого створювати не треба.
+
+```bash
+npx wrangler r2 bucket create ehurtozhytok-media
+```
+
 Якщо потрібна нова база: `npx wrangler d1 create ehurtozhytok`, `id` з
 відповіді — у `database_id` у `wrangler.jsonc`.
 

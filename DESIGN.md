@@ -168,7 +168,7 @@ A cool pastel field under white glass, graphite ink, and three signal colours th
 
 - **Coral Now** (now): the now-marker only — the vertical line and dot on day strips, the horizontal line and time pill on the timeline.
 
-### Fourth signal (v2, in `design/mockup/v2.html`, not in the app yet)
+### Fourth signal (amber «на розгляді» / в роботі)
 
 - **Amber "In work"** (work, work-dot): a task or complaint someone is working on right now — the «В роботі» and «Розглядаємо» status pills (text in work #8f5200, dot in work-dot #e8950f, fill work-dot at 16%), the current step of a progress track, the unread dot in an inbox and the «N днів без відповіді» warning. Never decoration, never a heading, never a button.
 
@@ -288,10 +288,13 @@ Tactile capsules that compress slightly when pressed.
 
 - **Top bar:** mark and wordmark (19px/700, −0.035em) left, 40px glass avatar right; inner screens use a 44px round glass back button.
 - **Tab bar:** floating glass bar (30px radius, white 62%, blur 22px) with one equal column per section: today «Пральня · Моє», later «Головна · Пральня · Дошка · Моє». No central action: each section owns its actions (the laundry page has the black «Записатися»). The current section sits on one white gloss pill (its own element, so it glides between tabs on page changes); tab labels 12px/600, muted; current in ink.
+- **Announcements:** the important one is the home page's largest glass card, its cover bleeding to the card's edges (16:9), a bell and «Важливе», the title, then the time in Fixel Display beside the day and place. Events are rows with a tear-off calendar leaf (graphite weekday band, day number) and a 64px rounded thumbnail when there is a picture; undated news shows a two-line excerpt and «вчора» / «3 дні тому». An announcement's pictures scroll sideways under the top bar (4:3, 22px radius, snap), the next one peeking in.
 - **Filter chips:** a sideways-scrolling row of glass capsules with a count; the chosen chip turns ink, like a chosen day, because a filter is not something of yours.
 - **Action sheet:** in the booking flow the same floating glass shape (white 72%) shows the chosen machine and time with a primary button.
 
-### Statuses and Progress (v2 mockup)
+### Statuses and Progress
+
+- **In the app today:** a proposed announcement shows «На розгляді» as the amber ring pill and a rejected one «Відхилено» as a neutral outline; the deciders' queue count is an amber pill. The board and complaints below are still mockup-only.
 
 - **Status pill:** one capsule shape, five states. «Нове / Надіслано» on ink 7%; «На розгляді» as an amber ring with a hollow dot; «В роботі» amber on amber 16%; «Готово / Вирішено» slate with a white check; «Відхилено» a neutral outline, never red.
 - **Progress track:** steps joined by a 2px line; done steps slate with a check, the current step an amber dot whose ring breathes (stops under reduced motion), later steps hollow. The same track sits on a public task and inside the resident's own complaint card.

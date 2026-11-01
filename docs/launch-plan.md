@@ -29,7 +29,8 @@
 | Перевірити секрети `SESSION_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `VAPID_PRIVATE_KEY`     | `npx wrangler secret list` у `apps/web`                        |
 | OAuth-клієнт Google і перевірка входу акаунтом @lpnu.ua                                                  | [`docs/run-project.md`](run-project.md)                        |
 | Секрет `CLOUDFLARE_API_TOKEN` у GitHub, щоб деплой ішов автоматично                                      | [`docs/run-project.md`](run-project.md)                        |
-| Перший розпорядник, далі ролі — у «Моє → Ролі»                                                           | `npm run role:grant -- --email … --role site_manager --remote` |
+| Увімкнути R2 і створити кошик для картинок оголошень (до деплою)                                         | `npx wrangler r2 bucket create ehurtozhytok-media`             |
+| Перший розпорядник, далі ролі — у «Моє → Люди й ролі»                                                    | `npm run role:grant -- --email … --role site_manager --remote` |
 | Перевірка на iPhone і Android: вхід, профіль, запис, нагадування, скасування, «Звільнити раніше», офлайн | твій телефон                                                   |
 | Надрукувати й наклеїти наліпки, оголошення в чаті гуртожитку                                             | гуртожиток                                                     |
 

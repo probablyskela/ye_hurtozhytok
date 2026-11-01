@@ -7,8 +7,8 @@ import { useEffect } from "react";
  * other way. Without JavaScript nothing slides and nothing breaks.
  */
 
-// Section roots in menu order; "/" is the laundry until the home page arrives.
-const SECTIONS: Record<string, number> = { "/": 0, "/laundry": 0, "/me": 1 };
+// Section roots in menu order.
+const SECTIONS: Record<string, number> = { "/": 0, "/laundry": 1, "/me": 2 };
 
 function currentSection(): number | null {
   const tabs = [...document.querySelectorAll(".tabbar .tab")];

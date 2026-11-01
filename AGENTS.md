@@ -48,7 +48,8 @@ docs in the same change.
 ## Architecture Rules
 
 - Stack: React Router v7 framework mode on a Cloudflare Worker, D1, Drizzle,
-  Tailwind v4. D1 is the only database.
+  Tailwind v4. D1 is the only database; announcement pictures live in R2
+  (`MEDIA`) and are served only through `/media/*` with a permission check.
 - Bookings store a Kyiv calendar date (`YYYY-MM-DD`) plus `start_min`/`end_min`
   (minutes from Kyiv midnight). Event timestamps are UTC milliseconds shown in
   Kyiv time through `app/lib/time.ts`. Never use the server's local time.
@@ -59,7 +60,8 @@ docs in the same change.
 - Write an `activity_log` entry for every change people make.
 - Forms must work without JavaScript (React Router `<Form>`); JavaScript only
   enhances them. Offline mode is read-only.
-- The service worker caches only `/`, `/laundry` and `/machines/*` (and their `.data`)
+- The service worker caches only `/`, `/announcements`, `/announcements/:id`,
+  `/laundry` and `/machines/*` (and their `.data`) plus `/media/*` pictures
   for offline reading, never other personal pages; logout clears the cache.
   Bump `CACHE` in `public/sw.js` when caching rules change.
 - Reminders are Web Push only; email needs an own domain and is not built.

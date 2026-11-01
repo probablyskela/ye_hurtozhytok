@@ -23,7 +23,12 @@ export type IconName =
   | "chev"
   | "home"
   | "logout"
-  | "shield";
+  | "shield"
+  | "horn"
+  | "pin"
+  | "image"
+  | "pencil"
+  | "x";
 
 /** One SVG sprite per page; icons reference it with <use>. */
 export function IconSprite() {
@@ -57,6 +62,27 @@ export function IconSprite() {
       <symbol id="i-bell" viewBox="0 0 24 24">
         <path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.5 1.5H5z" />
         <path d="M10 20.5a2.2 2.2 0 0 0 4 0" />
+      </symbol>
+      <symbol id="i-horn" viewBox="0 0 24 24">
+        <path d="M4 10v4a1.5 1.5 0 0 0 1.5 1.5H7l9 4.5V4L7 8.5H5.5A1.5 1.5 0 0 0 4 10z" />
+        <path d="M7.5 15.5 9 20.5h2.5" />
+        <path d="M19.5 9.5a3.5 3.5 0 0 1 0 5" />
+      </symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24">
+        <path d="M12 21s-6.5-5.8-6.5-11a6.5 6.5 0 0 1 13 0c0 5.2-6.5 11-6.5 11z" />
+        <circle cx="12" cy="10" r="2.4" />
+      </symbol>
+      <symbol id="i-image" viewBox="0 0 24 24">
+        <rect x="3.5" y="4.5" width="17" height="15" rx="3.2" />
+        <circle cx="9" cy="10" r="1.8" />
+        <path d="m4 17 5-4.5 4 3.5 3-2.5 4.5 3.8" />
+      </symbol>
+      <symbol id="i-pencil" viewBox="0 0 24 24">
+        <path d="M4.5 19.5l1-4L15.8 5.2a2 2 0 0 1 2.9 0l.1.1a2 2 0 0 1 0 2.9L8.5 18.5z" />
+        <path d="M13.8 7.2l3 3" />
+      </symbol>
+      <symbol id="i-x" viewBox="0 0 24 24">
+        <path d="M6.5 6.5l11 11M17.5 6.5l-11 11" />
       </symbol>
       <symbol id="i-cal" viewBox="0 0 24 24">
         <rect x="3.8" y="5" width="16.4" height="15.2" rx="3.2" />
@@ -382,12 +408,13 @@ export function Ticket({
   );
 }
 
-export type Tab = "laundry" | "me" | null;
+export type Tab = "home" | "laundry" | "me" | null;
 
 /** Sections of the app; each section owns its own actions. */
 /** Sections of the app; each section owns its own actions. */
 export function TabBar({ active }: { active: Tab }) {
   const tabs = [
+    { id: "home", to: "/", icon: "home", label: "Головна" },
     { id: "laundry", to: "/laundry", icon: "washer", label: "Пральня" },
     { id: "me", to: "/me", icon: "user", label: "Моє" },
   ] as const;
