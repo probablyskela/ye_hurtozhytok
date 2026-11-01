@@ -3,7 +3,10 @@ import { Outlet, useMatches } from "react-router";
 import { TabBar, type Tab } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
 import { useNavDirection } from "~/lib/nav-direction";
+import { skipForPhotoViewer } from "~/lib/revalidate";
 import type { Route } from "./+types/app-layout";
+
+export const shouldRevalidate = skipForPhotoViewer;
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const r = await requireProfile(request, context.cloudflare.env);

@@ -1,7 +1,8 @@
 import { Form, Link, data, redirect, useNavigation } from "react-router";
 
-import { StatusPill, mediaUrl } from "~/components/announcement";
+import { StatusPill } from "~/components/announcement";
 import { Check, ConfirmButton } from "~/components/controls";
+import { Gallery } from "~/components/gallery";
 import { ShareButton } from "~/components/share-button";
 import { Credit, Icon, TopBar } from "~/components/ui";
 import { REASON_MAX, agoLabel, fmtTime, whenLabel } from "~/lib/announcements";
@@ -13,12 +14,15 @@ import {
 import { requireProfile } from "~/lib/auth.server";
 import { renderMarkdown } from "~/lib/markdown.server";
 import { kyivDateKey, kyivNow } from "~/lib/time";
+import { skipForPhotoViewer } from "~/lib/revalidate";
 import type { Route } from "./+types/announcement";
 
 export const handle = { tab: "home" };
 export const meta: Route.MetaFunction = ({ data }) => [
   { title: `${data?.a.title ?? "Оголошення"} · єГуртожиток` },
 ];
+
+export const shouldRevalidate = skipForPhotoViewer;
 
 export async function loader({ request, params, context }: Route.LoaderArgs) {
   const env = context.cloudflare.env;
@@ -102,30 +106,7 @@ export default function AnnouncementPage({
         </p>
       )}
 
-      {a.images.length > 0 && (
-        <div
-          className="gallery"
-          role="group"
-          aria-label={`Картинки: ${a.images.length}`}
-        >
-          {a.images.map((img, i) => (
-            <a
-              key={img.id}
-              href={mediaUrl(img.key)}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={`Відкрити картинку ${i + 1} з ${a.images.length}`}
-            >
-              <img
-                src={mediaUrl(img.key)}
-                alt=""
-                loading={i === 0 ? "eager" : "lazy"}
-                decoding="async"
-              />
-            </a>
-          ))}
-        </div>
-      )}
+      <Gallery images={a.images} />
 
       <article className="glass ann-detail">
         <div className="ann-detail-top">
