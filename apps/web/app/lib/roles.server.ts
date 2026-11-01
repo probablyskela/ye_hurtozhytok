@@ -20,6 +20,9 @@ export type Person = {
   email: string;
   residentId: number | null;
   name: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  patronymic: string | null;
   room: string | null;
   telegram: string | null;
   blocked: boolean;
@@ -38,6 +41,9 @@ export async function listPeople(env: Env): Promise<Person[]> {
         id: residents.id,
         email: residents.email,
         name: residents.name,
+        firstName: residents.firstName,
+        lastName: residents.lastName,
+        patronymic: residents.patronymic,
         room: residents.room,
         telegram: residents.telegram,
         blocked: residents.blocked,
@@ -61,6 +67,9 @@ export async function listPeople(env: Env): Promise<Person[]> {
       email,
       residentId: p.id,
       name: p.name,
+      firstName: p.firstName,
+      lastName: p.lastName,
+      patronymic: p.patronymic,
       room: p.room,
       telegram: p.telegram,
       blocked: p.blocked,
@@ -73,6 +82,9 @@ export async function listPeople(env: Env): Promise<Person[]> {
         email,
         residentId: null,
         name: null,
+        firstName: null,
+        lastName: null,
+        patronymic: null,
         room: null,
         telegram: null,
         blocked: false,

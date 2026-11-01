@@ -30,5 +30,6 @@ export default [
     route("profile", "routes/profile.tsx"),
     route("council", "routes/council.tsx"),
     route("roles", "routes/roles.tsx"),
+    route("residents", "routes/residents.tsx"),
   ]),
 ] satisfies RouteConfig;

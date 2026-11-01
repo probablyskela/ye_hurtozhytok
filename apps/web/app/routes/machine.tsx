@@ -1,6 +1,7 @@
 import { Form, Link, data } from "react-router";
 
 import { PillGroup } from "~/components/pill-group";
+import { ConfirmButton } from "~/components/controls";
 import { Credit, Icon, TopBar } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
 import {
@@ -269,28 +270,18 @@ export default function MachineDay({
                   </span>
                 </span>
                 {council && (
-                  <Form
-                    method="post"
-                    replace
-                    preventScrollReset
-                    onSubmit={(e) => {
-                      if (
-                        !confirm(
-                          `Скасувати запис: ${b.name}, ${fmtMin(b.startMin)}?`,
-                        )
-                      )
-                        e.preventDefault();
-                    }}
-                  >
+                  <Form method="post" replace preventScrollReset>
                     <input type="hidden" name="intent" value="cancel" />
                     <input type="hidden" name="id" value={b.id} />
-                    <button
+                    <ConfirmButton
+                      variant="arm"
                       className="pill-btn danger"
-                      type="submit"
-                      aria-label={`Скасувати запис: ${b.name}, ${fmtMin(b.startMin)}`}
+                      label={`Скасувати запис: ${b.name}, ${fmtMin(b.startMin)}`}
+                      question={`Скасувати запис: ${b.name}, ${fmtMin(b.startMin)}?`}
+                      yes="Точно?"
                     >
                       Скасувати
-                    </button>
+                    </ConfirmButton>
                   </Form>
                 )}
               </div>

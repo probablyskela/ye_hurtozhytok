@@ -1,5 +1,6 @@
 import { Form, Link, data, redirect, useNavigation } from "react-router";
 
+import { ConfirmButton } from "~/components/controls";
 import { ReminderSwitch } from "~/components/reminder-switch";
 import { Icon, Ticket, TopBar } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
@@ -155,21 +156,15 @@ export default function BookingPage({
           )}
           {/* While washing, the owner frees the machine instead of cancelling. */}
           {!(running && b.mine) && (
-            <Form
-              method="post"
-              replace
-              onSubmit={(e) => {
-                if (!confirm("Скасувати цей запис?")) e.preventDefault();
-              }}
-            >
+            <Form method="post" replace className="confirm-form">
               <input type="hidden" name="intent" value="cancel" />
-              <button
+              <ConfirmButton
                 className="btn btn-ghost-danger block"
-                type="submit"
-                disabled={busy}
+                question="Скасувати цей запис?"
+                yes="Так, скасувати"
               >
                 Скасувати
-              </button>
+              </ConfirmButton>
             </Form>
           )}
         </div>
@@ -202,11 +197,21 @@ export default function BookingPage({
           </span>
         </div>
       </div>
-      <p style={{ margin: "14px 4px" }}>
-        <Link className="link" to={`/machines/${b.machineSlug}`}>
-          Розклад цієї пралки
-        </Link>
-      </p>
+      <Link
+        viewTransition
+        className="glass list-row"
+        to={`/machines/${b.machineSlug}`}
+        style={{ marginTop: 14 }}
+      >
+        <span className="who-av">
+          <Icon name="cal" small />
+        </span>
+        <span style={{ flex: 1 }}>
+          <b>Розклад цієї пралки</b>
+          <span className="sub">Хто ще записався на цей та інші дні</span>
+        </span>
+        <Icon name="chev" small />
+      </Link>
     </>
   );
 }

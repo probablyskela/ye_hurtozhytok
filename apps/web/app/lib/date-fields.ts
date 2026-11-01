@@ -1,7 +1,7 @@
 /**
- * Dates and times are entered with plain selects (day, month by name, year;
- * hours and minutes) instead of browser date/time inputs, which follow the
- * browser's locale and can show AM/PM or month-first dates. From Оперета.
+ * Dates and times come from the app's own pickers (day tiles, a time grid)
+ * instead of browser date/time inputs, which follow the browser's locale and
+ * can show AM/PM or month-first dates. Each picker posts one value.
  */
 
 export const MINUTE_STEP = 5;
@@ -16,17 +16,15 @@ function part(form: FormData, key: string): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-/** Reads `<name>_d`, `<name>_m`, `<name>_y`; all empty means no date. */
+/** Reads a "YYYY-MM-DD" date; empty means no date. */
 export function readDate(form: FormData, name: string): Read<string> {
-  const d = part(form, `${name}_d`);
-  const m = part(form, `${name}_m`);
-  const y = part(form, `${name}_y`);
-  if (!d && !m && !y) return { value: null };
-  if (!d || !m || !y) return { error: "Вкажіть день, місяць і рік повністю." };
-  const [day, month, year] = [Number(d), Number(m), Number(y)];
+  const v = part(form, name);
+  if (!v) return { value: null };
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+  if (!m) return { error: "Такої дати не існує." };
+  const [year, month, day] = [Number(m[1]), Number(m[2]), Number(m[3])];
   const date = new Date(Date.UTC(year, month - 1, day));
   if (
-    !Number.isInteger(day) ||
     date.getUTCFullYear() !== year ||
     date.getUTCMonth() !== month - 1 ||
     date.getUTCDate() !== day
@@ -35,21 +33,17 @@ export function readDate(form: FormData, name: string): Read<string> {
   return { value: `${year}-${pad(month)}-${pad(day)}` };
 }
 
-/** Reads `<name>_h` and `<name>_min` as minutes from midnight; both empty means no time. */
+/** Reads minutes from midnight on the 5-minute grid; empty means no time. */
 export function readTime(form: FormData, name: string): Read<number> {
-  const h = part(form, `${name}_h`);
-  const min = part(form, `${name}_min`);
-  if (!h && !min) return { value: null };
-  if (!h || !min) return { error: "Вкажіть і години, і хвилини." };
-  const [hour, minute] = [Number(h), Number(min)];
+  const v = part(form, name);
+  if (!v) return { value: null };
+  const minutes = Number(v);
   if (
-    !Number.isInteger(hour) ||
-    hour < 0 ||
-    hour > 23 ||
-    !Number.isInteger(minute) ||
-    minute < 0 ||
-    minute > 59
+    !Number.isInteger(minutes) ||
+    minutes < 0 ||
+    minutes >= 24 * 60 ||
+    minutes % MINUTE_STEP !== 0
   )
     return { error: "Такого часу не існує." };
-  return { value: hour * 60 + minute };
+  return { value: minutes };
 }

@@ -8,19 +8,20 @@ const form = (fields: Record<string, string>) => {
   return f;
 };
 
-describe("date and time selects", () => {
-  it("reads a full date and nothing as nothing", () => {
-    expect(
-      readDate(form({ d_d: "4", d_m: "11", d_y: "2026" }), "d").value,
-    ).toBe("2026-11-04");
+describe("date and time pickers", () => {
+  it("reads a date and nothing as nothing", () => {
+    expect(readDate(form({ d: "2026-11-04" }), "d").value).toBe("2026-11-04");
+    expect(readDate(form({ d: "" }), "d")).toEqual({ value: null });
     expect(readDate(form({}), "d")).toEqual({ value: null });
   });
-  it("asks for the whole date", () => {
-    expect(readDate(form({ d_d: "4" }), "d").error).toBeTruthy();
+  it("refuses dates that do not exist", () => {
+    expect(readDate(form({ d: "2027-02-31" }), "d").error).toBeTruthy();
+    expect(readDate(form({ d: "4.11.2026" }), "d").error).toBeTruthy();
   });
-  it("reads time as minutes from midnight", () => {
-    expect(readTime(form({ t_h: "9", t_min: "35" }), "t").value).toBe(575);
-    expect(readTime(form({ t_h: "24", t_min: "0" }), "t").error).toBeTruthy();
-    expect(readTime(form({ t_h: "9" }), "t").error).toBeTruthy();
+  it("reads time as minutes on the 5-minute grid", () => {
+    expect(readTime(form({ t: "575" }), "t").value).toBe(575);
+    expect(readTime(form({ t: "" }), "t")).toEqual({ value: null });
+    expect(readTime(form({ t: "1440" }), "t").error).toBeTruthy();
+    expect(readTime(form({ t: "577" }), "t").error).toBeTruthy();
   });
 });

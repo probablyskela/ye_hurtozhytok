@@ -8,6 +8,7 @@ import {
   canProposeAnnouncement,
   canPublishAnnouncements,
 } from "~/lib/permissions";
+import { kyivNow } from "~/lib/time";
 import type { Route } from "./+types/announcement-new";
 
 export const handle = { tab: "home" };
@@ -19,7 +20,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const me = await requireProfile(request, context.cloudflare.env);
   if (!canProposeAnnouncement(me))
     throw new Response("Ваш акаунт заблоковано.", { status: 403 });
-  return { canPublish: canPublishAnnouncements(me) };
+  return { canPublish: canPublishAnnouncements(me), today: kyivNow().date };
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -41,7 +42,7 @@ export default function NewAnnouncement({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const { canPublish } = loaderData;
+  const { canPublish, today } = loaderData;
   return (
     <>
       <TopBar
@@ -55,6 +56,7 @@ export default function NewAnnouncement({
         </p>
       )}
       <AnnouncementForm
+        today={today}
         canPublish={canPublish}
         errors={actionData?.errors}
         submitLabel={canPublish ? "Опублікувати" : "Надіслати на розгляд"}

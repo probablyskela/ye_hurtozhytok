@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Form, useNavigation } from "react-router";
 
 import { mediaUrl } from "~/components/announcement";
+import { Check, DateField, TimeField } from "~/components/controls";
 import { Icon } from "~/components/ui";
 import {
   BODY_MAX,
@@ -11,8 +12,6 @@ import {
   TITLE_MAX,
   type AnnouncementErrors,
 } from "~/lib/announcements";
-import { MINUTE_STEP } from "~/lib/date-fields";
-import { MONTHS_GENITIVE } from "~/lib/time";
 
 type Initial = {
   title: string;
@@ -197,7 +196,9 @@ export function AnnouncementForm({
   errors,
   canPublish,
   submitLabel,
+  today,
 }: {
+  today: string;
   initial?: Initial;
   errors?: AnnouncementErrors;
   canPublish: boolean;
@@ -205,13 +206,6 @@ export function AnnouncementForm({
 }) {
   const navigation = useNavigation();
   const busy = navigation.state === "submitting";
-  const [y, m, d] = initial?.date ? initial.date.split("-").map(Number) : [];
-  const thisYear = new Date().getFullYear();
-  const years = [thisYear, thisYear + 1];
-  if (y && !years.includes(y)) years.unshift(y);
-  const h = initial?.startMin != null ? Math.floor(initial.startMin / 60) : "";
-  const min = initial?.startMin != null ? initial.startMin % 60 : "";
-
   return (
     <Form method="post" encType="multipart/form-data" className="glass form">
       {initial?.date && (
@@ -229,101 +223,22 @@ export function AnnouncementForm({
         />
       </Field>
 
-      <fieldset className="field-row date-row">
-        <legend>
-          Коли <span className="opt">необовʼязково</span>
-        </legend>
-        <div className="date-grid">
-          <label className="sr-only" htmlFor="date_d">
-            День
-          </label>
-          <select
-            id="date_d"
-            name="date_d"
-            className="select"
-            defaultValue={d ?? ""}
-          >
-            <option value="">день</option>
-            {Array.from({ length: 31 }, (_, i) => (
-              <option key={i + 1} value={i + 1}>
-                {i + 1}
-              </option>
-            ))}
-          </select>
-          <label className="sr-only" htmlFor="date_m">
-            Місяць
-          </label>
-          <select
-            id="date_m"
-            name="date_m"
-            className="select"
-            defaultValue={m ?? ""}
-          >
-            <option value="">місяць</option>
-            {MONTHS_GENITIVE.map((name, i) => (
-              <option key={name} value={i + 1}>
-                {name}
-              </option>
-            ))}
-          </select>
-          <label className="sr-only" htmlFor="date_y">
-            Рік
-          </label>
-          <select
-            id="date_y"
-            name="date_y"
-            className="select"
-            defaultValue={y ?? ""}
-          >
-            <option value="">рік</option>
-            {years.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="time-grid">
-          <label className="sr-only" htmlFor="time_h">
-            Година
-          </label>
-          <select id="time_h" name="time_h" className="select" defaultValue={h}>
-            <option value="">год</option>
-            {Array.from({ length: 24 }, (_, i) => (
-              <option key={i} value={i}>
-                {String(i).padStart(2, "0")}
-              </option>
-            ))}
-          </select>
-          <span aria-hidden="true">:</span>
-          <label className="sr-only" htmlFor="time_min">
-            Хвилини
-          </label>
-          <select
-            id="time_min"
-            name="time_min"
-            className="select"
-            defaultValue={min}
-          >
-            <option value="">хв</option>
-            {Array.from(
-              { length: 60 / MINUTE_STEP },
-              (_, i) => i * MINUTE_STEP,
-            ).map((v) => (
-              <option key={v} value={v}>
-                {String(v).padStart(2, "0")}
-              </option>
-            ))}
-          </select>
-        </div>
-        {errors?.date || errors?.time ? (
-          <small className="field-error">{errors.date ?? errors.time}</small>
-        ) : (
-          <small>
-            Для подій: зборів, прибирання, відключень. Новину можна без дати.
-          </small>
-        )}
-      </fieldset>
+      <DateField
+        name="date"
+        legend={
+          <>
+            Коли <span className="opt">необовʼязково</span>
+          </>
+        }
+        today={today}
+        defaultValue={initial?.date ?? null}
+        error={errors?.date}
+      />
+      <TimeField
+        name="time"
+        defaultValue={initial?.startMin ?? null}
+        error={errors?.time}
+      />
 
       <Field id="place" label="Де" optional error={errors?.place}>
         <input
@@ -349,19 +264,12 @@ export function AnnouncementForm({
       <ImagePicker existing={initial?.images ?? []} error={errors?.images} />
 
       {canPublish && (
-        <label className="check-row">
-          <input
-            type="checkbox"
-            name="important"
-            defaultChecked={initial?.important}
-          />
-          <span>
-            <b>Важливе</b>
-            <small>
-              Зверху на головній і сповіщення всім, хто їх увімкнув.
-            </small>
-          </span>
-        </label>
+        <Check
+          name="important"
+          defaultChecked={initial?.important}
+          title="Важливе"
+          hint="Зверху на головній і сповіщення всім, хто їх увімкнув."
+        />
       )}
 
       <button className="btn btn-primary block" type="submit" disabled={busy}>

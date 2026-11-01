@@ -3,6 +3,7 @@ import { Form, Link, data, redirect, useNavigation } from "react-router";
 
 import { PillGroup } from "~/components/pill-group";
 import { TimeScrubber } from "~/components/time-scrubber";
+import { ChoiceChips } from "~/components/controls";
 import { Icon, TopBar } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
 import {
@@ -301,39 +302,32 @@ export default function Book({ loaderData, actionData }: Route.ComponentProps) {
         ) : (
           // Before JavaScript: two plain lists. The server re-checks the pair.
           <div className="pick-fallback">
-            <div className="field-row">
-              <label htmlFor="start-select">Початок</label>
-              <select
-                id="start-select"
-                name="start"
-                defaultValue={fromServer ?? undefined}
-                className="select"
-              >
-                {machine.starts.map((s) => (
-                  <option key={s} value={s}>
-                    {fmtMin(s)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="field-row">
-              <label htmlFor="len-select">Тривалість</label>
-              <select
-                id="len-select"
-                name="len"
-                defaultValue={len}
-                className="select"
-              >
-                {Array.from(
-                  { length: (MAX_DURATION - MIN_DURATION) / STEP_MIN + 1 },
-                  (_, i) => MIN_DURATION + i * STEP_MIN,
-                ).map((d) => (
-                  <option key={d} value={d}>
-                    {durationLabel(d)}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <ChoiceChips
+              name="start"
+              legend="Початок"
+              tone="mine"
+              columns={4}
+              defaultValue={
+                fromServer != null
+                  ? String(fromServer)
+                  : String(machine.starts[0])
+              }
+              options={machine.starts.map((s) => ({
+                value: String(s),
+                label: fmtMin(s),
+              }))}
+            />
+            <ChoiceChips
+              name="len"
+              legend="Тривалість"
+              tone="mine"
+              columns={3}
+              defaultValue={String(len)}
+              options={Array.from(
+                { length: (MAX_DURATION - MIN_DURATION) / STEP_MIN + 1 },
+                (_, i) => MIN_DURATION + i * STEP_MIN,
+              ).map((d) => ({ value: String(d), label: durationLabel(d) }))}
+            />
           </div>
         )}
       </div>

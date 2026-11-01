@@ -1,6 +1,7 @@
 import { Form, Link, data, redirect, useNavigation } from "react-router";
 
 import { StatusPill, mediaUrl } from "~/components/announcement";
+import { Check, ConfirmButton } from "~/components/controls";
 import { Credit, Icon, TopBar } from "~/components/ui";
 import { REASON_MAX, agoLabel, fmtTime, whenLabel } from "~/lib/announcements";
 import {
@@ -172,15 +173,11 @@ export default function AnnouncementPage({
             <h3>Рішення</h3>
           </div>
           <Form method="post" className="glass form">
-            <label className="check-row">
-              <input type="checkbox" name="important" />
-              <span>
-                <b>Важливе</b>
-                <small>
-                  Зверху на головній і сповіщення всім, хто їх увімкнув.
-                </small>
-              </span>
-            </label>
+            <Check
+              name="important"
+              title="Важливе"
+              hint="Зверху на головній і сповіщення всім, хто їх увімкнув."
+            />
             <button
               className="btn btn-primary block"
               type="submit"
@@ -230,24 +227,24 @@ export default function AnnouncementPage({
             <Icon name="pencil" small />
             Змінити
           </Link>
-          <Form
-            method="post"
-            onSubmit={(e) => {
-              const q =
-                mine && a.status === "pending"
-                  ? "Забрати цю пропозицію?"
-                  : "Видалити оголошення? Його більше ніхто не побачить.";
-              if (!confirm(q)) e.preventDefault();
-            }}
-          >
-            <button
-              className="btn btn-ghost-danger"
-              type="submit"
+          <Form method="post" className="confirm-form">
+            <ConfirmButton
+              className="btn btn-ghost-danger block"
               name="intent"
               value="delete"
+              question={
+                mine && a.status === "pending"
+                  ? "Забрати цю пропозицію?"
+                  : "Видалити оголошення? Його більше ніхто не побачить."
+              }
+              yes={
+                mine && a.status === "pending"
+                  ? "Так, забрати"
+                  : "Так, видалити"
+              }
             >
               {mine && a.status === "pending" ? "Забрати" : "Видалити"}
-            </button>
+            </ConfirmButton>
           </Form>
         </div>
       )}

@@ -231,18 +231,14 @@ export default function Me({ loaderData }: Route.ComponentProps) {
             )}
             {p.council && (
               <Row
-                to="/council"
-                icon="shield"
-                title="Студрада"
-                sub="Мешканці гуртожитку"
-              />
-            )}
-            {p.siteManager && (
-              <Row
-                to="/roles"
+                to="/residents"
                 icon="user"
-                title="Люди й ролі"
-                sub="Усі мешканці та їхні ролі"
+                title="Мешканці"
+                sub={
+                  p.siteManager
+                    ? "Список, ролі й блокування"
+                    : "Хто зареєструвався й де живе"
+                }
               />
             )}
           </div>

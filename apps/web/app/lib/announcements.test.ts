@@ -21,11 +21,8 @@ describe("announcement form", () => {
         title: "  Збори   мешканців ",
         body: "Звіт за жовтень\r\nі вибори",
         place: "Читальна зала",
-        date_d: "2",
-        date_m: "11",
-        date_y: "2026",
-        time_h: "19",
-        time_min: "0",
+        date: "2026-11-02",
+        time: String(19 * 60),
       }),
       TODAY,
     );
@@ -45,10 +42,7 @@ describe("announcement form", () => {
     expect(r.ok && r.values.date).toBeNull();
   });
   it("explains what is wrong", () => {
-    const r = parseAnnouncementForm(
-      form({ title: "Ок", time_h: "10", time_min: "0" }),
-      TODAY,
-    );
+    const r = parseAnnouncementForm(form({ title: "Ок", time: "600" }), TODAY);
     expect(r.ok).toBe(false);
     if (!r.ok) {
       expect(r.errors.title).toBeTruthy();
@@ -57,16 +51,11 @@ describe("announcement form", () => {
   });
   it("refuses impossible and past dates for new ones only", () => {
     const bad = parseAnnouncementForm(
-      form({ title: "Подія", date_d: "31", date_m: "2", date_y: "2027" }),
+      form({ title: "Подія", date: "2027-02-31" }),
       TODAY,
     );
     expect(!bad.ok && bad.errors.date).toBe("Такої дати не існує.");
-    const past = form({
-      title: "Подія",
-      date_d: "20",
-      date_m: "10",
-      date_y: "2026",
-    });
+    const past = form({ title: "Подія", date: "2026-10-20" });
     expect(parseAnnouncementForm(past, TODAY).ok).toBe(false);
     expect(parseAnnouncementForm(past, TODAY, { allowPast: true }).ok).toBe(
       true,

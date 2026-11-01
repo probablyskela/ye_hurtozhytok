@@ -8,6 +8,7 @@ import {
 } from "~/lib/announcements.server";
 import { requireProfile } from "~/lib/auth.server";
 import { canPublishAnnouncements } from "~/lib/permissions";
+import { kyivNow } from "~/lib/time";
 import type { Route } from "./+types/announcement-edit";
 
 export const handle = { tab: "home" };
@@ -24,6 +25,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
   return {
     id: a.id,
     canPublish: canPublishAnnouncements(me),
+    today: kyivNow().date,
     initial: {
       title: a.title,
       body: a.body,
@@ -57,11 +59,12 @@ export default function EditAnnouncement({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const { id, canPublish, initial } = loaderData;
+  const { id, canPublish, initial, today } = loaderData;
   return (
     <>
       <TopBar back={`/announcements/${id}`} title="Змінити оголошення" />
       <AnnouncementForm
+        today={today}
         initial={initial}
         canPublish={canPublish}
         errors={actionData?.errors}
