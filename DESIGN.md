@@ -146,7 +146,7 @@ Scope note: the presentation canvas in `design/mockup/index.html` (phone bezels,
 - Sliding pill: every horizontal switcher (days, machines, segmented controls) has one selection pill that slides to the tapped item at once (0.45s, the system ease) and text colour follows it; without JavaScript items keep their own highlight. A dark selected day has no white top highlight.
 - Nearest free time: one glass card with the soonest start across machines in Display numerals, the machine, a black «Записатися» that books in one tap and a soft «Інший час»; the other machines' first starts sit below as quiet links.
 - The time scrubber: the day slides under a fixed ultramarine frame the size of the booking (8px per 5 minutes, 96px per hour, native momentum scroll with snap points); the frame turns red on busy time and glides to the nearest free start when released. The frame's left edge stays where the longest booking would sit centred; its right edge is a 44px-wide handle (a 12×34px ultramarine capsule with a white rim) that stretches the booking in 5-minute steps like an event in a calendar. The length rides above the frame in 11.5px ultramarine. When the edge hits the next booking, 24:00 or 2.5 hours, only the handle turns red, bumps, and the hint line says why; the hint line is always two lines tall.
-- Motion: short crossfade view transitions without blur (the ticket morphs from home to its detail), tiles rise and the ticket catches light only on the first load of the app (never on later screens), a ripple spreads from the porthole after booking, a busy machine's drum turns and a free one breathes, the now-marker pulses. Everything stops under reduced motion.
+- Motion: page changes slide sideways like a pager, without blur: between menu sections in menu order, deeper into a section from the right, «Назад» and browser back from the left (`lib/nav-direction.ts` sets `html[data-nav]`); the background field and the tab bar stay put and the section pill glides to its new tab; the ticket morphs from the laundry page to its detail; tiles rise and the ticket catches light only on the first load of the app (never on later screens), a ripple spreads from the porthole after booking, a busy machine's drum turns and a free one breathes, the now-marker pulses. Everything stops under reduced motion.
 - The porthole motif: ticket rings and machine state dots.
 - The facade mark: a black squircle holding a 3×3 grid of rounded windows — three lit white, five dim, one ultramarine («твоє вікно»).
 
@@ -287,8 +287,8 @@ Tactile capsules that compress slightly when pressed.
 ### Navigation
 
 - **Top bar:** mark and wordmark (19px/700, −0.035em) left, 40px glass avatar right; inner screens use a 44px round glass back button.
-- **Tab bar:** floating glass bar (30px radius, white 62%, blur 22px) with three columns: «Головна», a central black capsule «Записатися» with a plus icon, «Мої записи». Tab labels 12px/600, muted; current page in ink.
-- **Five-item tab bar (v2 mockup):** «Головна · Оголошення · Записатися · Дошка · Моє»; the centre becomes a 46px black disc raised 20px above the bar with its label in line with the others; labels 11.5px.
+- **Tab bar:** floating glass bar (30px radius, white 62%, blur 22px) with one equal column per section: today «Пральня · Моє», later «Головна · Пральня · Дошка · Моє». No central action: each section owns its actions (the laundry page has the black «Записатися»). The current section sits on one white gloss pill (its own element, so it glides between tabs on page changes); tab labels 12px/600, muted; current in ink.
+- **Filter chips:** a sideways-scrolling row of glass capsules with a count; the chosen chip turns ink, like a chosen day, because a filter is not something of yours.
 - **Action sheet:** in the booking flow the same floating glass shape (white 72%) shows the chosen machine and time with a primary button.
 
 ### Statuses and Progress (v2 mockup)

@@ -9,6 +9,7 @@ import { TopBar } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
 import { fullName } from "~/lib/names";
 import { roomLabel } from "~/lib/profile";
+import { searchFrom } from "~/lib/search-params";
 import { canBlock, isCouncil } from "~/lib/permissions";
 import { isRole } from "~/lib/roles";
 import { listResidents, setBlocked } from "~/lib/residents.server";
@@ -118,7 +119,7 @@ export default function Council({
         className="field-row"
         style={{ marginBottom: 14 }}
         onChange={(e) =>
-          setParams(new FormData(e.currentTarget) as never, { replace: true })
+          setParams(searchFrom(e.currentTarget), { replace: true })
         }
       >
         <label htmlFor="q">Пошук</label>

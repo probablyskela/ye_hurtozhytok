@@ -385,27 +385,36 @@ export function Ticket({
 export type Tab = "laundry" | "me" | null;
 
 /** Sections of the app; each section owns its own actions. */
+/** Sections of the app; each section owns its own actions. */
 export function TabBar({ active }: { active: Tab }) {
+  const tabs = [
+    { id: "laundry", to: "/laundry", icon: "washer", label: "Пральня" },
+    { id: "me", to: "/me", icon: "user", label: "Моє" },
+  ] as const;
+  const index = tabs.findIndex((t) => t.id === active);
   return (
     <nav className="tabbar" aria-label="Розділи">
-      <Link
-        viewTransition
-        className="tab"
-        to="/laundry"
-        aria-current={active === "laundry" ? "page" : undefined}
-      >
-        <Icon name="washer" />
-        Пральня
-      </Link>
-      <Link
-        viewTransition
-        className="tab"
-        to="/me"
-        aria-current={active === "me" ? "page" : undefined}
-      >
-        <Icon name="user" />
-        Моє
-      </Link>
+      {/* One pill under the current section; it glides on page changes. */}
+      {index >= 0 && (
+        <span
+          className="tab-pill"
+          aria-hidden="true"
+          style={{ gridColumn: index + 1 }}
+        />
+      )}
+      {tabs.map((t, i) => (
+        <Link
+          key={t.id}
+          viewTransition
+          className="tab"
+          to={t.to}
+          style={{ gridColumn: i + 1 }}
+          aria-current={active === t.id ? "page" : undefined}
+        >
+          <Icon name={t.icon} />
+          {t.label}
+        </Link>
+      ))}
     </nav>
   );
 }

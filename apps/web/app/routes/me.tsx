@@ -173,8 +173,8 @@ export default function Me({ loaderData }: Route.ComponentProps) {
               <Row
                 to="/roles"
                 icon="user"
-                title="Ролі"
-                sub="Хто в студраді, оперзагоні й хто розпорядник"
+                title="Люди й ролі"
+                sub="Усі мешканці та їхні ролі"
               />
             )}
           </div>

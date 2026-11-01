@@ -2,6 +2,7 @@ import { Outlet, useMatches } from "react-router";
 
 import { TabBar, type Tab } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
+import { useNavDirection } from "~/lib/nav-direction";
 import type { Route } from "./+types/app-layout";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
@@ -12,6 +13,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 }
 
 export default function AppLayout() {
+  useNavDirection();
   const matches = useMatches();
   const handle = matches.at(-1)?.handle as
     { tab?: Tab; sheet?: boolean; wide?: boolean } | undefined;
