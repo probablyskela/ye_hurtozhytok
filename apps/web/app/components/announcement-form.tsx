@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { Form, useNavigation } from "react-router";
 
 import { mediaUrl } from "~/components/announcement";
@@ -83,6 +83,50 @@ function Field({
         hint && <small>{hint}</small>
       )}
     </div>
+  );
+}
+
+// Client only: the server never renders the editor, so it stays out of the Worker.
+const RichEditor = import.meta.env.SSR
+  ? () => null
+  : lazy(() => import("~/components/rich-editor"));
+
+/**
+ * Details in Markdown: a plain text field without JavaScript, the visual
+ * editor once the page is interactive.
+ */
+function DetailsField({
+  defaultValue,
+  describedBy,
+}: {
+  defaultValue: string;
+  describedBy?: string;
+}) {
+  const [live, setLive] = useState(false);
+  useEffect(() => setLive(true), []);
+  const plain = (
+    <textarea
+      id="body"
+      name="body"
+      className="area"
+      rows={5}
+      defaultValue={defaultValue}
+      maxLength={BODY_MAX}
+      aria-describedby={describedBy}
+    />
+  );
+  if (!live) return plain;
+  return (
+    <Suspense fallback={plain}>
+      <RichEditor
+        id="body"
+        name="body"
+        label="Подробиці"
+        defaultValue={defaultValue}
+        maxLength={BODY_MAX}
+        describedBy={describedBy}
+      />
+    </Suspense>
   );
 }
 
@@ -210,8 +254,27 @@ export function AnnouncementForm({
 }) {
   const navigation = useNavigation();
   const busy = navigation.state === "submitting";
+  const form = useRef<HTMLFormElement>(null);
+  const failed = !!errors && Object.keys(errors).length > 0;
+  // A refused form is usually refused far above the button: go to the first problem.
+  useEffect(() => {
+    if (!failed) return;
+    const first = form.current?.querySelector<HTMLElement>(".field-error");
+    const row = first?.closest(".field-row") ?? first;
+    row?.scrollIntoView({ behavior: "smooth", block: "center" });
+    row
+      ?.querySelector<HTMLElement>(
+        "input:not([type=hidden]), textarea, [contenteditable]",
+      )
+      ?.focus({ preventScroll: true });
+  }, [errors, failed]);
   return (
-    <Form method="post" encType="multipart/form-data" className="glass form">
+    <Form
+      ref={form}
+      method="post"
+      encType="multipart/form-data"
+      className="glass form"
+    >
       {initial?.date && (
         <input type="hidden" name="date_keep" value={initial.date} />
       )}
@@ -255,13 +318,9 @@ export function AnnouncementForm({
       </Field>
 
       <Field id="body" label="Подробиці" optional error={errors?.body}>
-        <textarea
-          id="body"
-          name="body"
-          className="area"
-          rows={5}
+        <DetailsField
           defaultValue={initial?.body ?? ""}
-          maxLength={BODY_MAX}
+          describedBy={errors?.body ? "body-error" : undefined}
         />
       </Field>
 
@@ -276,6 +335,11 @@ export function AnnouncementForm({
         />
       )}
 
+      {failed && !busy && (
+        <p className="form-failed" role="alert">
+          Не надіслано: виправте позначене червоним вище.
+        </p>
+      )}
       <button className="btn btn-primary block" type="submit" disabled={busy}>
         {busy ? "Надсилаємо…" : submitLabel}
       </button>

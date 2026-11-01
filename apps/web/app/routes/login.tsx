@@ -10,6 +10,7 @@ import {
 } from "~/lib/auth.server";
 import { bookingsOn, listMachines } from "~/lib/bookings.server";
 import { isUniversityEmail } from "~/lib/google";
+import { safeNext } from "~/lib/next-path";
 import { kyivNow } from "~/lib/time";
 import type { Route } from "./+types/login";
 
@@ -17,13 +18,15 @@ export const meta: Route.MetaFunction = () => [{ title: "Вхід · єГурт�
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const env = context.cloudflare.env;
-  if (await getCurrentResident(request, env)) throw redirect("/");
+  const next = safeNext(new URL(request.url).searchParams.get("next"));
+  if (await getCurrentResident(request, env)) throw redirect(next ?? "/");
   const now = kyivNow();
   const [machines, today] = await Promise.all([
     listMachines(env),
     bookingsOn(env, [now.date]),
   ]);
   return {
+    next,
     google: googleEnabled(env),
     dev: devLoginEnabled(env, request),
     nowMin: now.minute,
@@ -50,7 +53,7 @@ export async function action({ request, context }: Route.ActionArgs) {
   if (!isUniversityEmail(email) || !name)
     return { error: "Вкажіть імʼя та адресу @lpnu.ua." };
   const headers = await devLogin(request, env, { email, name });
-  return redirect("/", { headers });
+  return redirect(safeNext(form.get("next")) ?? "/", { headers });
 }
 
 const NO_MINE = new Set<number>();
@@ -59,7 +62,7 @@ export default function Login({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const { google, dev, machines, nowMin } = loaderData;
+  const { next, google, dev, machines, nowMin } = loaderData;
   return (
     <main className="page bare">
       <div className="signin">
@@ -121,6 +124,7 @@ export default function Login({
         <div className="signin-actions">
           {google && (
             <Form method="post" action="/auth/google" reloadDocument>
+              {next && <input type="hidden" name="next" value={next} />}
               <button className="btn btn-primary block" type="submit">
                 <Icon name="mail" />
                 Увійти через пошту Політехніки
@@ -134,6 +138,7 @@ export default function Login({
           )}
           {dev && (
             <Form method="post" className="glass form">
+              {next && <input type="hidden" name="next" value={next} />}
               <p className="muted" style={{ margin: 0, fontSize: 13.5 }}>
                 Вхід лише для розробки на власному компʼютері. На сайті його
                 немає.

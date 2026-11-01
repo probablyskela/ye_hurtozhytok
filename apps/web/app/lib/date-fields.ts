@@ -1,10 +1,8 @@
 /**
- * Dates and times come from the app's own pickers (day tiles, a time grid)
- * instead of browser date/time inputs, which follow the browser's locale and
- * can show AM/PM or month-first dates. Each picker posts one value.
+ * Dates come from the app's own day tiles; time comes from the phone's own
+ * time picker (<input type="time">), which posts "HH:MM" in 24 hours
+ * whatever the display. Each picker posts one value.
  */
-
-export const MINUTE_STEP = 5;
 
 type Read<T> =
   { value: T | null; error?: undefined } | { error: string; value?: undefined };
@@ -33,17 +31,13 @@ export function readDate(form: FormData, name: string): Read<string> {
   return { value: `${year}-${pad(month)}-${pad(day)}` };
 }
 
-/** Reads minutes from midnight on the 5-minute grid; empty means no time. */
+/** Reads "HH:MM" as minutes from midnight; empty means no time. */
 export function readTime(form: FormData, name: string): Read<number> {
   const v = part(form, name);
   if (!v) return { value: null };
-  const minutes = Number(v);
-  if (
-    !Number.isInteger(minutes) ||
-    minutes < 0 ||
-    minutes >= 24 * 60 ||
-    minutes % MINUTE_STEP !== 0
-  )
-    return { error: "Такого часу не існує." };
-  return { value: minutes };
+  const m = /^(\d{1,2}):(\d{2})(?::\d{2}(?:\.\d+)?)?$/.exec(v);
+  if (!m) return { error: "Такого часу не існує." };
+  const [hours, minutes] = [Number(m[1]), Number(m[2])];
+  if (hours > 23 || minutes > 59) return { error: "Такого часу не існує." };
+  return { value: hours * 60 + minutes };
 }

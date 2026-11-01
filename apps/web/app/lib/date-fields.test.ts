@@ -18,10 +18,13 @@ describe("date and time pickers", () => {
     expect(readDate(form({ d: "2027-02-31" }), "d").error).toBeTruthy();
     expect(readDate(form({ d: "4.11.2026" }), "d").error).toBeTruthy();
   });
-  it("reads time as minutes on the 5-minute grid", () => {
-    expect(readTime(form({ t: "575" }), "t").value).toBe(575);
+  it("reads the phone's time as minutes from midnight", () => {
+    expect(readTime(form({ t: "09:35" }), "t").value).toBe(575);
+    expect(readTime(form({ t: "19:03" }), "t").value).toBe(19 * 60 + 3);
+    expect(readTime(form({ t: "07:00:00" }), "t").value).toBe(420);
     expect(readTime(form({ t: "" }), "t")).toEqual({ value: null });
-    expect(readTime(form({ t: "1440" }), "t").error).toBeTruthy();
-    expect(readTime(form({ t: "577" }), "t").error).toBeTruthy();
+    expect(readTime(form({ t: "24:00" }), "t").error).toBeTruthy();
+    expect(readTime(form({ t: "12:60" }), "t").error).toBeTruthy();
+    expect(readTime(form({ t: "575" }), "t").error).toBeTruthy();
   });
 });

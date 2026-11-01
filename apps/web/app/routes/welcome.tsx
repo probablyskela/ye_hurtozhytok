@@ -3,6 +3,7 @@ import { redirect } from "react-router";
 import { ProfileForm } from "~/components/profile-form";
 import { TopBar } from "~/components/ui";
 import { requireResident } from "~/lib/auth.server";
+import { safeNext } from "~/lib/next-path";
 import { vocative } from "~/lib/profile";
 import { saveProfile } from "~/lib/residents.server";
 import type { Route } from "./+types/welcome";
@@ -13,7 +14,8 @@ export const meta: Route.MetaFunction = () => [
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const resident = await requireResident(request, context.cloudflare.env);
-  if (resident.room) throw redirect("/");
+  const next = safeNext(new URL(request.url).searchParams.get("next"));
+  if (resident.room) throw redirect(next ?? "/");
   return {
     name: resident.name,
     firstName: resident.firstName ?? resident.name.split(" ")[0],
@@ -26,7 +28,9 @@ export async function action({ request, context }: Route.ActionArgs) {
   const resident = await requireResident(request, env);
   const result = await saveProfile(env, resident, await request.formData());
   if (!result.ok) return { errors: result.errors };
-  throw redirect("/");
+  throw redirect(
+    safeNext(new URL(request.url).searchParams.get("next")) ?? "/",
+  );
 }
 
 /** First run: no back button and no tabs; the room is the only way forward. */

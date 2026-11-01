@@ -11,6 +11,7 @@ import {
 } from "./announcements";
 import { activity, getDb } from "./db";
 import { detectImageType, stripMetadata, type ImageType } from "./images";
+import { markdownExcerpt } from "./markdown.server";
 import {
   announcementImages,
   announcements,
@@ -64,7 +65,7 @@ function card(a: Announcement, cover?: { key: string; count: number }) {
   return {
     id: a.id,
     title: a.title,
-    body: a.body,
+    excerpt: a.body ? markdownExcerpt(a.body) : null,
     place: a.place,
     date: a.date,
     startMin: a.startMin,

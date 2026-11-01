@@ -2,6 +2,7 @@ import { Link, redirect } from "react-router";
 
 import { TopBar } from "~/components/ui";
 import { finishGoogleLogin } from "~/lib/auth.server";
+import { loginUrl } from "~/lib/next-path";
 import type { Route } from "./+types/auth-callback";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
@@ -10,9 +11,14 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     return { error: "Вхід скасовано. Спробуйте ще раз." };
   const result = await finishGoogleLogin(request, context.cloudflare.env);
   if (!result.ok) return { error: result.error };
-  throw redirect(result.needsProfile ? "/welcome" : "/", {
-    headers: result.headers,
-  });
+  throw redirect(
+    result.needsProfile
+      ? loginUrl(result.next, "/welcome")
+      : (result.next ?? "/"),
+    {
+      headers: result.headers,
+    },
+  );
 }
 
 export default function AuthCallback({ loaderData }: Route.ComponentProps) {

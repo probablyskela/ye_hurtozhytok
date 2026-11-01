@@ -2,6 +2,7 @@ import { Form, Link, data, redirect, useNavigation } from "react-router";
 
 import { StatusPill, mediaUrl } from "~/components/announcement";
 import { Check, ConfirmButton } from "~/components/controls";
+import { ShareButton } from "~/components/share-button";
 import { Credit, Icon, TopBar } from "~/components/ui";
 import { REASON_MAX, agoLabel, fmtTime, whenLabel } from "~/lib/announcements";
 import {
@@ -10,6 +11,7 @@ import {
   getAnnouncement,
 } from "~/lib/announcements.server";
 import { requireProfile } from "~/lib/auth.server";
+import { renderMarkdown } from "~/lib/markdown.server";
 import { kyivDateKey, kyivNow } from "~/lib/time";
 import type { Route } from "./+types/announcement";
 
@@ -35,7 +37,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
     a: {
       id: a.id,
       title: a.title,
-      body: a.body,
+      bodyHtml: a.body ? renderMarkdown(a.body) : null,
       place: a.place,
       date: a.date,
       startMin: a.startMin,
@@ -147,7 +149,13 @@ export default function AnnouncementPage({
             </span>
           </div>
         )}
-        {a.body && <p className="ann-body">{a.body}</p>}
+        {a.bodyHtml && (
+          <div
+            className="ann-body rich"
+            // Rendered on the server from Markdown; people's HTML stays text.
+            dangerouslySetInnerHTML={{ __html: a.bodyHtml }}
+          />
+        )}
         <p className="ann-by">
           {a.status === "published"
             ? `Опубліковано ${a.published}`
@@ -158,6 +166,10 @@ export default function AnnouncementPage({
           {a.author}
         </p>
       </article>
+
+      {a.status === "published" && (
+        <ShareButton title={a.title} path={`/announcements/${a.id}`} />
+      )}
 
       {a.status === "rejected" && a.rejectReason && (
         <div className="glass reason">

@@ -17,8 +17,13 @@
     "vapid:keys": "tsx scripts/vapid-keys.ts"
   },
   "dependencies": {
+    "@tiptap/markdown": "3.32.2",
+    "@tiptap/pm": "3.32.2",
+    "@tiptap/react": "3.32.2",
+    "@tiptap/starter-kit": "3.32.2",
     "drizzle-orm": "0.45.3",
     "isbot": "5.1.32",
+    "markdown-it": "15.0.3",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "react-router": "7.18.5"
@@ -27,6 +32,7 @@
     "@cloudflare/vite-plugin": "1.66.0",
     "@react-router/dev": "7.18.5",
     "@tailwindcss/vite": "4.1.17",
+    "@types/markdown-it": "14.2.0",
     "@types/node": "^22.15.2",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",

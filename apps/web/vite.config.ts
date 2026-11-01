@@ -11,4 +11,8 @@ export default defineConfig({
     reactRouter(),
     tsconfigPaths(),
   ],
+  // The editor loads lazily; bundling it up front keeps one copy of React in dev.
+  optimizeDeps: {
+    include: ["@tiptap/react", "@tiptap/starter-kit", "@tiptap/markdown"],
+  },
 });

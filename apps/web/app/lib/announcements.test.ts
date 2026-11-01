@@ -22,7 +22,7 @@ describe("announcement form", () => {
         body: "Звіт за жовтень\r\nі вибори",
         place: "Читальна зала",
         date: "2026-11-02",
-        time: String(19 * 60),
+        time: "19:00",
       }),
       TODAY,
     );
@@ -42,7 +42,10 @@ describe("announcement form", () => {
     expect(r.ok && r.values.date).toBeNull();
   });
   it("explains what is wrong", () => {
-    const r = parseAnnouncementForm(form({ title: "Ок", time: "600" }), TODAY);
+    const r = parseAnnouncementForm(
+      form({ title: "Ок", time: "10:00" }),
+      TODAY,
+    );
     expect(r.ok).toBe(false);
     if (!r.ok) {
       expect(r.errors.title).toBeTruthy();

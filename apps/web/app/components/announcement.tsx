@@ -12,7 +12,8 @@ export function mediaUrl(key: string) {
 type Item = {
   id: number;
   title: string;
-  body: string | null;
+  /** The details as plain text, cut short. */
+  excerpt: string | null;
   place: string | null;
   date: string | null;
   startMin: number | null;
@@ -77,7 +78,7 @@ export function ImportantCard({ a, today }: { a: Item; today: string }) {
           </span>
         </span>
       ) : (
-        a.body && <span className="ann-excerpt">{a.body}</span>
+        a.excerpt && <span className="ann-excerpt">{a.excerpt}</span>
       )}
     </Link>
   );
@@ -101,7 +102,9 @@ export function AnnouncementRow({
       {a.date ? <CalendarLeaf date={a.date} /> : null}
       <span className="ann-row-text">
         <b>{a.title}</b>
-        {!a.date && a.body && <span className="ann-excerpt">{a.body}</span>}
+        {!a.date && a.excerpt && (
+          <span className="ann-excerpt">{a.excerpt}</span>
+        )}
         <span className="meta">
           {a.startMin !== null && (
             <span>

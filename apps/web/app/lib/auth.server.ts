@@ -15,13 +15,20 @@ import {
   randomToken,
   type GoogleClaims,
 } from "./google";
+import { loginUrl, pagePath, safeNext } from "./next-path";
 import { rolesFor } from "./roles.server";
 
 type SessionData = { residentId: number; version: number };
 
 /** The signed-in person with the roles granted to their email. */
 export type Me = Resident & { roles: Role[] };
-type LoginData = { state: string; nonce: string; verifier: string };
+type LoginData = {
+  state: string;
+  nonce: string;
+  verifier: string;
+  /** The page to return to after signing in; "" for the home page. */
+  next: string;
+};
 
 const YEAR_SECONDS = 60 * 60 * 24 * 365;
 
@@ -93,14 +100,15 @@ export async function getCurrentResident(
 /** Signed in; blocked people still see their profile but cannot book. */
 export async function requireResident(request: Request, env: Env): Promise<Me> {
   const resident = await getCurrentResident(request, env);
-  if (!resident) throw redirect("/login");
+  if (!resident) throw redirect(loginUrl(safeNext(pagePath(request))));
   return resident;
 }
 
 /** Signed in and the room is filled in; otherwise the first-run profile. */
 export async function requireProfile(request: Request, env: Env): Promise<Me> {
   const resident = await requireResident(request, env);
-  if (!resident.room) throw redirect("/welcome");
+  if (!resident.room)
+    throw redirect(loginUrl(safeNext(pagePath(request)), "/welcome"));
   return resident;
 }
 
@@ -179,6 +187,11 @@ export async function startGoogleLogin(request: Request, env: Env) {
   const state = randomToken();
   const nonce = randomToken();
   const verifier = randomToken(48);
+  const next =
+    request.method === "POST"
+      ? (await request.formData()).get("next")
+      : new URL(request.url).searchParams.get("next");
+  session.set("next", safeNext(next) ?? "");
   session.set("state", state);
   session.set("nonce", nonce);
   session.set("verifier", verifier);
@@ -195,7 +208,7 @@ export async function startGoogleLogin(request: Request, env: Env) {
 }
 
 export type CallbackResult =
-  | { ok: true; headers: Headers; needsProfile: boolean }
+  | { ok: true; headers: Headers; needsProfile: boolean; next: string | null }
   | { ok: false; error: string };
 
 const LOGIN_ERRORS = {
@@ -261,7 +274,12 @@ export async function finishGoogleLogin(
   const headers = new Headers();
   headers.append("Set-Cookie", await startSession(request, env, resident));
   headers.append("Set-Cookie", await storage.destroySession(login));
-  return { ok: true, headers, needsProfile: !resident.room };
+  return {
+    ok: true,
+    headers,
+    needsProfile: !resident.room,
+    next: safeNext(login.get("next")),
+  };
 }
 
 export async function devLogin(

@@ -167,15 +167,15 @@ export function DateField({
             onChange={() => setValue("")}
           />
           <span>
-            <small>Без</small>
-            <b>дати</b>
+            <b>
+              Без
+              <br />
+              дати
+            </b>
           </span>
         </label>
-        {list.map((d, i) => {
-          const month =
-            i === 0 || dayOfMonth(d) === 1
-              ? MONTHS_SHORT[Number(d.slice(5, 7)) - 1]
-              : null;
+        {list.map((d) => {
+          const month = MONTHS_SHORT[Number(d.slice(5, 7)) - 1];
           return (
             <label className="day-tile" key={d} aria-label={dateLong(d)}>
               <input
@@ -195,7 +195,7 @@ export function DateField({
                       : WEEKDAYS_SHORT[weekdayIndex(d)]}
                 </small>
                 <b>{dayOfMonth(d)}</b>
-                {month && <i>{month}</i>}
+                <i>{month}</i>
               </span>
             </label>
           );
@@ -217,7 +217,11 @@ export function DateField({
 const pad = (n: number) => String(n).padStart(2, "0");
 const fmt = (m: number) => `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
 
-/** Time as our own drop-down: a grid of times every 15 minutes, «Без часу» first. */
+/**
+ * Time from the phone's own picker (the wheel on iPhone), dressed as our
+ * field: the real <input type="time"> lies invisibly over it and takes the
+ * tap. Without JavaScript the input simply shows as it is.
+ */
 export function TimeField({
   name,
   defaultValue,
@@ -227,58 +231,62 @@ export function TimeField({
   defaultValue: number | null;
   error?: string;
 }) {
-  const times = Array.from({ length: (24 - 6) * 4 }, (_, i) => 6 * 60 + i * 15);
-  // An existing time off the 15-minute grid stays choosable.
-  if (defaultValue !== null && !times.includes(defaultValue)) {
-    times.push(defaultValue);
-    times.sort((a, b) => a - b);
-  }
-  const [value, setValue] = useState<number | null>(defaultValue);
-  const box = useRef<HTMLDetailsElement>(null);
-  const pick = (v: number | null) => {
-    setValue(v);
-    box.current?.removeAttribute("open");
-  };
+  const [value, setValue] = useState(
+    defaultValue === null ? "" : fmt(defaultValue),
+  );
+  const [live, setLive] = useState(false);
+  useEffect(() => setLive(true), []);
+  const input = useRef<HTMLInputElement>(null);
   return (
     <div className="field-row">
-      <span className="label-like" id={`${name}-label`}>
+      <label htmlFor={name}>
         Час <span className="opt">необовʼязково</span>
-      </span>
-      <details className="dropdown" ref={box}>
-        <summary aria-labelledby={`${name}-label ${name}-value`}>
-          <Icon name="clock" small />
-          <span id={`${name}-value`}>
-            {value === null ? "Без часу" : fmt(value)}
+      </label>
+      <div className={live ? "time-field live" : "time-field"}>
+        {live && (
+          <span className="time-face" aria-hidden="true">
+            <Icon name="clock" small />
+            <span className={value ? undefined : "empty"}>
+              {value || "Без часу"}
+            </span>
           </span>
-        </summary>
-        <div className="dropdown-panel time-grid" role="radiogroup">
-          <label className="time-opt wide">
-            <input
-              className="control-input"
-              type="radio"
-              name={name}
-              value=""
-              defaultChecked={defaultValue === null}
-              onChange={() => pick(null)}
-            />
-            <span>Без часу</span>
-          </label>
-          {times.map((t) => (
-            <label className="time-opt" key={t}>
-              <input
-                className="control-input"
-                type="radio"
-                name={name}
-                value={t}
-                defaultChecked={t === defaultValue}
-                onChange={() => pick(t)}
-              />
-              <span>{fmt(t)}</span>
-            </label>
-          ))}
-        </div>
-      </details>
-      {error && <small className="field-error">{error}</small>}
+        )}
+        <input
+          ref={input}
+          id={name}
+          name={name}
+          type="time"
+          value={value}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${name}-error` : undefined}
+          onChange={(e) => setValue(e.target.value)}
+          onClick={() => {
+            // Desktop browsers open their picker only from a small icon.
+            try {
+              input.current?.showPicker();
+            } catch {
+              // Not supported: the input still takes typing.
+            }
+          }}
+        />
+        {live && value && (
+          <button
+            type="button"
+            className="time-clear"
+            aria-label="Прибрати час"
+            onClick={() => setValue("")}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 7l10 10M17 7 7 17" />
+            </svg>
+          </button>
+        )}
+      </div>
+      {error && (
+        <small className="field-error" id={`${name}-error`}>
+          {error}
+        </small>
+      )}
     </div>
   );
 }

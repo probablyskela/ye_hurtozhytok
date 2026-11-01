@@ -1747,8 +1747,179 @@ a.day:hover {
   margin: 0;
   font-size: 15.5px;
   line-height: 1.5;
-  white-space: pre-line;
   overflow-wrap: anywhere;
+}
+
+/* Formatted details: on the announcement page and inside the editor. */
+.rich > :first-child {
+  margin-top: 0;
+}
+.rich > :last-child {
+  margin-bottom: 0;
+}
+.rich p {
+  margin: 0 0 0.65em;
+}
+.rich h2 {
+  margin: 1.1em 0 0.4em;
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.rich ul,
+.rich ol {
+  margin: 0 0 0.65em;
+  padding-left: 1.35em;
+}
+.rich ul {
+  list-style: disc;
+}
+.rich ol {
+  list-style: decimal;
+}
+.rich li {
+  margin: 0.15em 0;
+  padding-left: 0.15em;
+}
+.rich li > p {
+  margin: 0;
+}
+.rich li::marker {
+  color: var(--muted);
+}
+.rich a {
+  color: var(--mine);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+.rich strong {
+  font-weight: 700;
+}
+
+.rich-field {
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.8);
+  box-shadow: inset 0 0 0 1px rgb(16 18 23 / 0.12);
+  transition:
+    background 0.15s,
+    box-shadow 0.15s;
+}
+/* An outline, not an inset shadow: it is drawn above the sticky toolbar. */
+.rich-field:focus-within {
+  background: #fff;
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+  box-shadow: 0 0 0 4px rgb(16 18 23 / 0.08);
+}
+.rich-tools {
+  position: sticky;
+  top: 8px;
+  z-index: 2;
+  display: flex;
+  gap: 2px;
+  padding: 6px;
+  border-bottom: 1px solid var(--line);
+  border-radius: 16px 16px 0 0;
+  background: inherit;
+}
+.rich-tool {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 36px;
+  border-radius: 10px;
+  color: var(--ink-2);
+  font-size: 17px;
+  line-height: 1;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+.rich-tool b {
+  font-weight: 800;
+}
+.rich-tool i {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+  font-weight: 600;
+}
+.rich-tool svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.rich-tool svg .dot {
+  fill: currentColor;
+  stroke: none;
+}
+.rich-tool:hover {
+  background: rgb(16 18 23 / 0.06);
+}
+.rich-tool[aria-pressed="true"] {
+  background: var(--ink);
+  color: #fff;
+}
+.rich-tool:focus-visible {
+  outline: 2px solid var(--mine);
+  outline-offset: 1px;
+}
+.rich-link {
+  display: flex;
+  gap: 6px;
+  padding: 8px 8px 0;
+}
+.rich-link input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: rgb(16 18 23 / 0.05);
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+}
+.rich-link input:focus {
+  outline: 2px solid var(--ink);
+}
+.rich-link-ok {
+  padding: 0 14px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+}
+.rich-input {
+  min-height: 130px;
+  padding: 12px 16px 14px;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+  outline: none;
+}
+.rich-input h2 {
+  font-size: 17px;
+}
+.rich-count {
+  display: block;
+  padding: 0 16px 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.rich-count.over {
+  color: var(--danger);
+  font-weight: 600;
 }
 .ann-by {
   margin: 4px 0 0;
@@ -1928,6 +2099,34 @@ textarea.area:focus {
   opacity: 0.5;
   cursor: default;
 }
+.share {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+.share > small {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.share-url {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.8);
+  box-shadow: inset 0 0 0 1px rgb(16 18 23 / 0.12);
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+}
+.form-failed {
+  margin: -4px 4px -6px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--danger);
+}
 .form-note {
   margin: -6px 4px 0;
   text-align: center;
@@ -2103,12 +2302,15 @@ input[type="search"]::-webkit-search-decoration {
 }
 .date-tiles {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   overflow-x: auto;
-  padding: 12px 4px 8px;
-  margin: 0 -4px;
+  /* Runs to the card's edges; room below for the tiles' shadows. */
+  margin: 0 -16px -8px;
+  padding: 4px 16px 16px;
+  scroll-padding-inline: 16px;
   scrollbar-width: none;
   scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
 }
 .date-tiles::-webkit-scrollbar {
   display: none;
@@ -2125,8 +2327,10 @@ input[type="search"]::-webkit-search-decoration {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 62px;
-  min-height: 64px;
+  gap: 1px;
+  min-width: 64px;
+  height: 76px;
+  padding: 0 8px;
   border-radius: 18px;
   background: var(--glass-strong);
   box-shadow: var(--shadow-gloss);
@@ -2138,36 +2342,39 @@ input[type="search"]::-webkit-search-decoration {
   font-size: 11.5px;
   font-weight: 600;
   color: var(--muted);
+  white-space: nowrap;
 }
 .day-tile b {
-  font-size: 19px;
+  font-size: 20px;
+  line-height: 1.1;
   font-weight: 700;
   letter-spacing: -0.02em;
   font-feature-settings: "tnum";
 }
 .day-tile i {
-  position: absolute;
-  top: -7px;
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: var(--ink-2);
-  color: #fff;
   font-style: normal;
-  font-size: 10.5px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
 }
 .day-tile.none b {
-  font-size: 15px;
+  font-size: 14px;
+  line-height: 1.2;
+  text-align: center;
+  letter-spacing: 0;
 }
 .day-tile:hover > span {
   background: #fff;
 }
 /* A filter-like choice: ink, like a chosen day on the booking page. */
+/* No white top highlight on ink: it shows as a light rim on the dark tile. */
 .day-tile .control-input:checked + span {
   background: var(--ink);
   color: #fff;
+  box-shadow: 0 6px 16px -6px rgb(16 18 23 / 0.45);
 }
-.day-tile .control-input:checked + span small {
+.day-tile .control-input:checked + span small,
+.day-tile .control-input:checked + span i {
   color: rgb(255 255 255 / 0.72);
 }
 .day-tile .control-input:focus-visible + span {
@@ -2178,96 +2385,79 @@ input[type="search"]::-webkit-search-decoration {
   display: block;
   margin-top: 4px;
 }
-/* Our drop-down: a capsule that opens a glass panel; works without JavaScript */
-.dropdown {
+/* Time: the phone's own picker under our capsule */
+.time-field {
   position: relative;
 }
-.dropdown > summary {
+.time-field input,
+.time-face {
   display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
   min-height: 52px;
   padding: 0 16px;
   border-radius: 16px;
   background: rgb(255 255 255 / 0.8);
   box-shadow: inset 0 0 0 1px rgb(16 18 23 / 0.12);
+  font: inherit;
   font-size: 17px;
   font-weight: 600;
   letter-spacing: -0.01em;
   font-feature-settings: "tnum";
+  color: var(--ink);
+}
+.time-face .ico {
+  color: var(--ink-2);
+}
+.time-face .empty {
+  color: var(--muted);
+  font-weight: 500;
+}
+/* Once our capsule shows, the real input covers it unseen and takes the tap. */
+.time-field.live input {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  opacity: 0;
   cursor: pointer;
-  list-style: none;
+  -webkit-appearance: none;
+  appearance: none;
 }
-.dropdown > summary::-webkit-details-marker {
-  display: none;
-}
-.dropdown > summary::after {
-  content: "";
-  width: 8px;
-  height: 8px;
-  margin-left: auto;
-  border: solid var(--ink-2);
-  border-width: 0 2px 2px 0;
-  transform: translateY(-2px) rotate(45deg);
-  transition: transform 0.25s var(--ease);
-}
-.dropdown[open] > summary {
+.time-field.live:focus-within .time-face {
   background: #fff;
   box-shadow:
     inset 0 0 0 2px var(--ink),
     0 0 0 4px rgb(16 18 23 / 0.08);
 }
-.dropdown[open] > summary::after {
-  transform: translateY(2px) rotate(-135deg);
+.time-field:not(.live) input[aria-invalid="true"],
+.time-field:has(input[aria-invalid="true"]) .time-face {
+  box-shadow: inset 0 0 0 2px var(--danger);
 }
-.dropdown > summary .ico {
-  color: var(--ink-2);
-}
-.dropdown-panel {
-  margin-top: 8px;
-  max-height: 264px;
-  overflow-y: auto;
-  padding: 8px;
-  border-radius: 20px;
-  background: rgb(255 255 255 / 0.92);
-  -webkit-backdrop-filter: blur(18px) saturate(170%);
-  backdrop-filter: blur(18px) saturate(170%);
-  box-shadow: var(--shadow-glass);
-  animation: rise 0.25s var(--ease-out);
-}
-.time-grid {
+.time-clear {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  z-index: 1;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 4px;
-}
-.time-opt {
-  position: relative;
-  cursor: pointer;
-}
-.time-opt.wide {
-  grid-column: 1 / -1;
-}
-.time-opt span {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
+  place-items: center;
+  width: 36px;
+  height: 36px;
   border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  font-feature-settings: "tnum";
-  transition: background 0.15s var(--ease);
+  transform: translateY(-50%);
+  color: var(--muted);
 }
-.time-opt:hover span {
+.time-clear:hover {
   background: rgb(16 18 23 / 0.06);
+  color: var(--ink);
 }
-.time-opt .control-input:checked + span {
-  background: var(--ink);
-  color: #fff;
-}
-.time-opt .control-input:focus-visible + span {
-  outline: 2px solid var(--mine);
-  outline-offset: -2px;
+.time-clear svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
 }
 /* Asking before something destructive, in place */
 .btn-danger {
