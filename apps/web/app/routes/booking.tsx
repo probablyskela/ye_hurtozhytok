@@ -15,7 +15,7 @@ import { notifyCancelledByCouncil } from "~/lib/scheduled.server";
 import { dayHeading, kyivMinuteToUtc, kyivNow } from "~/lib/time";
 import type { Route } from "./+types/booking";
 
-export const handle = { tab: "bookings" };
+export const handle = { tab: "me" };
 export const meta: Route.MetaFunction = () => [
   { title: "Мій запис · єГуртожиток" },
 ];
@@ -69,7 +69,7 @@ export async function action({ request, params, context }: Route.ActionArgs) {
       context.cloudflare.ctx.waitUntil(notifyCancelledByCouncil(env, id));
       throw redirect(`/machines/${before.machineSlug}?d=${before.date}`);
     }
-    if (ok) throw redirect("/bookings");
+    if (ok) throw redirect("/me");
     return data(
       {
         error:
@@ -80,7 +80,7 @@ export async function action({ request, params, context }: Route.ActionArgs) {
   }
   if (intent === "release") {
     const ok = await releaseBooking(env, resident, id, now);
-    if (ok) throw redirect("/");
+    if (ok) throw redirect("/laundry");
     return data(
       { error: "Звільнити можна лише запис, який зараз триває." },
       { status: 409 },
@@ -105,7 +105,7 @@ export default function BookingPage({
           : "Підтверджено";
   return (
     <>
-      <TopBar back="/bookings" title={b.mine ? "Мій запис" : "Запис"} />
+      <TopBar back="/me" title={b.mine ? "Мій запис" : "Запис"} />
       {isNew && (
         <p className="ok-note" role="status">
           Записано. Нагадаємо за 15 хвилин, якщо сповіщення увімкнені.

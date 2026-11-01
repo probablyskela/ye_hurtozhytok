@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { createCookieSessionStorage, redirect } from "react-router";
 
 import { activity, getDb } from "./db";
-import { residents, type Resident } from "./db/schema";
+import { residents, type Resident, type Role } from "./db/schema";
 import { parseName, shortName, type PersonName } from "./names";
 import {
   GOOGLE_JWKS_URL,
@@ -15,8 +15,12 @@ import {
   randomToken,
   type GoogleClaims,
 } from "./google";
+import { rolesFor } from "./roles.server";
 
 type SessionData = { residentId: number; version: number };
+
+/** The signed-in person with the roles granted to their email. */
+export type Me = Resident & { roles: Role[] };
 type LoginData = { state: string; nonce: string; verifier: string };
 
 const YEAR_SECONDS = 60 * 60 * 24 * 365;
@@ -71,7 +75,7 @@ export function devLoginEnabled(env: Env, request: Request): boolean {
 export async function getCurrentResident(
   request: Request,
   env: Env,
-): Promise<Resident | null> {
+): Promise<Me | null> {
   const storage = sessionStorage(env, request);
   const session = await storage.getSession(request.headers.get("Cookie"));
   const residentId = session.get("residentId");
@@ -83,24 +87,18 @@ export async function getCurrentResident(
     .get();
   if (!resident || resident.sessionVersion !== session.get("version"))
     return null;
-  return resident;
+  return { ...resident, roles: await rolesFor(env, resident.email) };
 }
 
 /** Signed in; blocked people still see their profile but cannot book. */
-export async function requireResident(
-  request: Request,
-  env: Env,
-): Promise<Resident> {
+export async function requireResident(request: Request, env: Env): Promise<Me> {
   const resident = await getCurrentResident(request, env);
   if (!resident) throw redirect("/login");
   return resident;
 }
 
 /** Signed in and the room is filled in; otherwise the first-run profile. */
-export async function requireProfile(
-  request: Request,
-  env: Env,
-): Promise<Resident> {
+export async function requireProfile(request: Request, env: Env): Promise<Me> {
   const resident = await requireResident(request, env);
   if (!resident.room) throw redirect("/welcome");
   return resident;

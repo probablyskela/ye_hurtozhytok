@@ -6,7 +6,15 @@ import {
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 
-export const ROLES = ["resident", "council"] as const;
+// Everyone signed in is a resident; a role only adds rights. Roles are
+// granted by email (see roleGrants), so they work before the first sign-in.
+export const ROLES = [
+  "council",
+  "council_head",
+  "squad",
+  "squad_head",
+  "site_manager",
+] as const;
 export type Role = (typeof ROLES)[number];
 
 export const MACHINE_STATUSES = ["working", "broken"] as const;
@@ -31,7 +39,6 @@ export const residents = sqliteTable(
     room: text("room"),
     // Telegram username without "@", optional, so others can reach the person.
     telegram: text("telegram"),
-    role: text("role", { enum: ROLES }).notNull().default("resident"),
     blocked: integer("blocked", { mode: "boolean" }).notNull().default(false),
     // Bumped on block so open sessions stop working at once.
     sessionVersion: integer("session_version").notNull().default(1),
@@ -97,6 +104,20 @@ export const pushSubscriptions = sqliteTable(
   (t) => [uniqueIndex("push_endpoint_idx").on(t.endpoint)],
 );
 
+export const roleGrants = sqliteTable(
+  "role_grants",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    // Lower-case @lpnu.ua address; matched against residents.email.
+    email: text("email").notNull(),
+    role: text("role", { enum: ROLES }).notNull(),
+    // Null when granted by the role:grant script.
+    grantedBy: integer("granted_by").references(() => residents.id),
+    createdAt: integer("created_at").notNull(),
+  },
+  (t) => [uniqueIndex("role_grants_email_role_idx").on(t.email, t.role)],
+);
+
 export const activityLog = sqliteTable(
   "activity_log",
   {
@@ -114,5 +135,6 @@ export const activityLog = sqliteTable(
 );
 
 export type Resident = typeof residents.$inferSelect;
+export type RoleGrant = typeof roleGrants.$inferSelect;
 export type Machine = typeof machines.$inferSelect;
 export type Booking = typeof bookings.$inferSelect;

@@ -17,7 +17,7 @@
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "db:migrate:local": "npm run db:migrate:local --workspace @ehurtozhytok/web",
-    "council:add": "npm run council:add --workspace @ehurtozhytok/web --"
+    "role:grant": "npm run role:grant --workspace @ehurtozhytok/web --"
   },
   "devDependencies": {
     "prettier": "^3.5.3"

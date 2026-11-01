@@ -1,9 +1,10 @@
 import { and, asc, eq, gt, or, sql } from "drizzle-orm";
 
 import { activity, getDb } from "./db";
-import { bookings, residents, type Resident } from "./db/schema";
+import { bookings, residents, roleGrants, type Resident } from "./db/schema";
 import { kyivNow } from "./time";
 import { canBlock, type Actor } from "./permissions";
+import { rolesFor } from "./roles.server";
 import { PROFILE_ERRORS, normalizeRoom, normalizeTelegram } from "./profile";
 
 export type ProfileResult =
@@ -47,7 +48,10 @@ export async function listResidents(env: Env) {
       email: residents.email,
       room: residents.room,
       telegram: residents.telegram,
-      role: residents.role,
+      // Comma-separated roles granted to the person's email, or null.
+      roles: sql<
+        string | null
+      >`(select group_concat(${roleGrants.role}) from ${roleGrants} where ${roleGrants.email} = lower(${residents.email}))`,
       blocked: residents.blocked,
     })
     .from(residents)
@@ -68,7 +72,14 @@ export async function setBlocked(
     .from(residents)
     .where(eq(residents.id, targetId))
     .get();
-  if (!target || !canBlock(actor, target)) return false;
+  if (
+    !target ||
+    !canBlock(actor, {
+      id: target.id,
+      roles: await rolesFor(env, target.email),
+    })
+  )
+    return false;
   await db
     .update(residents)
     .set({

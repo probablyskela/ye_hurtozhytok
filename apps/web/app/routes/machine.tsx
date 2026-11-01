@@ -32,7 +32,7 @@ import { usePolling } from "~/lib/use-polling";
 import type { Route } from "./+types/machine";
 import "../timeline.css";
 
-export const handle = { tab: null };
+export const handle = { tab: "laundry" };
 export const meta: Route.MetaFunction = ({ data }) => [
   { title: `${data?.machine.name ?? "Пралка"} · єГуртожиток` },
 ];
@@ -147,7 +147,7 @@ export default function MachineDay({
 
   return (
     <>
-      <TopBar back="/" />
+      <TopBar back="/laundry" />
       <div className="day-head">
         <div>
           <h2>{machine.name}</h2>

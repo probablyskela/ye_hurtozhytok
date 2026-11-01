@@ -1,15 +1,14 @@
-import { Form, Link } from "react-router";
+import { Form } from "react-router";
 
 import { ProfileForm } from "~/components/profile-form";
 import { ReminderSwitch } from "~/components/reminder-switch";
 import { Credit, Icon, TopBar } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
-import { isCouncil } from "~/lib/permissions";
 import { initials } from "~/lib/profile";
 import { saveProfile } from "~/lib/residents.server";
 import type { Route } from "./+types/profile";
 
-export const handle = { tab: "profile" };
+export const handle = { tab: "me" };
 export const meta: Route.MetaFunction = () => [
   { title: "Профіль · єГуртожиток" },
 ];
@@ -22,7 +21,6 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     email: r.email,
     room: r.room,
     telegram: r.telegram,
-    council: isCouncil(r),
     blocked: r.blocked,
     vapidKey: env.VAPID_PUBLIC_KEY ?? "",
   };
@@ -42,7 +40,7 @@ export default function Profile({
   const p = loaderData;
   return (
     <>
-      <TopBar back="/" title="Профіль" />
+      <TopBar back="/me" title="Профіль" />
       <div className="me">
         <span className="me-av" aria-hidden="true">
           {initials(p.name)}
@@ -71,23 +69,6 @@ export default function Profile({
       />
 
       <ReminderSwitch vapidKey={p.vapidKey} />
-
-      {p.council && (
-        <Link
-          className="glass list-row"
-          to="/council"
-          style={{ marginTop: 14 }}
-        >
-          <span className="who-av">
-            <Icon name="shield" small />
-          </span>
-          <span style={{ flex: 1 }}>
-            <b>Студрада</b>
-            <span className="sub">Мешканці й блокування</span>
-          </span>
-          <Icon name="chev" small />
-        </Link>
-      )}
 
       <Form
         method="post"

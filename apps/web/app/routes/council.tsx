@@ -10,10 +10,11 @@ import { requireProfile } from "~/lib/auth.server";
 import { fullName } from "~/lib/names";
 import { roomLabel } from "~/lib/profile";
 import { canBlock, isCouncil } from "~/lib/permissions";
+import { isRole } from "~/lib/roles";
 import { listResidents, setBlocked } from "~/lib/residents.server";
 import type { Route } from "./+types/council";
 
-export const handle = { tab: "profile" };
+export const handle = { tab: "me" };
 export const meta: Route.MetaFunction = () => [
   { title: "Студрада · єГуртожиток" },
 ];
@@ -25,18 +26,25 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     throw new Response("Ця сторінка лише для студради.", { status: 403 });
   const people = await listResidents(env);
   return {
-    people: people.map((p) => ({
-      ...p,
-      full:
-        p.lastName || p.firstName
-          ? fullName({
-              firstName: p.firstName ?? "",
-              lastName: p.lastName ?? "",
-              patronymic: p.patronymic,
-            })
-          : p.name,
-      canBlock: canBlock(me, p),
-    })),
+    people: people.map((raw) => {
+      const p = {
+        ...raw,
+        roles: (raw.roles?.split(",") ?? []).filter(isRole),
+      };
+      return {
+        ...p,
+        full:
+          p.lastName || p.firstName
+            ? fullName({
+                firstName: p.firstName ?? "",
+                lastName: p.lastName ?? "",
+                patronymic: p.patronymic,
+              })
+            : p.name,
+        council: isCouncil(p),
+        canBlock: canBlock(me, p),
+      };
+    }),
   };
 }
 
@@ -88,7 +96,7 @@ export default function Council({
   ];
   return (
     <>
-      <TopBar back="/profile" title="Студрада" />
+      <TopBar back="/me" title="Студрада" />
       <p className="lede">
         Записи будь-кого можна скасувати на сторінці пралки. Тут — блокування
         мешканців.
@@ -129,9 +137,7 @@ export default function Council({
             <span style={{ flex: 1, minWidth: 0 }}>
               <b>
                 {p.full}{" "}
-                {p.role === "council" && (
-                  <span className="council-tag">студрада</span>
-                )}
+                {p.council && <span className="council-tag">студрада</span>}
               </b>
               <span className="sub">
                 {roomLabel(p.room)} · {p.email}

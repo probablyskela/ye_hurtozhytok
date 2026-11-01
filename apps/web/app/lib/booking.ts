@@ -14,8 +14,7 @@ export const BUFFER_MIN = 5;
 /** A booking lasts 30 minutes to 2.5 hours, in 5-minute steps. */
 export const MIN_DURATION = 30;
 export const MAX_DURATION = 150;
-/** One-tap lengths on the home screen; the booking page takes any length. */
-export const QUICK_DURATIONS = [30, 60, 90, 120, 150] as const;
+/** The length the booking page starts with; any length can be chosen. */
 export const DEFAULT_DURATION = 120;
 /** Today plus six more days. */
 export const HORIZON_DAYS = 7;

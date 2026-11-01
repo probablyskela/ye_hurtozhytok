@@ -32,7 +32,7 @@ import {
 } from "~/lib/time";
 import type { Route } from "./+types/book";
 
-export const handle = { tab: "book", sheet: true };
+export const handle = { tab: "laundry", sheet: true };
 export const meta: Route.MetaFunction = () => [
   { title: "Записатися · єГуртожиток" },
 ];
@@ -206,7 +206,7 @@ export default function Book({ loaderData, actionData }: Route.ComponentProps) {
 
   return (
     <Form method="post" replace>
-      <TopBar back="/" />
+      <TopBar back="/laundry" />
       <h2 className="title">Записатися</h2>
       <p className="lede">
         Оберіть день і пралку, а на шкалі — час і тривалість.

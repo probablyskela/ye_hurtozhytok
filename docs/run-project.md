@@ -25,10 +25,11 @@ npm run dev                                            # адресу показ
 Ключі для нагадувань локально: `npm run vapid:keys --workspace @ehurtozhytok/web`,
 обидва значення в `.dev.vars`.
 
-Члена студради призначає скрипт (людина має хоч раз увійти):
+Роль видає скрипт; людині не обовʼязково вже входити. Далі ролі роздає
+розпорядник у застосунку («Моє → Ролі»):
 
 ```bash
-npm run council:add -- --email імʼя@lpnu.ua
+npm run role:grant -- --email імʼя@lpnu.ua --role site_manager
 ```
 
 ## Перевірки
@@ -72,8 +73,9 @@ cd ../gateway && npm run deploy           # лише коли змінився �
 
 Нова пара ключів VAPID (`npm run vapid:keys`) робить недійсними всі наявні
 підписки на сповіщення: публічний ключ іде у `vars.VAPID_PUBLIC_KEY`, приватний
-— у секрет. Члена студради в продакшені призначає
-`npm run council:add -- --email імʼя@lpnu.ua --remote` (з кореня).
+— у секрет. Першого розпорядника в продакшені призначає
+`npm run role:grant -- --email імʼя@lpnu.ua --role site_manager --remote`
+(з кореня).
 
 Якщо потрібна нова база: `npx wrangler d1 create ehurtozhytok`, `id` з
 відповіді — у `database_id` у `wrangler.jsonc`.

@@ -1,17 +1,15 @@
 import { Outlet, useMatches } from "react-router";
 
-import { TabBar } from "~/components/ui";
+import { TabBar, type Tab } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
 import type { Route } from "./+types/app-layout";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const r = await requireProfile(request, context.cloudflare.env);
   return {
-    resident: { id: r.id, name: r.name, role: r.role, blocked: r.blocked },
+    resident: { id: r.id, name: r.name, roles: r.roles, blocked: r.blocked },
   };
 }
-
-type Tab = "home" | "book" | "bookings" | "profile" | null;
 
 export default function AppLayout() {
   const matches = useMatches();

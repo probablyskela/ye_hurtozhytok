@@ -382,34 +382,29 @@ export function Ticket({
   );
 }
 
-export function TabBar({
-  active,
-}: {
-  active: "home" | "book" | "bookings" | "profile" | null;
-}) {
+export type Tab = "laundry" | "me" | null;
+
+/** Sections of the app; each section owns its own actions. */
+export function TabBar({ active }: { active: Tab }) {
   return (
     <nav className="tabbar" aria-label="Розділи">
       <Link
         viewTransition
         className="tab"
-        to="/"
-        aria-current={active === "home" ? "page" : undefined}
+        to="/laundry"
+        aria-current={active === "laundry" ? "page" : undefined}
       >
-        <Icon name="home" />
-        Головна
-      </Link>
-      <Link className="tab-main" to="/book" viewTransition>
-        <Icon name="plus" />
-        Записатися
+        <Icon name="washer" />
+        Пральня
       </Link>
       <Link
         viewTransition
         className="tab"
-        to="/bookings"
-        aria-current={active === "bookings" ? "page" : undefined}
+        to="/me"
+        aria-current={active === "me" ? "page" : undefined}
       >
-        <Icon name="cal" />
-        Мої записи
+        <Icon name="user" />
+        Моє
       </Link>
     </nav>
   );

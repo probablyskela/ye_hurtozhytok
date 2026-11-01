@@ -1,10 +1,10 @@
 // єГуртожиток service worker: offline read-only pages and booking reminders.
 // Bump the version when the caching rules change: activate drops older caches.
-const CACHE = "eh-v3";
+const CACHE = "eh-v4";
 
-// Only the home page and machine pages are kept for offline reading; profile,
-// bookings and the council page are never cached, so nothing personal beyond
-// the home page outlives a logout. React Router fetches page data from
+// Only the start page, the laundry page and machine pages are kept for offline
+// reading; «Моє», profile, bookings, council and roles are never cached, so
+// nothing personal beyond the laundry page outlives a logout. React Router fetches page data from
 // "<path>.data" ("/_root.data" for "/"), so data requests follow the same rule.
 const pagePath = (path) =>
   path === "/_root.data"
@@ -12,7 +12,8 @@ const pagePath = (path) =>
     : path.endsWith(".data")
       ? path.slice(0, -5)
       : path;
-const OFFLINE_OK = (path) => path === "/" || path.startsWith("/machines/");
+const OFFLINE_OK = (path) =>
+  path === "/" || path === "/laundry" || path.startsWith("/machines/");
 
 const OFFLINE_HTML = `<!doctype html>
 <html lang="uk">
@@ -21,8 +22,8 @@ const OFFLINE_HTML = `<!doctype html>
 <title>Немає зʼєднання · єГуртожиток</title>
 <body style="margin:0;padding:24px 16px;font:16px/1.5 system-ui,sans-serif;background:#edf2f8;color:#101217">
 <h1 style="margin:0 0 8px;font-size:22px">Немає зʼєднання</h1>
-<p style="margin:0 0 16px">Без інтернету можна переглянути лише головну й сторінки пралок, які ви вже відкривали. Записатися чи скасувати запис можна, коли зʼєднання повернеться.</p>
-<a href="/" style="color:#2a37d8;font-weight:600">На головну</a>
+<p style="margin:0 0 16px">Без інтернету можна переглянути лише пральню й сторінки пралок, які ви вже відкривали. Записатися чи скасувати запис можна, коли зʼєднання повернеться.</p>
+<a href="/laundry" style="color:#2a37d8;font-weight:600">До пральні</a>
 </body>
 </html>`;
 

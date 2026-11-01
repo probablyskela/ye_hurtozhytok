@@ -14,12 +14,15 @@ export default [
   route("push", "routes/push.ts"),
   route("bookings/:id/calendar.ics", "routes/booking-ics.ts"),
   layout("routes/app-layout.tsx", [
-    index("routes/home.tsx"),
+    index("routes/index.tsx"),
+    route("laundry", "routes/laundry.tsx"),
     route("book", "routes/book.tsx"),
     route("machines/:slug", "routes/machine.tsx"),
     route("bookings", "routes/bookings.tsx"),
     route("bookings/:id", "routes/booking.tsx"),
+    route("me", "routes/me.tsx"),
     route("profile", "routes/profile.tsx"),
     route("council", "routes/council.tsx"),
+    route("roles", "routes/roles.tsx"),
   ]),
 ] satisfies RouteConfig;

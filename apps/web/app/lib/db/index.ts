@@ -16,14 +16,16 @@ export type ActivityAction =
   | "resident.joined"
   | "resident.profile"
   | "resident.blocked"
-  | "resident.unblocked";
+  | "resident.unblocked"
+  | "role.granted"
+  | "role.revoked";
 
 export function activity(
   db: Db,
   entry: {
     actorId: number;
     action: ActivityAction;
-    entity: "booking" | "resident";
+    entity: "booking" | "resident" | "role_grant";
     entityId: number;
     details?: Record<string, unknown>;
   },
