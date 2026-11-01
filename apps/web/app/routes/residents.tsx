@@ -7,7 +7,7 @@ import {
   type ShouldRevalidateFunctionArgs,
 } from "react-router";
 
-import { Check, ChoiceChips, ConfirmButton } from "~/components/controls";
+import { Check, ConfirmButton } from "~/components/controls";
 import { Credit, TopBar } from "~/components/ui";
 import { requireProfile } from "~/lib/auth.server";
 import {
@@ -21,7 +21,7 @@ import { roomLabel } from "~/lib/profile";
 import { searchFrom } from "~/lib/search-params";
 import { ROLES, ROLE_LABELS, type Role } from "~/lib/roles";
 import { setBlocked } from "~/lib/residents.server";
-import { grantRole, listPeople, setRoles } from "~/lib/roles.server";
+import { listPeople, setRoles } from "~/lib/roles.server";
 import type { Route } from "./+types/residents";
 
 export const handle = { tab: "me" };
@@ -103,20 +103,12 @@ export async function action({ request, context }: Route.ActionArgs) {
   const env = context.cloudflare.env;
   const me = await requireProfile(request, env);
   const form = await request.formData();
-  if (form.get("intent") === "grant") {
-    const result = await grantRole(env, me, form);
-    if (!result.ok)
-      return data({ error: result.error, email: null }, { status: 400 });
-    return {
-      email: result.email,
-      note: `Видано: ${ROLE_LABELS[result.role]}.${
-        result.pending
-          ? " Людина ще не входила — роль увімкнеться після першого входу."
-          : ""
-      }`,
-    };
-  }
   const intent = form.get("intent");
+  if (intent === "grant" && form.getAll("role").length === 0)
+    return data(
+      { error: "Оберіть хоча б одну роль.", email: null },
+      { status: 400 },
+    );
   if (intent === "block" || intent === "unblock") {
     const ok = await setBlocked(
       env,
@@ -147,11 +139,15 @@ export async function action({ request, context }: Route.ActionArgs) {
       `знято: ${result.removed.map((r) => ROLE_LABELS[r]).join(", ")}`,
     result.kept.length && "свою роль розпорядника зняти не можна",
   ].filter(Boolean);
+  const pending = result.pending
+    ? " Людина ще не входила — ролі увімкнуться після першого входу."
+    : "";
   return {
     email: result.email,
-    note: parts.length
-      ? `Збережено: ${parts.join("; ")}.`
-      : "Нічого не змінилося.",
+    note:
+      (parts.length
+        ? `Збережено: ${parts.join("; ")}.`
+        : "Нічого не змінилося.") + pending,
   };
 }
 
@@ -164,6 +160,43 @@ export function shouldRevalidate({
 }: ShouldRevalidateFunctionArgs) {
   if (!formMethod && currentUrl.pathname === nextUrl.pathname) return false;
   return defaultShouldRevalidate;
+}
+
+/** The same list of role checkboxes for a person and for a new email. */
+function RoleChecks({
+  label,
+  checked,
+  locked,
+}: {
+  label: string;
+  checked: readonly Role[];
+  locked: readonly Role[];
+}) {
+  return (
+    <fieldset>
+      <legend className="sr-only">{label}</legend>
+      {ROLES.map((role) => {
+        const isLocked = locked.includes(role);
+        return (
+          <div className="role-check" key={role}>
+            <Check
+              name="role"
+              value={role}
+              defaultChecked={checked.includes(role)}
+              disabled={isLocked}
+              title={ROLE_LABELS[role]}
+              hint={
+                isLocked
+                  ? "свою роль розпорядника зняти не можна"
+                  : RIGHTS[role]
+              }
+            />
+            {isLocked && <input type="hidden" name="role" value={role} />}
+          </div>
+        );
+      })}
+    </fieldset>
+  );
 }
 
 export default function Residents({
@@ -300,31 +333,11 @@ export default function Residents({
               </summary>
               <Form method="post" className="role-form" preventScrollReset>
                 <input type="hidden" name="email" value={p.email} />
-                <fieldset>
-                  <legend className="sr-only">Ролі: {p.name ?? p.email}</legend>
-                  {ROLES.map((role) => {
-                    const locked = p.locked.includes(role);
-                    return (
-                      <div className="role-check" key={role}>
-                        <Check
-                          name="role"
-                          value={role}
-                          defaultChecked={p.roles.includes(role)}
-                          disabled={locked}
-                          title={ROLE_LABELS[role]}
-                          hint={
-                            locked
-                              ? "свою роль розпорядника зняти не можна"
-                              : RIGHTS[role]
-                          }
-                        />
-                        {locked && (
-                          <input type="hidden" name="role" value={role} />
-                        )}
-                      </div>
-                    );
-                  })}
-                </fieldset>
+                <RoleChecks
+                  label={`Ролі: ${p.full}`}
+                  checked={p.roles}
+                  locked={p.locked}
+                />
                 {savedFor === p.email && actionData && "note" in actionData && (
                   <p className="ok-note" role="status" style={{ margin: 0 }}>
                     {actionData.note}
@@ -377,7 +390,7 @@ export default function Residents({
             <span style={{ flex: 1 }}>
               <b>Людини ще немає в списку?</b>
               <span className="sub">
-                Видати роль за поштою: увімкнеться після першого входу
+                Видати ролі за поштою: увімкнуться після першого входу
               </span>
             </span>
             <span className="person-toggle" aria-hidden="true">
@@ -397,22 +410,14 @@ export default function Residents({
                 required
               />
             </div>
-            <ChoiceChips
-              name="role"
-              legend="Роль"
-              defaultValue="council"
-              options={ROLES.map((role) => ({
-                value: role,
-                label: ROLE_LABELS[role],
-              }))}
-            />
+            <RoleChecks label="Ролі" checked={[]} locked={[]} />
             <button
               className="btn btn-primary block"
               type="submit"
               name="intent"
               value="grant"
             >
-              Видати роль
+              Видати ролі
             </button>
           </Form>
         </details>

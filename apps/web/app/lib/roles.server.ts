@@ -94,7 +94,15 @@ export async function listPeople(env: Env): Promise<Person[]> {
 }
 
 export type SetRolesResult =
-  | { ok: true; email: string; added: Role[]; removed: Role[]; kept: Role[] }
+  | {
+      ok: true;
+      email: string;
+      added: Role[];
+      removed: Role[];
+      kept: Role[];
+      /** Nobody has signed in with this email yet; roles apply on first sign-in. */
+      pending: boolean;
+    }
   | { ok: false; error: string };
 
 /**
@@ -109,7 +117,8 @@ export async function setRoles(
   if (!canManageRoles(actor))
     return { ok: false, error: "Ролі видає лише розпорядник." };
   const email = normalizeEmail(form.get("email"));
-  if (!email) return { ok: false, error: "Невідома пошта." };
+  if (!email)
+    return { ok: false, error: "Вкажіть пошту Політехніки: імʼя@lpnu.ua." };
   const wanted = new Set(form.getAll("role").filter(isRole));
 
   const db = getDb(env);
@@ -152,56 +161,17 @@ export async function setRoles(
       details: { email, role },
     });
   }
+  const person = await db
+    .select({ id: residents.id })
+    .from(residents)
+    .where(sql`lower(${residents.email}) = ${email}`)
+    .get();
   return {
     ok: true,
     email,
     added: sortRoles(added),
     removed: sortRoles(removed),
     kept,
+    pending: !person,
   };
-}
-
-export type GrantResult =
-  | { ok: true; email: string; role: Role; pending: boolean }
-  | { ok: false; error: string };
-
-export async function grantRole(
-  env: Env,
-  actor: Actor,
-  form: FormData,
-): Promise<GrantResult> {
-  if (!canManageRoles(actor))
-    return { ok: false, error: "Ролі видає лише розпорядник." };
-  const email = normalizeEmail(form.get("email"));
-  if (!email)
-    return { ok: false, error: "Вкажіть пошту Політехніки: імʼя@lpnu.ua." };
-  const role = form.get("role");
-  if (!isRole(role)) return { ok: false, error: "Оберіть роль." };
-
-  const db = getDb(env);
-  const existing = await db
-    .select({ id: roleGrants.id })
-    .from(roleGrants)
-    .where(and(eq(roleGrants.email, email), eq(roleGrants.role, role)))
-    .get();
-  if (existing) return { ok: false, error: "Ця роль у людини вже є." };
-
-  const row = await db
-    .insert(roleGrants)
-    .values({ email, role, grantedBy: actor.id, createdAt: Date.now() })
-    .returning({ id: roleGrants.id })
-    .get();
-  await activity(db, {
-    actorId: actor.id,
-    action: "role.granted",
-    entity: "role_grant",
-    entityId: row.id,
-    details: { email, role },
-  });
-  const person = await db
-    .select({ id: residents.id })
-    .from(residents)
-    .where(sql`lower(${residents.email}) = ${email}`)
-    .get();
-  return { ok: true, email, role, pending: !person };
 }
