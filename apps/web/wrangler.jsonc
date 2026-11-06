@@ -15,6 +15,16 @@
     "VAPID_PUBLIC_KEY": "BINn6_eWph5C_iIMcWD06U5O5b-P_92HXa7I5LlBYFfgSfl2yXQaAmKpUO7GDxzWWtikvNnMa_npyubrhRR1kyE",
     "VAPID_SUBJECT": "https://ehurtozhytok.pages.dev",
   },
+  // Set with `npx wrangler secret put <NAME>`; locally they come from .dev.vars.
+  // Listed here so `wrangler types` knows them without .dev.vars (CI).
+  "secrets": {
+    "required": [
+      "SESSION_SECRET",
+      "GOOGLE_CLIENT_ID",
+      "GOOGLE_CLIENT_SECRET",
+      "VAPID_PRIVATE_KEY",
+    ],
+  },
   // Every minute: reminders 15 minutes before a booking starts, then the next
   // batch of queued push messages (important announcements).
   "triggers": {
