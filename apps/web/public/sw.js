@@ -1,6 +1,6 @@
 // єГуртожиток service worker: offline read-only pages and booking reminders.
 // Bump the version when the caching rules change: activate drops older caches.
-const CACHE = "eh-v5";
+const CACHE = "eh-v6";
 
 // The home page with announcements, announcements themselves, the laundry
 // page and machine pages are kept for offline reading; «Моє», profile,
@@ -20,7 +20,11 @@ const OFFLINE_OK = (path) =>
   path === "/announcements" ||
   /^\/announcements\/\d+$/.test(path);
 
-const OFFLINE_HTML = `<!doctype html>
+// The error text and the online flag help tell a real loss of network from a
+// failed request on a phone that is online.
+const escape = (text) =>
+  text.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
+const offlineHtml = (error) => `<!doctype html>
 <html lang="uk">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -28,7 +32,8 @@ const OFFLINE_HTML = `<!doctype html>
 <body style="margin:0;padding:24px 16px;font:16px/1.5 system-ui,sans-serif;background:#edf2f8;color:#101217">
 <h1 style="margin:0 0 8px;font-size:22px">Немає зʼєднання</h1>
 <p style="margin:0 0 16px">Без інтернету можна переглянути лише головну з оголошеннями, пральню й сторінки пралок, які ви вже відкривали. Записатися, скасувати запис чи запропонувати оголошення можна, коли зʼєднання повернеться.</p>
-<a href="/" style="color:#2a37d8;font-weight:600">На головну</a>
+<p style="margin:0 0 16px"><a href="" style="color:#2a37d8;font-weight:600">Спробувати ще</a> · <a href="/" style="color:#2a37d8;font-weight:600">На головну</a></p>
+<p style="margin:0;font-size:13px;color:#5b6270">Для розробника: ${escape(String(error && error.message ? `${error.name}: ${error.message}` : error))}; мережа ${self.navigator.onLine ? "є" : "немає"}.</p>
 </body>
 </html>`;
 
@@ -93,19 +98,22 @@ self.addEventListener("fetch", (event) => {
 
   const offlineOk = OFFLINE_OK(pagePath(url.pathname));
 
-  // Pages: network first, the last copy when offline. Booking always needs the network.
+  // Pages kept for offline reading: network first, the last copy when offline.
+  // Other pages are left to the browser: the worker has nothing to add there,
+  // and some phones fail navigations it handles while being online.
   if (req.mode === "navigate") {
+    if (!offlineOk) return;
     event.respondWith(
       fetch(req)
         .then((res) => {
-          if (offlineOk) keep(req, res);
+          keep(req, res);
           return res;
         })
-        .catch(() =>
-          (offlineOk ? caches.match(req) : Promise.resolve(undefined)).then(
+        .catch((error) =>
+          caches.match(req).then(
             (hit) =>
               hit ||
-              new Response(OFFLINE_HTML, {
+              new Response(offlineHtml(error), {
                 status: 503,
                 headers: { "Content-Type": "text/html; charset=utf-8" },
               }),
